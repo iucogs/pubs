@@ -1,0 +1,223 @@
+/*** Global CSS ***/
+body {
+	/*background-color:#DCBD97;*/
+	/*background-color:#587498;*/
+	background-color:#6D7B8D;
+}
+
+a, a:link, a:visited, a:hover
+{
+	color: #666;
+	font-size: 14px;
+	text-decoration: none;
+}
+
+/*** Default links style. Mainly used with <span> ***/
+.link {
+	color: #666;
+	font-size: 14px;
+	text-decoration: none;
+}
+
+.pagelink {
+	color: #000000;
+	font-size: 14px;
+}
+
+/*** Change cursor on mouse over ***/
+.pointerhand:hover {		/* onmouseover of an element */
+	cursor: pointer;		/* Explorer 6 Windows, Mozilla, Opera, Explorer 5 Mac, Safari 1.0+ */
+	cursor: hand; 			/* Explorer 4-6 Windows, Opera, Explorer 5 Mac, Safari 1.2 */
+	color: #7D110C;
+}
+
+.grey_highlight:hover {
+	background-color:#C0C0C0;
+}
+
+.grey_highlight:hover td {
+	background-color:#C0C0C0;
+}
+
+.white_bgcolor {
+	background-color:#FFFFFF;
+}
+
+.missing_field {
+	background-color:#FFCC99;
+}
+
+.panel_div {
+	border: 2px solid green;
+	padding:0px; 
+	margin-bottom:5px;
+	vertical-align:text-top;
+}
+
+.panel_div_buttons {
+	border: 2px solid transparent;
+	padding:0px; 
+	margin-bottom:5px;
+	vertical-align:text-top;
+}
+
+
+/*** Upload Dialog CSS ***/
+.emsg {						/* UploadForm CSS*/
+	text-align:left;
+	margin-left:30px;
+	margin-right:30px;
+	color:#666;
+	background-repeat: no-repeat;
+	padding:5px;
+	padding-left:30px;
+}
+
+.e_panel_msg {				/* UploadForm Panel1 Error Message CSS*/
+	text-align:center;
+}
+
+.f1_upload_form {
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #666666;
+}
+
+.f1_upload_process{
+   z-index:100;
+   visibility:hidden;
+   /*position:absolute;*/
+   text-align:center;
+   /*width:400px;*/
+   height:0px;
+}
+
+.f1_upload_status{
+   z-index:100;
+   /*visibility:hidden;*/
+   /*position:absolute;*/
+   text-align:center;
+   /*width:400px;*/
+   padding-top:6px;
+   padding-bottom:6px;
+}
+
+#f1_upload_form {
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #666666;
+}
+
+#f1_upload_process{
+   z-index:100;
+   visibility:hidden;
+   /*position:absolute;*/
+   text-align:center;
+   width:400px;
+}
+
+/*** listCitations paging CSS ***/
+.current_page {
+	font-size: 14px;
+	font-weight: bold;
+	color: #999999;
+}
+
+.page_arrows {
+	font-size: 14px;
+	font-weight: normal;
+	/*color: #666;*/
+}
+
+/*** YAHOO CSS ***/
+#myAutoComplete {
+	/*width:5em;*/ /* set width here or else widget will expand to fit its container */
+	/*padding-bottom:20em;*/ /* allow enough real estate for the container */
+}
+.yui-skin-sam .yui-ac-content { /* set scrolling */
+	max-height:18em;overflow:auto;overflow-x:hidden; /* set scrolling */
+	/* _height:18em; *//* ie6 */
+}
+
+/*** Panel1 Message DIV centering sytle ***/
+.panel1_message {
+	width:570px; 			/* Width of panel1*/
+	height:230px;
+	margin-left: auto;
+	margin-right: auto; 
+	text-align:center; 
+	display:table-cell; 
+	vertical-align:middle; 
+	position:relative; 
+}
+
+.panel1_button {
+	width:100px;
+}
+
+/*** Main divs CSS ***/
+
+#top {
+	text-align:center;
+}
+
+#insert {
+	text-align:center;
+}
+
+#insert	table
+{ 
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#options {
+	text-align:left;
+	border:solid; 
+	background-color:#af906a;
+}
+
+#right_col {
+	position: absolute;
+	right: 10px;
+	/*margin-top:30px;*/
+	padding: 0px;
+	width: 190px;
+	/*background-color:#f8f3d2;*/
+}
+
+#right_col2 {
+	position: absolute;
+	right: 10px;
+	top: 455px;
+	padding: 0px;
+	width: 190px;
+	background-color:#f8f3d2;
+}
+
+#citations {
+	margin-left: 0px;
+	padding: 0px;
+	margin-right: 200px;
+	background-color:#f8f3d2;
+	text-align:left;
+	border: 4px solid #7D110C; 
+	padding:3px;
+}
+
+#secondary {
+	margin-left: 0px;
+	padding: 0px;
+	margin-right: 200px;
+	background-color:#f8f3d2;
+	text-align: left;
+	border: 4px solid #7D110C; 
+	padding:3px;
+}
+
+#secondary table {
+	margin-left: auto;
+	margin-right: auto;
+}

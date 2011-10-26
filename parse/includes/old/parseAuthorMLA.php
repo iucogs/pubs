@@ -1,0 +1,7 @@
+<?php
+	function parseAuthorMLA($str)
+	{
+		
+	}
+
+?>
