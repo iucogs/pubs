@@ -1,10 +1,13 @@
 <?php 
-
+session_start();
 require_once('../lib/constants.php');	// Definition for PARSE_VERSION, DB_NAME
 require_once('../../'.PARSE_VERSION.'/Parse.class.php');
 require_once('../classes/Collections.class.php');
 require_once('../classes/Citations.class.php');
 require_once('../classes/Logger.class.php');
+
+$_SESSION['progress'] = array("", 0, 0);
+session_write_close();
 
 // Create parse object
 $parse = new Parse();
@@ -36,7 +39,6 @@ if(isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	// Initialize JSON variables
 	$filename = $return_arr['filename'];						// value is citation entries sent.
 	$collection_name = $return_arr['collection_name'];
-	$action = $return_arr['action'];
 	$submitter = $return_arr['submitter'];
 	$owner = $return_arr['owner'];
 	
@@ -54,7 +56,7 @@ if(isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	}
 	else
 	{	
-		parseIntoCollection($filename, $collection_name, $action, $entryTime, $submitter, $owner);
+		processImportedCitations($filename, $collection_name, $entryTime, $submitter, $owner);
 	}
 }
 else if(isset($_FILES["myfile"]))  // Process file upload.
@@ -85,7 +87,7 @@ else if(isset($_FILES["myfile"]))  // Process file upload.
 	}
 	else 
 	{
-		parseIntoCollection($filename, $collection_name, $action, $entryTime, $submitter, $owner);
+		processImportedCitations($filename, $collection_name, $entryTime, $submitter, $owner);
 	}
 }
 else	// Neither file upload or JSON request. Try alert then echo JSON string.
@@ -97,86 +99,112 @@ else	// Neither file upload or JSON request. Try alert then echo JSON string.
 //			   FUNCTIONS			//
 /************************************/
 
-// Function that will do all (add, insert, parse).
-function parseIntoCollection($filename, $collection_name, $action, $entryTime, $submitter, $owner)
+function process_TI_file($filename)
 {
-	global $collection;
-	global $citations;
-	global $parse;
+	$temp_files = array();
+	$temp_filename;
+	$temp_handle;
 	
-	if($action == "new") // Create collection
+	$handle = @fopen($filename, "r") or exit("Unable to open file! <$filename>"); 	// Check if file exist and open it
+	
+	// Loop through original file and break it into several files by collection
+	while(!feof($handle))
 	{
-		$collection_name = trim($collection_name);
-		$collection_id = $collection->checkCollection($collection_name, $submitter, $owner);
-		$is_TI = is_file_TI($filename); 		// Check if entries are TI: type
-		$collection_status = "exists";
-		$continue_to_parse = false;
-		
-		// Initialize $continue_to_parse
-		if($is_TI == true) {			// Doesn't matter if collection_name exists or empty, processing TI:
-			$continue_to_parse = true; 
-		}
-		else {  						// Not TI:
-			if($collection_id == false)  	
-			{
-				if(empty($collection_name)) {	// Not TI: but no collection_name given
-					$continue_to_parse = false;
-					$collection_status = "empty_name";
-				}
-				else {					// Impossible error: Not TI:, Empty collection_name but also collection_id is false?
-					$continue_to_parse = true;	
-				}
-			}
-			else {						// Not TI: Processing regular file upload
-				$continue_to_parse = true;
-			}
-		}
-		
-		// Continue parsing based on rules above.
-		if($continue_to_parse) 	
-		{	
-			// Check for Bibtext or EndNote format.
-			$format = get_entry_format($filename);
-					
-			if($format == "text") 
-			{
-				$parse_result = $parse->execute($filename, $submitter, $owner, $entryTime);	// Execute Parse
-			}
-			else
-			{
-				$parse_result = import($format, $filename, $submitter, $owner, $entryTime);	
-			}
-			
-			/*********************************************************/
-			if(is_array($parse_result))  // TI:  multiple collections
-			{
-				parse_ti($parse_result, $submitter, $owner, $entryTime);
-			}
-			/*********************************************************/	
-			else if($parse_result)
-			{	
-				// Update similar_to DB			
-				$citation_ids = updateSimilarToDB_and_returnCitationIDs($entryTime);
-				if($citation_ids != false) {
-					// Add citations to collection. (Still check if collection exists or not).
-					action_new_add_collections($collection_name, $citation_ids, $entryTime, $submitter, $owner);
-				}
-				else {	// Error updating similar to.
-					return_error(5);
-				} 
-			}
-			else
-			{
-				return_error(2); // Error writing to DB
-			}
-		}
-		else	// Return collection exists message.
+		$line = trim(fgets($handle)); 
+		if(mb_substr($line, 0, 3) == "TI:")
 		{
-			$responseObj = array("error" => $collection->error, "collection_status" => $collection_status, "collection_id" => $collection_id, "collection_name" => $collection_name);
-			sendResponse($responseObj);
+			if(isset($temp_handle)) fclose($temp_handle);	// Close the previous handle if it is open.
+			$temp_filename = tempnam(sys_get_temp_dir(),''); // Create unique temp file in OS temp folder.
+			$temp_handle = @fopen($temp_filename, 'w') or exit("Unable to open file!"); // Check if file exist and open it	
+			$collection_name = trim(mb_substr($line, 3));
+			$temp_files[] = array("collection_name" => $collection_name, "filename" => $temp_filename);
+		}
+		else
+		{
+			fwrite($temp_handle,$line);			// Write to temp file
 		}
 	}
-	else if($action == "insert")  // Insert into current collection
+	
+	fclose($handle);
+	return $temp_files;
+}
+
+// Function that will do all (parse, collections, similar).
+function processImportedCitations($filename, $collection_name, $entryTime, $submitter, $owner)
+{
+	if(is_file_TI($filename)) // Check if entries are TI: type
+	{
+		$collection_and_file_names_array = process_TI_file($filename);
+		foreach($collection_and_file_names_array as $one_collection)
+		{
+			parseOneCollection($one_collection['filename'], $one_collection['collection_name'], $entryTime, $submitter, $owner);
+		}
+	}
+	else
+	{
+		parseOneCollection($filename, $collection_name, $entryTime, $submitter, $owner);
+	}
+	
+}
+
+function parseOneCollection($filename, $collection_name, $entryTime, $submitter, $owner)
+{
+	global $collection;
+	global $parse;
+	
+	$collection_id = $collection->return_collection_id_and_create_collection_if_nonexistent($collection_name, $submitter, $owner);	
+	
+	// Check for Bibtext or EndNote format.
+	$format = get_entry_format($filename);
+			
+	if($format == "text")   // apa and mla
+	{
+		$parse_result = $parse->execute($filename, $collection_id, $collection_name, $submitter, $owner, $entryTime);	// Execute Parse
+	}
+	else  // bibtex and endnote
+	{
+		$parse_result = import($format, $filename, $collection_id, $collection_name, $submitter, $owner, $entryTime);	
+	}
+	
+	$responseObj = array("error" => $collection->error, "collection_status" => "inserted", "collection_id" => $collection_id, "collection_name" => $collection_name);
+	sendResponse($responseObj);
+	
+	/*********************************************************/  // similar and collections for TI
+/*	if(is_array($parse_result))  // TI:  multiple collections
+	{
+		parse_ti($parse_result, $submitter, $owner, $entryTime);
+	}*/
+	/*********************************************************/	
+/*	if($parse_result)
+	{	
+		// Update similar_to DB			
+		$citation_ids = updateSimilarToDB_and_returnCitationIDs($entryTime);
+		if(isset($_SESSION['progress']))	// Update progress session 
+		{
+			session_start();
+			$_SESSION['progress'] = array("update_collection", 0, 0);
+			session_write_close();
+		}
+		sleep(1);
+		if($citation_ids != false) {
+			// Add citations to collection. (Still check if collection exists or not).
+			action_new_add_collections($collection_name, $citation_ids, $entryTime, $submitter, $owner);
+		}
+		else {	// Error updating similar to.
+			return_error(5);
+		} 
+	}
+	else
+	{
+		return_error(2); // Error writing to DB
+	}*/
+
+/*	else	// Return collection exists message.
+	{
+		$responseObj = array("error" => $collection->error, "collection_status" => $collection_status, "collection_id" => $collection_id, "collection_name" => $collection_name);
+		sendResponse($responseObj);
+	}*/
+	/*else if($action == "insert")  // Insert into current collection
 	{
 		if(($collection_id = $collection->checkCollection($collection_name, $submitter, $owner)) != false) // Collection id exist.
 		{
@@ -194,6 +222,13 @@ function parseIntoCollection($filename, $collection_name, $action, $entryTime, $
 			
 			// Update similar_to DB			
 			$citation_ids = updateSimilarToDB_and_returnCitationIDs($entryTime);
+			if(isset($_SESSION['progress']))	// Update progress session 
+			{
+				session_start();
+				$_SESSION['progress'] = array("update_collection", 0, 0);
+				session_write_close();
+			}			
+			sleep(1);
 			if($citation_ids != false) {
 				// Insert citations to collection.
 				action_insert_into_collections($collection_id, $citation_ids, $entryTime, $submitter, $owner);
@@ -206,11 +241,11 @@ function parseIntoCollection($filename, $collection_name, $action, $entryTime, $
 		{
 			return_error(5);
 		}
-	}
-	else  // Action is other than "new" or "insert"
+	}*/
+	/*else  // Action is other than "new" or "insert"
 	{
 		return_error(5);
-	}
+	}*/
 }
 
 // send response.
@@ -220,7 +255,7 @@ function sendResponse($responseObj)
 	global $JS_RESPONSE_FUNCTION; // This is only for javascript mode
 	
 	$jsonString = json_encode($responseObj);
-	
+		
 	if($MODE == "javascript") {
 		?><script language="javascript" type="text/javascript">window.top.window.<?php echo $JS_RESPONSE_FUNCTION; ?>('<?php echo $jsonString; ?>');</script><?php
 	}
@@ -310,7 +345,7 @@ function parse_ti($parse_result, $submitter, $owner, $entryTime)
 			$coll_result = $collection->createAndAddCollection($c_name, $citation_ids, $submitter, $owner, true);  // Optional FORCE_CREATE collection_name
 			
 			// Create or update collections table entries
-			$citations->createAndUpdateCollectionsTable($coll_result[1], $submitter, $owner);
+			$citations->createAndUpdateOneCollectionInCollectionsTable($coll_result[1], $submitter, $owner);
 			
 			if($coll_result != -1) // Collection exists. Shouldn't be here due to FORCE CREATE
 			{
@@ -324,86 +359,6 @@ function parse_ti($parse_result, $submitter, $owner, $entryTime)
 		sendResponse($responseObj); 
 	}
 	/**********************************************************/
-}
-
-function action_new_add_collections($collection_name, $citation_ids, $entryTime, $submitter, $owner)
-{
-	global $collection;
-	global $citations;
-	
-	$result_arr = $collection->createAndAddCollection($collection_name, $citation_ids, $submitter, $owner);
-
-	if($result_arr != false) // Either collection doesnt exist(1) or collection exist (-1)
-	{
-		list($collection_status, $collection_id, $insert_count, $duplicates) = $result_arr;
-		
-		// Create or update collections table entries
-		$citations->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
-		
-		// Send response.
-		$responseObj = array("error" => $collection->error, "collection_status" => $collection_status, 
-						"collection_id" => $collection_id, "collection_name" => $collection_name, 
-						"insert_count" => $insert_count, "duplicates" => $duplicates, "parsed_timestamp" => $entryTime);		
-		sendResponse($responseObj); 
-	}
-	else // DB create or insert error.
-	{
-		return_error(5);
-	}
-}
-
-function updateSimilarToDB_and_returnCitationIDs($entryTime)
-{
-	global $citations;
-	
-	// Update similar_to DB
-	if($citations->updateSimilarToByTimestamp($entryTime))
-	{
-		$citation_ids = array();
-		
-		// Get parsed citation_ids
-		$result = $citations->getCitations_byTimestamp_all($entryTime);
-		foreach($result[0] as $citation)
-		{
-			$citation_ids[] = $citation['citation_id']; ;
-		}
-		//print_r($citation_ids);
-		return $citation_ids;		
-	}
-	else
-	{
-		// Return similar to error here.
-		return false;
-	}
-}
-
-function action_insert_into_collections($collection_id, $citation_ids, $entryTime, $submitter, $owner)
-{
-	global $collection;
-	global $citations;
-	
-	$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner);
-	if($insert_result != -1)  // Collection insertion successful.
-	{
-		list($collection_id, $insert_count, $duplicates) = $insert_result;
-		
-		// Get collection name using collection_id.
-		$collection_array = $collection->getCollectionByID($collection_id);
-		$collection_name = $collection_array['collection_name'];
-		
-		// Create or update collections table entries
-		$citations->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
-		
-		// collection_status 0 means "inserted into existing collection".
-		$responseObj = array("error" => $collection->error, "collection_status" => "exists_inserted", 
-						"collection_id" => $collection_id, "collection_name" => $collection_name, 
-						"insert_count" => $insert_count, "duplicates" => $duplicates, "parsed_timestamp" => $entryTime);
-		sendResponse($responseObj);
-	}
-	else
-	{
-		return_error(5);
-	}
 }
 
 function initialize_file_upload()
@@ -458,9 +413,6 @@ function initialize_JSON_data($jsonObj)
 	if(isset($jsonObj->{'request'}->{'entries'})) { // Grab values (entries)
 		$value = $jsonObj->{'request'}->{'entries'};
 	}
-	if(isset($jsonObj->{'request'}->{'action'})) {
-		$action = $jsonObj->{'request'}->{'action'};
-	}
 
 	
 	$filename = tempnam(sys_get_temp_dir(),''); // Create unique temp file in OS temp folder.
@@ -468,7 +420,7 @@ function initialize_JSON_data($jsonObj)
 	fwrite($handle, $value);
 	fclose($handle);
 	
-	$return_arr = array('filename' => $filename, 'collection_name' => $collection_name, 'action' => $action, 'submitter' => $submitter, 'owner' => $owner);
+	$return_arr = array('filename' => $filename, 'collection_name' => $collection_name, 'submitter' => $submitter, 'owner' => $owner);
 		
 	return $return_arr;
 }

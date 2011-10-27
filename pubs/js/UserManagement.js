@@ -166,6 +166,10 @@ Page.clear_createproxyfrm = function()
 //				- Called by inputMethod(), create proxy page
 Page.createuser_request = function(account, username, firstname, lastname, submitter)
 {
+	var option_admin = Page.getCheckedValue(document.getElementsByName('option_admin'));
+	var option_cogs = Page.getCheckedValue(document.getElementsByName('option_cogs'));
+	var option_self_proxy = Page.getCheckedValue(document.getElementsByName('option_self_proxy'));
+	
 	if(username == "" && firstname == "" && lastname == "")
 	{
 		var html = '<center>Please enter a Username or a Last Name.</center>';
@@ -173,7 +177,8 @@ Page.createuser_request = function(account, username, firstname, lastname, submi
 	}
 	else
 	{	
-		var jsonStr = '{"request": {"type": "create",  "account": "' + account + '", "username": "' + username + '", "lastname": "' + lastname + '", "firstname": "' + firstname + '", "submitter": "' + submitter + '"}}';
+		var jsonStr = '{"request": {"type": "create",  "account": "' + account + '", "username": "' + username + '", "lastname": "' + lastname + '", "firstname": "' + firstname + '", "option_admin": "' + option_admin + '", "option_cogs": "' + option_cogs + '", "option_self_proxy": "' + option_self_proxy + '", "submitter": "' + submitter + '"}}';
+		//alert(jsonStr);
 		Ajax.SendJSON('services/user.php', Page.createuser_response, jsonStr);
 	}
 }
@@ -503,27 +508,31 @@ Page.viewOwners_response = function()
 				Page.owner = owners[0].username;		
 			}
 			Page.setHasProxy();
-			Page.rewriteSelectMenu();
+		//	Page.printWorkAsMenu();
 		}
 		Page.current_page=1; 
 		Page.current_viewable_pages=new Array();
-		if (Page.loggedIn)
-		{
-			Page.getCitationsGivenCollectionID();
+	//	if (Page.loggedIn)
+	/*	{
+			alert('before');
+			Page.getCollectionNamesAndIds('display_collections');
+			alert('middle: ' + Page.special_collections);
+			Page.homePage_loggedIn();
+
 		}
 		else
-		{
+		{*/
 			Page.get_faculty_request();
-		}
+	//	}
 		
 	}
 	return '';
 }
 
-Page.rewriteSelectMenu = function()
+Page.printWorkAsMenu = function()
 {
 	var html = '';
-	html += 'Show collections belonging to: <select id="setOwner" onchange="Page.changeSetOwnerSelectMenu(this);">';
+	html += 'Show collections belonging to:&nbsp;&nbsp;<select id="setOwner" onchange="Page.changeSetOwnerSelectMenu(this);">';
 		
 	if(!Page.hasProxy) {
 		html += '<option value=""></option>';
@@ -531,24 +540,27 @@ Page.rewriteSelectMenu = function()
 	
 	for (var i=0; i<Page.proxies.length; i++) {
 		if (Page.proxies[i].username == 'sep') {
-			html += '<option value="' + Page.proxies[i].username + '"';
+			html += '<option onmouseover="this.parentNode.title=\'Stanford Encyclopedia of Philosophy\'" value="' + Page.proxies[i].username + '"';
 			if (Page.owner == Page.proxies[i].username)	{
 				html += ' selected="selected"';
 			}
-			html += '>Stanford Encyclopedia of Philosophy</option>';
+			html += '>Stanford Encyclopedia ...</option>';
 		}
 		else {
-			html += '<option value="' + Page.proxies[i].username + '"';
+			var user_name = Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname;
+			html += '<option onmouseover="this.parentNode.title=\''+user_name+'\'" value="' + Page.proxies[i].username + '"';
 			if (Page.owner == Page.proxies[i].username)	{
 				html += ' selected="selected"';
 			}
-			html += '>' + Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname + '</option>';
-		}
+			// Check if the full name is more than 20 characters and cut it.
+			if(user_name.length > 20) user_name = user_name.substr(0,20) + ' ...';
+			html += '>' + user_name + '</option>';
+		}	
 	}
 	html += '</select>';
-	document.getElementById('owner_div').innerHTML = html;				//set	
+//	document.getElementById('owner_div').innerHTML = html;				//set	
 	Page.cache_all_request('proxies');
-
+	return html;
 }
 
 Page.changeSetOwnerSelectMenu = function(myselect)
@@ -577,7 +589,6 @@ Page.get_faculty_response = function()
 	var html = '';
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	 
-		//alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.homePage(responseObj.get_faculty);
 	}
@@ -605,7 +616,7 @@ Page.homePage = function(faculty)
 	// Reset owner then rewrite proxy select menu
 	Page.owner = '';
 	if (Page.loggedIn) { 
-		Page.rewriteSelectMenu();
+		Page.printWorkAsMenu();
 	}
 	
 	var html = 'Welcome to Publications, sponsored by the Indiana University Cognitive Science Program.<br><br>';
@@ -620,14 +631,21 @@ Page.homePage = function(faculty)
 	Page.hideCitations();
 }
 
+Page.homePage_loggedIn = function()
+{
+	var html = Page.printCollectionNamesMenuInMainWindow();
+	document.getElementById('secondary').innerHTML = html;
+	Page.hideCitations();
+}
+
 Page.getFacultyRepresentativePublications = function(faculty_username)  // essentially same as getCitationsGivenCollectionID, but don't set owner
 {
 	var citation_id = 0;
 	
 	// Rewrite proxy select menu
-	if(Page.loggedIn) {
+	/*if(Page.loggedIn) {
 		Page.rewriteSelectMenu();
-	}
+	}*/
 	Page.current_get_type = 'getCollection';
 	
 	Page.getCitations(Page.current_page, Page.current_get_type);
@@ -727,7 +745,14 @@ Page.createuser_html = function(selected_username)
 	html += '<tr><td>Last Name</td><td>' + Page.printTextBox('proxy_lastname', '', '30') + '</td><td>(starts with)</td><tr>';
 	html += '<tr><td>First Name</td><td>' + Page.printTextBox('proxy_firstname', '', '30') + '</td><td></td><tr>';
 	html += '<tr><td></td><td><center>OR</center></td><td></td></tr>';
-	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';															  
+	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';	
+	
+	html += '<tr><td>Options</td><td>';
+	html += '<input type="checkbox" id="option_admin" name="option_admin" value="admin"><label for="option_admin">Admin</label>&nbsp;&nbsp;';
+	html += '<input type="checkbox" id="option_cogs" name="option_cogs" value="cogs"><label for="option_cogs">Cogs</label>&nbsp;&nbsp;';
+	html += '<input type="checkbox" id="option_self_proxy" name="option_self_proxy" value="self_proxy" checked disabled><label for="option_self_proxy">Proxy to self</label>&nbsp;&nbsp;';
+	html += '</td><td></td><tr>';
+	
 	html += '<tr><td></td><td><p><input type="button" onclick="Page.checkproxy_request();" value="Search">&nbsp;&nbsp;';
 	html += '<input type="button" onclick="Page.clear_createproxyfrm();" value="Clear">&nbsp;&nbsp;';
 	html += '<input type="button" onclick="Page.createuser_request(';
@@ -814,15 +839,29 @@ Page.adminPage = function()
 	var html = '';
 	html += '<div id="user_div"></div>';
 	
+	// Collections Table Management
 	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
-	html += '<tr><td align="center"><b>Collections Table</b></td></tr>';
+	html += '<tr><td align="center"><b>Collections Table Management</b></td></tr>';
     html += '<tr><td>';
 	html += '<div id="populate_div">'
-	html += '<input type="button" onclick="Page.populateCollectionsTable_request();" value="Populate" name="populate_button"/>';
 	html += '&nbsp;&nbsp;';
-	html += '<input type="button" onclick="Page.truncateCollectionsTable_request();" value="Truncate" name="truncate_button"/>';
+	html += '<b>1.</b>&nbsp;<input type="button" onclick="Page.truncateCollectionsTable_request();" value="Truncate" name="truncate_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
+	html += '<b>2.</b>&nbsp;<input type="button" onclick="Page.populateCollectionsTable_request();" value="Populate" name="populate_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
+	html += '<b>3.</b>&nbsp;<input type="button" onclick="Page.createMiscCollectionsTable_request();" value="Create Misc" name="create_misc_button"/>&nbsp;&nbsp;';
+	html += '</div>';
+	html += '</td></tr>';
+	html += '</table>';
+	
+	// Similar Citations Management
+	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
+	html += '<tr><td align="center"><b>Similar Citations Management</b></td></tr>';
+    html += '<tr><td>';
+	html += '<div id="populate_div">'
 	html += '&nbsp;&nbsp;';
-	html += '<input type="button" onclick="Page.createMiscCollectionsTable_request();" value="Create Misc" name="create_misc_button"/>';
+	html += '<b>1.</b>&nbsp;<input type="button" onclick="Page.truncateSimilarTo_request();" value="Truncate" name="truncate_similar_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
+	html += '<b>2.</b>&nbsp;<input type="button" onclick="Page.populateSimilarTo_request();" value="Populate" name="populate_similar_button" disabled/>&nbsp;&nbsp;&nbsp;&nbsp;';
+	html += '<b>3.</b>&nbsp;<input type="button" onclick="Page.updateSimilarTo_byID_request();" value="Update By ID" name="update_similar_by_id_button"/>&nbsp;&nbsp;';
+	html += '<b>:</b>&nbsp;<input type="text" id="update_similar_by_id_text" name="update_similar_by_id_text"/>&nbsp;&nbsp;';
 	html += '</div>';
 	html += '</td></tr>';
 	html += '</table>';
@@ -851,6 +890,4 @@ Page.adminPage = function()
 	html += '</table>';
 	document.getElementById('user_div').innerHTML = html;
 	Page.get_feedback_request();
-
-	
 }

@@ -14,10 +14,10 @@ class User
 		require_once('../lib/mysql_connect.php');
 		require_once('../lib/adLDAP.php');
 		$this->table = 'users';
-		$this->proxy = 'proxy_of';
+		$this->proxy = 'proxy_of'; 
 		$this->error = 0;
 		$this->ldap=new adLDAP();
-	}
+	} 
 	
 	function get_feedback_list()
 	{
@@ -77,7 +77,7 @@ class User
 		else return false;
 	}
 	
-	function create_user($account, $username, $firstname, $lastname, $submitter)
+	function create_user($account, $username, $firstname, $lastname, $option_admin, $option_cogs, $option_self_proxy, $submitter)
 	{
 		$this->link = $this->connectDB();
 		
@@ -97,14 +97,17 @@ class User
 			else{
 				// Get email as username for guest account.
 				$username = $this->get_real_username($account, $username);
+				$admin = ($option_admin == "admin") ? 1 : 0;
+				$cogs = ($option_cogs == "cogs") ? 1 : 0;
+				$self_proxy = ($option_self_proxy == "self_proxy") ? 1 : 0;
 				
 				// Query username to check if user exist
 				$query = "SELECT * FROM $this->table WHERE username='".mysql_real_escape_string($username)."'";
 				$result = $this->doQuery($query, $this->link);
 				if (mysql_num_rows($result) <= 0) 		// User doesn't exist - Add / Insert
 				{
-					$value_str = "'".mysql_real_escape_string($username)."','".mysql_real_escape_string($firstname)."','".mysql_real_escape_string($lastname)."'";
-					$query = "INSERT INTO $this->table (username, firstname, lastname) VALUES (".$value_str.")";
+					$value_str = "'".mysql_real_escape_string($username)."','".mysql_real_escape_string($firstname)."','".mysql_real_escape_string($lastname)."','".$admin."','".$cogs."'";
+					$query = "INSERT INTO $this->table (username, firstname, lastname, admin, cogs) VALUES (".$value_str.")";
 					$result = $this->doQuery($query, $this->link);
 					if (!$result) { 
 						$this->error .= 2; 
@@ -113,6 +116,40 @@ class User
 					else { 
 						$new_user_id = (int)mysql_insert_id();
 						//$this->error .= "New user added successfully [".$new_user_id."].<br />"; 				
+						
+						// Check if user is a faculty (cogs). Create "Misc", "My Representative Publications" and "My CV Publications".
+						if($cogs) {
+							$query ="SELECT collection_id FROM collections WHERE collection_name = 'misc' AND owner = '".mysql_real_escape_string($username)."'";
+							$result = $this->doQuery($query, $this->link);
+							if(mysql_num_rows($result) == 0) {
+								$query = "INSERT INTO collections (collection_name, user_id, submitter, owner) ";
+								$query .= "VALUES ('misc', 0, '".mysql_real_escape_string($submitter)."', '".mysql_real_escape_string($username)."') ";
+								$result = $this->doQuery($query, $this->link);
+							}
+							
+							$query ="SELECT collection_id FROM collections WHERE collection_name = 'My Representative Publications' AND owner = '".mysql_real_escape_string($username)."'";
+							$result = $this->doQuery($query, $this->link);
+							if(mysql_num_rows($result) == 0) {
+								$query = "INSERT INTO collections (collection_name, user_id, submitter, owner) ";
+								$query .= "VALUES ('My Representative Publications', 0, '".mysql_real_escape_string($submitter)."', '".mysql_real_escape_string($username)."') ";
+								$result = $this->doQuery($query, $this->link);
+							}
+							
+							$query = "SELECT collection_id FROM collections WHERE collection_name = 'My CV Publications' AND owner = '".mysql_real_escape_string($username)."'";
+							$result = $this->doQuery($query, $this->link);
+							if(mysql_num_rows($result) == 0) {
+								$query = "INSERT INTO collections (collection_name, user_id, submitter, owner) ";
+								$query .= "VALUES ('My CV Publications', 0, '".mysql_real_escape_string($submitter)."', '".mysql_real_escape_string($username)."') ";
+								$result = $this->doQuery($query, $this->link);
+							}
+						}
+						
+						// Create proxy to self in order for the user to see or edit his/her own collections
+						if($self_proxy) {
+							$query = "INSERT INTO proxy_of (proxyid, authorid) VALUES (".$new_user_id.", ".$new_user_id.")";
+							$result = $this->doQuery($query, $this->link);
+						}
+						
 						return array(true, $new_user_id);
 					}
 				}
@@ -344,7 +381,7 @@ class User
 		$this->link = $this->connectDB();
 		
 		
-		$query = "SELECT u.*, c.collection_id FROM $this->table u, collections c where u.cogs=1 AND u.username=c.owner AND c.collection_name='My Representative Publications'  ORDER BY u.lastname, u.firstname";
+		$query = "SELECT u.*, c.collection_id FROM $this->table u, collections c where u.cogs=1 AND u.username=c.owner AND c.collection_name='My Representative Publications' ORDER BY u.lastname, u.firstname";
 		$result = $this->doQuery($query, $this->link);
 		if(mysql_num_rows($result) > 0)
 		{

@@ -29,7 +29,7 @@ else {
 	printForm();
 	$parse->printOptions();
 	//$parse->execute("samples/default.txt","","",time());  			// There's an error in test.txt (preg_match warning)
-	$parse->execute("samples.txt","","",time());  						// There's an error in test.txt (preg_match warning)
+	$parse->execute("default.txt","","",time());  						// There's an error in test.txt (preg_match warning)
 }
 
 function writeTempFile($data)

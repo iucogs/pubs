@@ -18,15 +18,18 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$arr['username'] = trim($jsonObj->{'request'}->{'username'}); 
 			$arr['firstname'] = trim($jsonObj->{'request'}->{'firstname'});
 			$arr['lastname'] = trim($jsonObj->{'request'}->{'lastname'});
+			$arr['option_admin'] = trim($jsonObj->{'request'}->{'option_admin'});
+			$arr['option_cogs'] = trim($jsonObj->{'request'}->{'option_cogs'});
+			$arr['option_self_proxy'] = trim($jsonObj->{'request'}->{'option_self_proxy'});
 			$arr['submitter'] = $jsonObj->{'request'}->{'submitter'}; 
 				
-			$user_result = $user->create_user($arr['account'], $arr['username'], $arr['firstname'], $arr['lastname'], $arr['submitter']);		
+			$user_result = $user->create_user($arr['account'], $arr['username'], $arr['firstname'], $arr['lastname'], $arr['option_admin'], $arr['option_cogs'], $arr['option_self_proxy'], $arr['submitter']);		
 			if($user_result[0] != false)
 			{
 				$new_user_id = $user_result[1];
 				$new_result = $user->get_user($new_user_id, $arr['submitter']);
 				$result = $user->get_all_users($arr['submitter']);
-
+				
 $jsonString = '{"error": "'.$user->error.'", "id": "'.$new_user_id.'", "username": "'.$new_result[0]['username'].'", "firstname": "'.$new_result[0]['firstname'].'", "lastname": "'.$new_result[0]['lastname'].'", "submitter": "'.$arr['submitter'].'", "result": "true", "createuser":'.json_encode($result).'}';
 				echo $jsonString;
 			}

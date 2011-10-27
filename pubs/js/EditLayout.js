@@ -17,7 +17,7 @@ Page.printAuthorRowText = function(_citation)
 				fnValue = Page.authorNameSubstitutions[j].new_fn;	
 			}
 		}
-		
+		 
 		var style = 'style="padding-left:30px"';
 		html += '<tr height="26px" align="left" style="vertical-align:middle">';
 		html += '<td width="8%" align="center">' + (i+1) + '</td>';
@@ -140,7 +140,6 @@ Page.enterChangingByPubtypeInfo = function(_citation, pubtype, flagField, citati
 				var size = Page.fields_arr[field_name][1];
 				var label = Page.fields_arr[field_name][0];
 				
-			//	var cit_temp = Page.citations_array_b[temp];
 				if(_citation[field_name] == undefined) {					// If the citation field is undefined, treat it as empty
 					html += Page.printTableRow(label, field_name, "", size, citation_suffix, 0, pubtype);
 				}

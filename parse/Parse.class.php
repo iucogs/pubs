@@ -4,6 +4,8 @@ class Parse
 {
 	var $db_ids;
 	var $options;
+	var $collection;
+	var $citation;
 		
 	function Parse()
 	{
@@ -15,6 +17,12 @@ class Parse
 		mb_internal_encoding("UTF-8"); 		// Setting mb_internal_encoding to UTF-8
 		mb_regex_encoding('UTF-8');			// Setting mb_regex_encoding to UTF-8
 		
+		require_once('../classes/Collections.class.php');
+		$this->collection = new Collections();
+		
+		require_once('../classes/Citations.class.php');
+		$this->citation = new Citations();
+
 		//require_once 'Zend/Feed.php';
 		//require_once 'Zend/Search/Lucene.php';
 		include('includes/printHTML.php');
@@ -44,10 +52,10 @@ class Parse
 		// Options
 		$this->options = array('html' => false, 
 							   'db' => true, 
-							   'db_name' => '', 
-							   'db_user' => '', 
-							   'db_password' => '', 
-							   'db_host' => ''	// Local, if remote add :3306
+							   'db_name' => 'dev', 
+							   'db_user' => 'dev', 
+							   'db_password' => 'minddev08', 
+							   'db_host' => '156.56.91.21'	// Local, if remote add :3306
 							   );
 	}
 	
@@ -112,7 +120,7 @@ class Parse
 		echo "</center>";
 	}
 	
-	function execute($filename, $submitter, $owner, $timestamp) // filename must be full path unless the file is on the same directory as parse
+	function execute($filename, $collection_id, $collection_name, $submitter, $owner, $timestamp) // filename must be full path unless the file is on the same directory as parse
 	{
 		//echo "<h1>Citation Parser v1.0</h1>";
 		
@@ -160,9 +168,28 @@ class Parse
 		
 		//$processing_arr = array(1, 12, 13, 15, 52, 55, 56, 58, 64, 68, 79, 80, 82);
 		
+		// Find total lines to be parsed
+		$lines = 0;
+		while (!feof($file)) {
+			$line = trim(fgets($file));
+			if($line == "" || mb_substr($line, 0, 2) == "//"){continue;}  	// Check for empty lines and skip
+			if(mb_substr($line, 0, 3) == "TI:"){continue;}					// Check for TI and skip
+			$lines++;
+		}
+		rewind($file); // Rewind the file pointer to the beginning.
+		
+		// Reset progress session if it is set
+		if(isset($_SESSION['progress']))
+		{
+			session_start();
+			$_SESSION['progress'] = array("parse", 0, $lines);
+			session_write_close();
+		}
+		
 		// Output a line of the file until the end is reached
 		while(!feof($file))
 		{
+			//sleep(1);
 			// TO-DO: Try and catch clause - if catch: then log it.
 			// 		  To prevent code from dying in the middle.
 			try{
@@ -209,7 +236,15 @@ class Parse
 			}
 			
 			if($line == "" || mb_substr($line, 0, 2) == "//"){continue;}  	// Check for empty lines and remove it.
-			else {$count++;}												// Update Count
+			else {
+				$count++; // Update Count
+				if(isset($_SESSION['progress']))
+				{
+					session_start();
+					$_SESSION['progress'] = array("parse", $count, $lines);
+					session_write_close();
+				}
+			}
 			
 			/*****************************************/ // TI:
 			if(mb_substr($line, 0, 3) == "TI:")
@@ -348,20 +383,32 @@ class Parse
 			
 			$duplicate_toggle = false; // Toggle for printHTML
 						
-			if($this->options['db'])
+			if($this->options['db'])  // writing to db as opposed to printing to HTML
 			{
-				if(($entry_to_db_result = parseEntryToDB($entry)) != false)
+				if(($citation_id = parseEntryToDB($entry)) != false)
 				{
-					$entry['citation_id'] = $entry_to_db_result; // Just so that printHTML can print citation id.
-					$db_ids_holder[] = $entry_to_db_result;	
+					$entry['citation_id'] = $citation_id; // Just so that printHTML can print citation id.
+					$db_ids_holder[] = $citation_id;	 // storing citation ids
+					
+					if (($result = $this->collection->insert_member_of_collection($collection_id, array($citation_id), $submitter, $owner)) == -1)
+					{
+						// return error
+					}
+					if (($result = $this->citation->updateSimilarToWhenSaving($citation_id)) == false)
+					{
+						// return error
+					}
+					
 				}
 				else
 				{
 					$duplicate_toggle = true;  // debugging; no longer for handling duplicates; could be used for errors in inserting entry
 				}
+				
+				
 			}
 			
-			if($this->options['html'])
+			if($this->options['html'])  //for debugging only
 			{
 				if(!$duplicate_toggle) { printHTML($entry, $count); }
 			}
@@ -415,6 +462,7 @@ class Parse
 	// Create connection to database.
 	function connectDB($db_name, $db_user, $db_password, $db_host)
 	{
+		//@ $db = mysql_pconnect('dev.cogs.indiana.edu','dev','minddev08');
 		@ $db = mysql_pconnect($db_host, $db_user, $db_password);
 			
 		if(!$db){
@@ -468,10 +516,10 @@ class Parse
 		// Connect to database
 		$this->connectDB($this->options['db_name'], $this->options['db_user'], $this->options['db_password'], $this->options['db_host']);
 		
-		if(($entry_to_db_result = parseEntryToDB($entry)) != false)
+		if(($citation_id = parseEntryToDB($entry)) != false)
 		{
-			//$entry['citation_id'] = $entry_to_db_result; 		// Might want to return the entire entry instead?
-			return $entry_to_db_result;
+			//$entry['citation_id'] = $citation_id; 		// Might want to return the entire entry instead?
+			return $citation_id;
 		}
 		else
 		{

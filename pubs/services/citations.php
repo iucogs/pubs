@@ -3,7 +3,7 @@
 //header("Content-Type: application/xml; charset=UTF-8"); //commented for JSON
 require_once('../classes/Citations.class.php');
 require_once('../classes/Logger.class.php');
-
+//return '{"error":"0"}';
 $citations = new Citations();
 
 // Functions 
@@ -12,7 +12,7 @@ function echoJSONstr($result)
 	global $citations;
 	$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 //	$jsonString = '{"error": "'.$citations->error.'", "total_citations": "'.$result[0].'", "citations":'.json_encode($result[1]).'}';
-	echo $jsonString; 
+	echo $jsonString;  
 }
 
 function get_and_return_citations($current_get_type, $submitter, $owner, $page, $citations_per_page, $sort_order, $entryTime, $citation_id_page = 0)
@@ -21,23 +21,23 @@ function get_and_return_citations($current_get_type, $submitter, $owner, $page, 
 	if($current_get_type == "getCitations_byTimestamp_all")
 	{
 		$result = $citations->getCitations_byTimestamp_all($entryTime);
-		$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result[0]).', "similar_citations_array": '.json_encode($result[1]).'}';
+		$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result[0]).',  "similar_citations_exist_array": '.json_encode($result[1]).'}'; 
 	}
 	else if($current_get_type == "getCitations_byFac_all")
 	{
 		$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, 'all');
-		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}'; 		
-		echo $jsonString;
+		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_exist_array": '.json_encode($result[2]).'}'; 		
 	}
 	else if($current_get_type == "getCitations_byFac_unverified")
 	{
 		$result = $citations->get_citations_JSON($current_get_type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
-		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).', "debug":'.json_encode($citations->debug).'}'; 
+		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "debug":'.json_encode($citations->debug).', "similar_citations_exist_array": '.json_encode($result[2]).'}';
 	}
 	else {
 		$jsonString = '{"error": "'.$citations->error.'"}';
 	}
 	
+	// Echo result here!
 	echo $jsonString;
 }
 
@@ -88,7 +88,10 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	if(isset($jsonObj->{'request'}->{'coll_id'})){ 
 		$coll_id = $jsonObj->{'request'}->{'coll_id'};
 	}
-
+	
+	if(isset($jsonObj->{'request'}->{'working_owner'})){ 
+		$working_owner = $jsonObj->{'request'}->{'working_owner'};
+	}
 	// Variables inside of citations object
 	if(isset($jsonObj->{'request'}->{'citations'})){ 
 		$citationObj = $jsonObj->{'request'}->{'citations'};
@@ -113,6 +116,8 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$citation_id = $citationObj->{'citation_id'};
 			if($citation_id == "undefined"){ $citation_id = ""; }
 		}
+		
+	
 		// new author lastname and firstname
 		if(isset($citationObj->{'lastname'})){ 
 			$lastname = $citationObj->{'lastname'};
@@ -171,30 +176,29 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	if($type == "getCitations_byTimestamp_all")
 	{
 		$result = $citations->getCitations_byTimestamp_all($entryTime);
-		$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result[0]).', "similar_citations_array": '.json_encode($result[1]).'}';
+		$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result[0]).', "similar_citations_exist_array": '.json_encode($result[1]).'}';
 		echo $jsonString;
 	}
 	else if($type == "getCitations_byFac_all")
 	{	
-	#	$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
-	#	$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "citation_id_page": "'.$citation_id_page.'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
 		$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, 'all');
-		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
-		//Logger::instance()->clear();
-		//Logger::instance()->log($jsonString);
+		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_exist_array": '.json_encode($result[2]).'}';
 		echo $jsonString;
 		}
 	else if($type == "getCitations_byFac_unverified")
 	{	
 		$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
-		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "citation_id_page": "'.$citation_id_page.'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
+		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "citation_id_page": "'.$citation_id_page.'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_exist_array": '.json_encode($result[2]).'}';
 	
 		echo $jsonString;
 	}
 	else if($type == "getCitationsGivenCollectionID")
 	{	
-		$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, $collection_id);
-		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}'; 		
+	//	$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, $collection_id);  //10-4
+		//$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, $collection_id, $citation_id_page);  //10-4
+		
+		$result = $citations->getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner);
+		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[1].'", "citations":'.json_encode($result[0]).', "similar_citations_exist_array": '.json_encode($result[2]).'}'; 		
 		echo $jsonString;
 	}
 	else if($type == "delete")
@@ -205,12 +209,12 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			require_once('../classes/Collections.class.php');
 			$collection = new Collections();
 			$deleted = $collection->deleteCitationByCollectionId($citation_id, $collection_id);
-			$coll_table_deleted = $collection->deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id);
+			$coll_table_deleted = $collection->deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id, $submitter, $owner);
 		}
 		else										// Delete permanently
 		{
 			$deleted = $citations->delete($citation_id, "DELETE", $submitter, $owner);
-			$coll_table_deleted = $citations->delete_collecitons_table($citation_id, $submitter, $owner);
+			$coll_table_deleted = $citations->delete_from_collections_table_by_id($citation_id);
 		}
 		
 		// If deletetion is successful then proceed with response type
@@ -223,14 +227,14 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			else if (($current_get_type == 'journal') || ($current_get_type == 'title') )
 			{
 				$result = $citations->get_citations_JSON($current_get_type, $page, $submitter, $owner, $citations_per_page, $keyword, $sort_order, 0, 0); 
-				$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
+				$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_exist_array": '.json_encode($result[2]).'}';
 				echo $jsonString;
 			}
 			else if ($current_get_type == 'getCollection')
 			{
 				//$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, $collection_id, 0); 
 				$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, $collection_id);
-				$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}'; 
+				$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_exist_array": '.json_encode($result[2]).'}'; 
 				echo $jsonString;
 			}
 		}
@@ -256,7 +260,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	}
 	else if ($type == "check_authors")
 	{	
-		$result = $citations->checkAuthors($args, $args_authors, $coll_id);
+		$result = $citations->checkAuthors($args, $args_authors, $coll_id, $working_owner, $submitter);
 		
 		if (isset($result[0][0]))  // Returning author array not citation array. Unverified Authors
 		{
@@ -307,7 +311,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	}
 	else if ($type == "create_authors")
 	{
-		$result = $citations->createNewAuthorsAndSave($args, $args_authors, $coll_id);
+		$result = $citations->createNewAuthorsAndSave($args, $args_authors, $coll_id, $working_owner, $submitter);
 		if (!empty($pre_merge_id1) && !empty($pre_merge_id2))   // Save merged citations and create verified authors.
 		{
 			// get collection ids of pre_merge_id1 and pre_merge_id2
@@ -341,6 +345,16 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$collection_id = $insert_result[0];
 		}
 		echoJSONstr($result);
+	}
+	else if ($type == "get_similar")
+	{
+		if (isset($jsonObj->{'request'}->{'citation_id'})){
+			$citation_id = $jsonObj->{'request'}->{'citation_id'};
+		
+			$result = $citations->getSimilarCitationsForOneCitation($citation_id);
+			$jsonString = '{"error": "'.$citations->error.'", "similar_citations_array": '.json_encode($result).'}'; 		
+			echo $jsonString;
+		}
 	}
 	else if($type == "blankXML")
 	{

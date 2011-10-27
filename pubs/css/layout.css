@@ -3,6 +3,8 @@ body {
 	/*background-color:#DCBD97;*/
 	/*background-color:#587498;*/
 	background-color:#6D7B8D;
+	/*background-image: url(../images/bg_gray_pattern.jpg);
+    background-repeat: repeat-x;*/
 }
 
 a, a:link, a:visited, a:hover
@@ -198,6 +200,7 @@ a, a:link, a:visited, a:hover
 }
 
 #citations {
+	margin-top:4px;
 	margin-left: 0px;
 	padding: 0px;
 	margin-right: 200px;
@@ -208,6 +211,7 @@ a, a:link, a:visited, a:hover
 }
 
 #secondary {
+	margin-top:4px;
 	margin-left: 0px;
 	padding: 0px;
 	margin-right: 200px;

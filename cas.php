@@ -32,12 +32,15 @@ function redirect(){
 		// set URL and other appropriate options
 		curl_setopt($ch, CURLOPT_URL, $urlNew);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	//	curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
-//curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		//echo $urlNew;	
+		//curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		//curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, TRUE); 
 		curl_setopt ($ch, CURLOPT_CAINFO, "/etc/certificates/cacert.pem");
 		// grab URL and pass it to the browser
 		$handle = curl_exec($ch);
+		if ($handle !== false) {/*echo $handle;*/} else echo curl_error($ch);
+	
 		// close curl resource, and free up system resources
 		curl_close($ch);
 
@@ -45,6 +48,8 @@ function redirect(){
 		$retArray = explode("\n", $handle);
 		$access = trim($retArray[0]);
 		$user = trim($retArray[1]);
+		//echo "Redirecting...";
+		//print_r($retArray);
 			
 		//send user back to homePage.php with validated username
 		if ($access == "yes") 

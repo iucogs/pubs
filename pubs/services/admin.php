@@ -10,6 +10,9 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	if(isset($jsonObj->{'request'}->{'type'})){
 		$type = $jsonObj->{'request'}->{'type'};
 	}
+	if(isset($jsonObj->{'request'}->{'citation_id'})){
+		$citation_id = $jsonObj->{'request'}->{'citation_id'};
+	}
 	
 	if($type == "populate_all") {
 		$result = $citations->updateEveryCollectionsTable();
@@ -25,6 +28,21 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		//$result = $citations->createMiscCollectionForOneOwner('colallen');
 		$result = $citations->createMiscCollectionForAllOwners();
 		$jsonString = '{"error": "'.$citations->error.'", "type":"'.$type.'", "result":'.json_encode($result).'}';
+		echo $jsonString;
+	}
+	else if($type == "populate_similar_to") {
+		$result = $citations->populateSimilarTo();
+		$jsonString = '{"error": "'.$citations->error.'", "type":"'.$type.'", "result":'.json_encode($result).'}';
+		echo $jsonString;
+	}
+	else if($type == "truncate_similar_to") {
+		$result = $citations->truncateSimilarTo();
+		$jsonString = '{"error": "'.$citations->error.'", "type":"'.$type.'", "result":'.json_encode($result).'}';
+		echo $jsonString;
+	}
+	else if($type == "update_similar_to_by_id") {
+		$result = $citations->updateSimilarTo_byID($citation_id);
+		$jsonString = '{"error": "'.$citations->error.'", "type":"'.$type.'", "citation_id":"'.$citation_id.'", "result":'.json_encode($result).'}';
 		echo $jsonString;
 	}
 	else echo '{"error": "no type found"}';
