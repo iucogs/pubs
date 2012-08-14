@@ -22,8 +22,8 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	if(isset($jsonObj->{'request'}->{'submitter'})){ 
 		$submitter = $jsonObj->{'request'}->{'submitter'};
 	}
-	if(isset($jsonObj->{'request'}->{'owner'})){  
-		$owner = $jsonObj->{'request'}->{'owner'}; 
+	if(isset($jsonObj->{'request'}->{'owner'})){ 
+		$owner = $jsonObj->{'request'}->{'owner'};
 	}
 	if(isset($jsonObj->{'request'}->{'sort_order'})){ 
 		$sort_order = $jsonObj->{'request'}->{'sort_order'};
@@ -54,7 +54,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	}
 	
 	if ($type == "new") {
-		if(($result = $collection->return_collection_id_and_create_collection_if_nonexistent($collection_name, $submitter, $owner)) != false) {
+		if(($result = $collection->createCollection($collection_name, $submitter, $owner)) != false) {
 			list($collection_status, $collection_id) = $result;
 			$collection_array = $collection->getCollectionByID($collection_id); 
 			$collection_name = $collection_array['collection_name'];
@@ -67,7 +67,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			list($collection_status, $collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
-			$citation->createAndUpdateOneCollectionInCollectionsTable($collection_id, $submitter, $owner);
+			$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
 			
 			$collection_array = $collection->getCollectionByID($collection_id);
 			$responseObj = array("error" => $collection->error, "collection_status" => $collection_status, "collection_id" => $collection_id, 
@@ -81,7 +81,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			list($collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
-			$citation->createAndUpdateOneCollectionInCollectionsTable($collection_id, $submitter, $owner);
+			$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
 			
 			$collection_array = $collection->getCollectionByID($collection_id);
 			$collection_name = $collection_array['collection_name'];
@@ -123,8 +123,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	{
 		$result = $collection->getCollectionNamesAndIds($submitter, $owner);
 		$result2 = $collection->getDefaultCollectionNamesAndIds($submitter, $owner);	//all and unverified by submitter
-		$result3 = $collection->getSpecialCollectionNamesAndIds($submitter, $owner);	// misc, my rep pub and my cv pubs
-		$jsonString = '{"error": "'.$collection->error.'", "collections":'.json_encode($result).', "default_collections":'.json_encode($result2).', "special_collections":'.json_encode($result3).'}';
+		$jsonString = '{"error": "'.$collection->error.'", "collections":'.json_encode($result).', "default_collections":'.json_encode($result2).'}';
 		echo $jsonString;
 	}
 	else if($type == "getCollectionsGivenCitationID")

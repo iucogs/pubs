@@ -34,6 +34,15 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$jsonString = '{"error": "'.$user->error.'", "feedback_list":'.json_encode($result).'}';
 			echo $jsonString;
 		}
+		
+		//Abhinav
+			if ($type == 'get_sortedfeedback_list')
+		{
+			$result = $user->get_sortedfeedback_list();
+			$jsonString = '{"error": "'.$user->error.'", "feedback_list":'.json_encode($result).'}';
+			echo $jsonString;
+		}
+		
 		else if ($type == 'add_feedback')
 		{
 			$user->add_feedback($submitter, $feedback);

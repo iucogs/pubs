@@ -1,8 +1,21 @@
-Page.get_feedback_request = function()
+var cogs_value;
+
+Page.get_feedback_request = function(cogs)
 {
+	cogs_value=cogs;
 	var jsonStr = '{"request": {"type": "get_feedback_list", "submitter": "' + Page.submitter + '"}}';
 	Ajax.SendJSON('services/feedback.php', Page.get_feedback_response, jsonStr);
 }
+
+//Abhinav 
+
+Page.get_sortedfeedback_request = function(cogs)
+{
+	cogs_value=cogs;
+	var jsonStr = '{"request": {"type": "get_sortedfeedback_list", "submitter": "' + Page.submitter + '"}}';
+	Ajax.SendJSON('services/feedback.php', Page.get_feedback_response, jsonStr);
+}
+
 
 Page.get_feedback_response = function()
 {						
@@ -38,7 +51,7 @@ Page.write_feedback_table = function(list_or_editID)
 			
 	html += '<tr valign="top">';
 	html += '<td><b>ID</b></td>';
-	html += '<td><b>Suggested By</b></td>';
+	html += '<td class="pointerhand" onclick="Page.adminPage(1,\''+ cogs_value +'\')";><b>Suggested By</b></td>'; //Abhinav
 	html += '<td><b>Date</b></td>';
 	html += '<td><b>Feedback</b></td>';
 	html += '<td><b>Fixed</b></td>';

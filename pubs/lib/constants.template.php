@@ -4,7 +4,7 @@ DEFINE ('PARSE_VERSION','parse');		// Which version (folder name) of parse to us
 DEFINE ('DB_USER', '');
 DEFINE ('DB_PASSWORD', '');
 DEFINE ('DB_HOST', 'localhost');			// Local, if remote add :3306
-DEFINE ('DB_NAME', 'pubs');
+DEFINE ('DB_NAME', 'pubscopy');
 DEFINE ('DB_FLAGS', 'MYSQL_CLIENT_SSL');	// Use this flag for remote connection
 DEFINE ('FUZZY_MATCH_RATIO', 0.5);
 DEFINE ('PDF_DIRECTORY', $_SERVER["DOCUMENT_ROOT"].'/pubspdf');

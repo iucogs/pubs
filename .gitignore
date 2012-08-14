@@ -5,3 +5,7 @@ parse/samples
 parse/temp.txt
 
 pubs/lib/constants.php
+
+## Ignore scratch files
+*.swp
+*~

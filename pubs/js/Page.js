@@ -2,11 +2,9 @@ var Page = new Object();
 
 // Page object variables
 //Page.entry = 0;
-Page.FIXED_COLLECTIONS = new Array("My Representative Publications", "My CV Publications");
-Page.PROTECTED_GROUPINGS = new Array("All My Citations", "All My Unverified Citations", "My Citations Not in a Collection");
 Page.state = 1; // For now: 3=Paging through all, unverified or a collection; 2=Paging through newly added citations; 1=Everything else
 Page.movingTab = false;
-Page.current_citation_num = 0;  
+Page.current_citation_num = 0; 
 Page.current_row_num = 0;
 Page._citation;  // goes later 
 Page._citations = '';
@@ -15,6 +13,9 @@ Page._current_citation2 = "";
 
 Page.pre_merge_id1 = "";  
 Page.pre_merge_id2 = "";
+//Page.similar_citation1 = "";
+//Page.similar_citation2 = "";
+//Page.mergedCitation = ""; 
 
 Page.collections;
 Page.default_collections; // all and unverified
@@ -35,7 +36,7 @@ Page.notify_toggle = false;
 Page.citation_toggle = false;
 Page.inputArray;
 Page.submitter;
-Page.owner = '';  // owner of collections being viewed
+Page.owner = '';
 Page.owner_fullname = '';
 Page.user;
 Page.proxies = new Array();
@@ -78,16 +79,13 @@ Page.show_notes_flag = 1;
 Page.show_abstracts_flag = 0;
 Page.show_URLs_flag = 1;
 
-//Page.similar_citations_array = new Array();
-Page.similar_citations_exist_array = new Array();
-
-Page.similar_on_left_or_right = '';
+Page.similar_citations_array = new Array();
 Page.selected_citations = [];
 
 //Page.oContextMenu = "";
 //Page.oContextMenu2 = "";
 Page.newly_added_citations = [];
-Page.newly_added_similar_citations_exist_array = [];
+Page.newly_added_similar_citations_array = [];
 Page.current_newly_added_num = 0;
 
 Page.highlight_citations_with_missing_info_flag = 0;
@@ -99,8 +97,8 @@ var tabView_b = "";
 
 Page.numViewableTabsLimit = 4;
 
-Page.citations_array_a = Array(); // need to make global for movement between tabs
-Page.citations_array_b = Array(); // need to make global for movement between tabs
+Page.citations_array_a = "";
+Page.citations_array_b = "";
 
 Page.tt = "";
 Page.tt_col = "";
@@ -116,16 +114,14 @@ Page.tab_deleting_citation_suffix = '';
 Page.interval_value = '';
 
 Page.baseURL = document.URL.substring(0, document.URL.indexOf('/', 14)) + "/";
-//Page.rootDirectory = document.URL.substring(Page.baseURL.length,(document.URL.lastIndexOf("/")));  // pubstest, pubsdev or pubs
-Page.basePdfDirectory = Page.baseURL + 'pubspdf/'; 
+Page.rootDirectory = document.URL.substring(Page.baseURL.length,(document.URL.lastIndexOf("/")));  // pubstest, pubsdev or pubs
+Page.basePdfDirectory = Page.baseURL + 'pubspdf/' + Page.rootDirectory + '/'; 
 
 Page.document_root = '';
 
 Page.user_back_button_state = 'user'; // or 'admin'
 
 Page.feedback_list = '';
-
-Page.special_collections = Array();
 
 Page.initializePanel = function() 
 {
@@ -144,7 +140,6 @@ Page.initializePanel = function()
 	html += '<form name="cForm" action="pubs/services/uploadpdf.php" method="post" enctype="multipart/form-data" target="upload_target2" onsubmit="startUpload2();" >';
 	html += '<input type="hidden" id="upload_citation_suffix" name="upload_citation_suffix" value="">';		// Updated when cForm submit button is clicked.
 	html += '<input type="hidden" id="attached_filename" name="attached_filename" value="">';				// Keep track of attached_filename to be saved.
-	html += '<input type="hidden" id="submitter" name="submitter" value="' + Page.submitter + '">';	
 	
 	html += '<div id="panel2_div"></div>';
 	html += '<div id="panel1_div">';
@@ -211,10 +206,7 @@ Page.initializePanel = function()
 	Page.panel4 = new YAHOO.widget.Panel("panel4", { width:"240px", fixedcenter: true, visible:false, draggable:false, close:false, modal:true, zindex:4 } );
 	html = '';	
 	Page.panel4.setHeader('Loading, please wait...'); 
-	//Page.panel4.setBody('<img src="' + Page.document_root + 'images/loading.gif" />');
-	var setBody = '<img src="' + Page.document_root + 'images/loading.gif" />';
-	setBody += '<br><div id="progress"></div>';
-	Page.panel4.setBody(setBody);	
+	Page.panel4.setBody('<img src="' + Page.document_root + 'images/loading.gif" />');
 	Page.panel4.render("container");
 	
 	Page.panel2.showEvent.subscribe(function() { 
@@ -227,8 +219,7 @@ Page.initializePanel = function()
 	
 	Page.panel2.hideEvent.subscribe(function() {								
 		Page.removeAllTabs();	
-		Page.panel2.setHeader("");
-
+		
 		if (Page.interval_value != '')
 		{
          	window.clearInterval(Page.interval_value);
@@ -247,6 +238,8 @@ Page.initializePanel = function()
 		document.getElementById('citations').style.display = '';	//show
 		document.getElementById('options').style.display = '';		//show
 		Page.right_column_display('all');
+		
+		//alert("Page.panel2.hideEvent.subscribe : Page._current_citation.citation_id : " + Page._current_citation.citation_id);
 
 		Page.getCitationsGivenCollectionID(Page._current_citation.citation_id);
 	}, Page.panel2, true);
@@ -308,6 +301,7 @@ Page.oneCitationInPanel = function(citationInPanel, fieldFlag, newFlag) {
 		document.getElementById('constantByPubtype_fields').innerHTML = Page.enterConstantByPubtypeInfo(citationInPanel, "", "");
 		document.getElementById('changingByPubtype_fields').innerHTML = Page.enterChangingByPubtypeInfo(citationInPanel, citationInPanel.pubtype, "", "");
 		document.getElementById('additional_fields').innerHTML = Page.enterAdditionalInfo(citationInPanel, "", "");
+	//	document.getElementById('upload_div').innerHTML = '<br><p>' + Page.printUploadDialog(citationInPanel.filename) + '</p>';
 		document.getElementById('pubtype_div').innerHTML = Page.pubtypeMenu(citationInPanel.pubtype, "", "");
 		if(newFlag == "new") {
 			document.getElementById('top_right_div').innerHTML = Page.enterRawInfo(citationInPanel, "new", "");
@@ -409,9 +403,9 @@ Page.rewritePage = function(responseObj)
 		Page._citations = responseObj.citations; 
 		Page.current_page = (responseObj.page == undefined) ? 1 : responseObj.page;
 		Page.total_count = responseObj.total_count;
-	//	Page.similar_citations_array = responseObj.similar_citations_array;
-		Page.similar_citations_exist_array = responseObj.similar_citations_exist_array;
-		Page.getCollectionNamesAndIds('display_citations');
+		Page.similar_citations_array = responseObj.similar_citations_array;
+		Page.getCollectionNamesAndIds();
+		//	alert('here2');
 	}
 }
 
@@ -429,12 +423,16 @@ Page.onResponse = function()
 		if ((Page.input_method== 9) || (Page.input_method== 4)){	
 			if (Page.panel_open == 0) {
 				Page.rewritePage(responseObj);
+/*				Page._citations = responseObj.citations; 
+				Page.total_count = responseObj.total_count;
+				Page.similar_citations_array = responseObj.similar_citations_array;
+				Page.getCollectionNamesAndIds();*/
 			}
 
 		}
 		if ((Page.input_method== 1) || (Page.input_method== 2) || (Page.input_method== 3)){	
 			if (Page.panel_open == 0) {
-				Page.getCollectionNamesAndIds('display_citations');
+				Page.getCollectionNamesAndIds();
 			}
 
 		}
@@ -449,8 +447,8 @@ Page.onResponseCheckAuthors = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-	alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
+	
 		if (responseObj.citations[0].citation_id) // citation id is returned; therefore, returning a citation
 		{
 			// Reset Variables
@@ -467,7 +465,7 @@ Page.onResponseCheckAuthors = function()
 }
 
 Page.showFeedbackAfterSave = function(responseObj)
-{
+{ 
 	var sentCitation = Page._current_citation;
 	//compare sent data with received data
 	Page._current_citation = responseObj.citations[0];
@@ -476,7 +474,6 @@ Page.showFeedbackAfterSave = function(responseObj)
 	document.getElementById("panel1_div").style.display = 'none';	//hide
 	document.getElementById("panel2_div").style.display = '';	//show
 	if (differenceString == "") {
-		
 		for (var i=0; i<6; i++)
 		{
 			if (((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != sentCitation['author'+i+'ln']))	|| ((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'fn'] != "") && (Page._current_citation['author'+i+'fn'] != sentCitation['author'+i+'fn'])))
@@ -541,14 +538,12 @@ Page.updateCitationsArraysAndTabs_after_save = function()
 	Page.updateOneCitationsArray_after_save(Page.citations_array_a);
 	Page.updateOneCitationsArray_after_save(Page.citations_array_b);
 	Page.updateOneCitationsArray_after_save(Page.newly_added_citations);
-//	Page.updateOneCitationsArray_after_save(Page.newly_added_similar_citations_array);
+	Page.updateOneCitationsArray_after_save(Page.newly_added_similar_citations_array);
 	
-	/*for (var i=0; i<Page.similar_citations_array.length; i++)
+	for (var i=0; i<Page.similar_citations_array.length; i++)
 	{
 		Page.updateOneCitationsArray_after_save(Page.similar_citations_array[i]);
-	}*/
-	
-	// to do: update similar_citations_exist_array
+	}
 	
 	Page.updateTabView(tabView_a, Page.citations_array_a);
 	Page.updateTabView(tabView_b, Page.citations_array_b);
@@ -572,7 +567,7 @@ Page.updateCitationsArraysAndTabs_after_delete = function()
 	Page.updateOneCitationsArray_after_delete(Page.citations_array_a);
 	Page.updateOneCitationsArray_after_delete(Page.citations_array_b);
 	Page.updateOneCitationsArray_after_delete(Page.newly_added_citations);
-//	Page.updateOneCitationsArray_after_delete(Page.newly_added_similar_citations_array);
+	Page.updateOneCitationsArray_after_delete(Page.newly_added_similar_citations_array);
 	
 	if (Page.tab_deleting_citation_suffix.indexOf("_a") >= 0)
 	{
@@ -667,13 +662,83 @@ Page.showCheckAuthorPanel = function(responseObj)
 	else
 	{
 		html += 'The following author(s) are not in the author database: <br>';
-		html += '<input type="button" value="Add Checked Authors Only" onclick="Page.checkInputAndSave(\'create_authors\',\''+ merge +'\',0);" />&nbsp;&nbsp;';
-		html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave(\'create_authors\',\''+ merge +'\',0);" />';
+		html += '<input type="button" value="Add Checked Authors Only" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,1);" />&nbsp;&nbsp;';
+		html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />';
 	}
 	
 	Page.panel1.setBody(html);
 	Page.panel1.show();
 }
+
+//abhinav
+
+
+Page.checkInputAndSave1 = function(type, merge, timestamp,verified)
+{	
+	var response;
+	if (type == "check_authors")
+	{	
+		// Continue 
+		Page.create_page_dot_sentData(timestamp);
+	}
+	else if (type == "create_authors")
+	{		
+	
+		if (Page.getCheckedValue(document.forms['cForm'].elements['verified']) == 1) 
+		{
+			if(Page.validate_verified_entry() == 0)
+			{
+				if(confirm("Entry will remain unverified because not all the authors are verified."))
+				{
+					if (Page.update_page_dot_sentData(timestamp) == false)
+					{
+						return false;
+					}
+					Page.sentData['verified'] = 0;
+			//		Page.panel1.hide();
+				}
+				else
+				{
+					return;
+				}	
+			}
+			else
+			{
+				
+				if (Page.update_page_dot_sentData(timestamp) == false)
+				{
+					return false;
+				}
+			//	Page.panel1.hide();
+			}
+		}
+		else
+		{
+			
+			if (Page.update_page_dot_sentData(timestamp) == false)
+			{
+				//return false;
+			}
+		//	Page.panel1.hide();	
+		}
+	}
+	var pre_merge_ids = "";
+	if ((merge == "merge") && (Page.pre_merge_id1 != undefined) && (Page.pre_merge_id2 != undefined))
+	{
+		pre_merge_ids = '"pre_merge_id1": "' + Page.pre_merge_id1 + '", "pre_merge_id2": "' + Page.pre_merge_id2 + '", ';
+	}
+	Page.panel1.hide();
+	//var jsonStr = '{"request": {"type": "' + type + '",  ' + pre_merge_ids + '"citations": ' + YAHOO.lang.JSON.stringify(Page.sentData) + '}}';
+	
+	var jsonStr = '{"request": {"type": "' + type + '","verified": "' + verified + '",  "coll_id":"' + Page.currentCollection + '", ' + pre_merge_ids + '"citations": ' + YAHOO.lang.JSON.stringify(Page.sentData) + '}}';
+	Ajax.SendJSON('services/citations.php', Page.onResponseCheckAuthors, jsonStr);		
+}
+
+
+
+
+
+
 
 Page.uncheckAllAuthorCheckboxesInPanel = function()
 {
@@ -681,7 +746,7 @@ Page.uncheckAllAuthorCheckboxesInPanel = function()
 	{
 		if(document.getElementById('author'+i+'ln_checkbox')) // Check if exist
 		{						
-			document.getElementById('author'+i+'ln_checkbox').checked = "";
+			document.getElementById('author'+i+'ln_checkbox').checked = false;
 		}
 	}
 }
@@ -748,6 +813,13 @@ Page.inputMethod = function(input_method)
 	{
 		Page.viewproxy_request(Page.submitter);	
 	}
+	
+	//Abhinav
+	else if(input_method == 0)
+	{
+		Page.viewsortproxy_request(Page.submitter);	
+	}	
+	
 	else if(input_method == 8)
 	{
 		Page.viewuser_request(Page.submitter);	
@@ -777,7 +849,7 @@ Page.inputMethod = function(input_method)
 	}
 	else{}
 	
-	if ((input_method == 6) || (input_method == 7) || (input_method == 8) || (input_method == 16))
+	if ((input_method == 6) || (input_method == 7) || (input_method == 8) || (input_method == 16) || (input_method == 0))  //Abhinav
 	{
 		document.getElementById('citations').style.display = 'none';
 		Page.right_column_display('none');
@@ -1027,7 +1099,7 @@ Page.printBackTD = function(pointer_style)
 	var html = '';
 	if (((Page.state == 2) && (Page.current_newly_added_num > 0)) || ((Page.state == 3) && (Page.current_row_num > 0))) {
 		
-		html += '<tr><td id="goToBack" align="left" width="10%" ' + pointer_style + ' onclick="Page.goToBackCitation();"><font size="+2">Back</font></td>';
+		html += '<tr><td id="goToBack" title="Previous citation in list" align="left" width="10%" ' + pointer_style + ' onclick="Page.goToBackCitation();"><font size="+2">Back</font></td>';
 	}
 	else {
 		html += '<tr><td id="goToBack" align="left" width="10%"></td>';	
@@ -1039,7 +1111,7 @@ Page.printNextTD = function(pointer_style)
 {
 	var html = '';
 	if (((Page.state == 2) && (Page.current_newly_added_num < Page.newly_added_citations.length-1)) || ((Page.state == 3) && (Page.current_row_num < Page._citations.length-1))) {
-		html += '<td id="goToNext" align="right" width="10%" ' + pointer_style + ' onclick="Page.goToNextCitation();"><font size="+2">Next</font></td>';
+		html += '<td id="goToNext" title="Next citation in list" align="right" width="10%" ' + pointer_style + ' onclick="Page.goToNextCitation();"><font size="+2">Next</font></td>';
 	}
 	else {
 		html += '<td id="goToNext" align="right" width="10%" ></td>';	
@@ -1106,17 +1178,11 @@ Page.goToNextCitation = function()
 			if (Page.current_newly_added_num < Page.newly_added_citations.length-1)
 			{
 				Page.current_newly_added_num++;
-				var citation_id = Page.newly_added_citations[Page.current_newly_added_num].citation_id;
-				if (Page.similar_citations_exist_array[citation_id] && (Page.similar_citations_exist_array[citation_id] == 1))
+				if (Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id])
 				{
-				//	Page.panel2.setHeader("Your new citation is on the left. Potential matches already in the database are on the right.");
+					Page.panel2.setHeader("Your new citation is on the left. Potential matches already in the database are on the right.");
 		
-				//	Page.citations_array_a = new Array(Page.newly_added_citations[Page.current_newly_added_num]); 
-				//	Page.citations_array_b = Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id];
-					Page._current_citation = Page.newly_added_citations[Page.current_newly_added_num];
-					Page.similar_on_left_or_right = 'right'; 
-					Page.getSimilarCitations(Page._current_citation);
-					Page.editTwoCitations();
+					Page.editTwoCitations(new Array(Page.newly_added_citations[Page.current_newly_added_num]), Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id]);
 				}
 				else
 				{
@@ -1144,18 +1210,12 @@ Page.goToBackCitation = function()
 		{
 			if (Page.current_newly_added_num > 0)
 			{
-				Page.current_newly_added_num--;				
-				var citation_id = Page.newly_added_citations[Page.current_newly_added_num].citation_id;
-				if (Page.similar_citations_exist_array[citation_id] && (Page.similar_citations_exist_array[citation_id] == 1))	
+				Page.current_newly_added_num--;
+				if (Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id])
 				{
-					//Page.panel2.setHeader("Your new citation is on the left.");
+					Page.panel2.setHeader("Your new citation is on the left.");
 		
-					//Page.citations_array_a = new Array(Page.newly_added_citations[Page.current_newly_added_num]); 
-					//Page.citations_array_b = Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id];
-					Page._current_citation = Page.newly_added_citations[Page.current_newly_added_num];
-					Page.similar_on_left_or_right = 'right'; 
-					Page.getSimilarCitations(Page._current_citation);
-					Page.editTwoCitations();					
+					Page.editTwoCitations(new Array(Page.newly_added_citations[Page.current_newly_added_num]), Page.similar_citations_array[Page.newly_added_citations[Page.current_newly_added_num].citation_id]);					
 				}
 				else
 				{
@@ -1186,7 +1246,6 @@ Page.printCitationEditButton = function(_current_citation, size) {
 
 Page.printUploadDialog = function(_citation, citation_suffix) {
 	var filename = _citation.filename;
-//	document.getElementById('attached_filename').value = filename;
 	var citation_id = _citation.citation_id;
 	
 	var html = '';
@@ -1195,151 +1254,76 @@ Page.printUploadDialog = function(_citation, citation_suffix) {
 	var status = '';
 	
 	// Attach Label
-	var attached_filename_with_suffix_obj = document.getElementById('attached_filename'+citation_suffix);
+	var attached_filename_suffix_obj = document.getElementById('attached_filename'+citation_suffix);
+	var attached_filename_obj = document.getElementById('attached_filename');
 	
 	if(citation_suffix == "")   // Saving / Regular
 	{
-		if(document.getElementById('attached_filename').value != '' && document.getElementById('attached_filename').value != undefined) 
+		if(attached_filename_obj.value != '' && attached_filename_obj.value != undefined) 
 		{
-			status = 'The file <b>' + document.getElementById('attached_filename').value + '</b> was attached successfully.<br/>To save the file, click on "Save".';
+			status = 'The file <b>' + attached_filename_obj.value + '</b> was attached successfully.<br/>To save the file, click on "Save".';
 		}
 	}
 	else 
 	{
-		// Setting attached filename with suffix value to empty.
-		if(attached_filename_with_suffix_obj != null) attached_filename_with_suffix_obj.parentNode.removeChild(attached_filename_with_suffix_obj); // Remove element if it exists.
-		document.getElementById('attached_filename').value = '';  	// Set to empty value if input suffix is undefined
+		// Setting attached suffix value to empty.
+		if(attached_filename_suffix_obj != null) attached_filename_suffix_obj.parentNode.removeChild(attached_filename_suffix_obj); // Remove element if it exists.
+		attached_filename_obj.value = '';  	// Set to empty value if input suffix is undefined
 		html += '<input type="hidden" id="attached_filename'+ citation_suffix +'" name="attached_filename'+ citation_suffix +'" value="">'; // Input element does not exist. Create it.
+	}
+	
+	// Filename label
+	if((filename == "") || (filename == undefined)) {
+		html += '<b>File:</b> None. <br>';
+	}
+	else {
+		html += '<b>File:</b> <a href="' + Page.basePdfDirectory + citation_id + '/' + filename + '" target="_blank">' + filename + '</a><br>';
 	}
 	
 	// Print Upload Dialog Div or Form
 	html += '<div id="'+upload_div+'">';
-	
-	var filepath = Page.basePdfDirectory + citation_id + '/' + filename;
-	html += Page.printFileUploadDiv(citation_id, citation_suffix, filepath, filename);
+	html += Page.printFileUploadDiv(citation_id, citation_suffix, status);
 	html += '</div>';
 	
 	return html;
 }
 
-Page.clearAttachedFile = function(citation_suffix, filename)  // filename parameter stores the original filename. ie the one to be reverted to.
+Page.clearAttachedFile = function(citation_suffix)
 {
-	// might be redundant
-	if (citation_suffix == '' || citation_suffix == undefined)
-	{ 	
-		citation_suffix = Page.get_citation_suffix_of_active_tab(tabView_b);
-	}
-	
-	if(document.getElementById('attached_filename'+citation_suffix)) document.getElementById('attached_filename'+citation_suffix).value = 'NO_FILE_ATTACHED'; 
-
-	if(document.getElementById('status_div'+citation_suffix)) document.getElementById('status_div'+citation_suffix).innerHTML = '';
-	
-	if(document.getElementById('filename_div'+citation_suffix)) document.getElementById('filename_div'+citation_suffix).innerHTML = '<b>File:</b> None. <br>';
-	
-	if (document.getElementById('revert_button'+citation_suffix) && (filename != '')) 
-	{
-		document.getElementById('revert_button'+citation_suffix).disabled = false;	
-	}
-	
-	if(document.getElementById('clear_button'+citation_suffix)) 
-	{
-		document.getElementById('clear_button'+citation_suffix).disabled = true;	
-	}
-	return true;
-}
-
-Page.revertToOriginalFile = function(citation_suffix, filepath, filename)
-{
-	// might be redundant
-	if (citation_suffix == '' || citation_suffix == undefined)
+	if(citation_suffix == '' || citation_suffix == undefined)
 	{ 	
 		citation_suffix = Page.get_citation_suffix_of_active_tab(tabView_b);
 	}
 	
 	if(document.getElementById('attached_filename'+citation_suffix)) document.getElementById('attached_filename'+citation_suffix).value = ''; 
-
+	if(document.getElementById('attached_filename')) document.getElementById('attached_filename').value = '';
 	if(document.getElementById('status_div'+citation_suffix)) document.getElementById('status_div'+citation_suffix).innerHTML = '';
-	if(document.getElementById('filename_div'+citation_suffix)) document.getElementById('filename_div'+citation_suffix).innerHTML = '<b>File:</b> <a href="' + filepath + '" target="_blank">' + filename + '</a>';
-	
-	if (document.getElementById('revert_button'+citation_suffix))
-	{
-		document.getElementById('revert_button'+citation_suffix).disabled = true;	
-	}
-	
-	if (document.getElementById('clear_button'+citation_suffix))
-	{
-		if (filename == '') 
-		{ 
-			document.getElementById('clear_button'+citation_suffix).disabled = true;	
-		}
-		else
-		{
-			document.getElementById('clear_button'+citation_suffix).disabled = false;
-		}
-	}
+	if(document.getElementById('status_div')) document.getElementById('status_div').innerHTML = '';
 	return true;
 }
 
-Page.printFileUploadDiv = function(citation_id, citation_suffix, filepath, filename)
+Page.printFileUploadDiv = function(citation_id, citation_suffix, status)
 {
 	var upload_div = 'upload_div'+citation_suffix;
 	var label_div = 'label_div'+citation_suffix;
-	var filename_div = 'filename_div'+citation_suffix;
 	var status_div = 'status_div'+citation_suffix;
 	var loading_div = 'loading_div'+citation_suffix;
 	var submit_button = 'submit_button'+citation_suffix;
-	var clear_button = 'clear_button'+citation_suffix;
-	var revert_button = 'revert_button'+citation_suffix;
-	var onclick_html = '';
 	
 	// Reset
 	if(document.getElementById(upload_div)) document.getElementById(upload_div).innerHTML = '';
 	if(document.getElementById('upload_citation_suffix')) document.getElementById('upload_citation_suffix').value = 'initial';
 	
 	var html = '';	
-	html += '<table width="100%"><tr><td>';
-	
-	// Filename label
-	html += '<div id="'+filename_div+'">';
-	if ((filename == "") || (filename == undefined)) 
-	{
-		html += '<b>File:</b> None.';
-	}
-	else 
-	{
-		html += '<b>File:</b> <a href="' + filepath + '" target="_blank">' + filename + '</a>';
-	}
-	html += '</div>';
-	
-	// Unattach and Revert buttons
-	html += '</td><td align="right">';
-	
-	onclick_html = 'onclick="Page.clearAttachedFile(\''+citation_suffix+'\', \'' + filename + '\');"';
-	if((filename == "") || (filename == undefined)) 
-	{
-		onclick_html += 'disabled=true';
-	}
-	html += '&nbsp;&nbsp;<input type="button" id="'+clear_button+'" name="'+clear_button+'" value="Unattach" ' + onclick_html + '/>';
-	onclick_html = 'onclick="Page.revertToOriginalFile(\''+citation_suffix+'\', \'' + filepath + '\', \'' + filename + '\');"';
-	if (document.getElementById('attached_filename').value != "") 
-	{
-		onclick_html += ' disabled=false';
-	}
-	else
-	{
-		onclick_html += ' disabled=true';
-	}
-	html += '&nbsp;&nbsp;<input type="button" id="'+revert_button+'" name="'+revert_button+'" value="Revert" ' + onclick_html + '/>';
-	html += '</td></tr></table>';
+	var clear_attached_file_html = '&nbsp;&nbsp;<span class="pointerhand" style="color:#7D110C"; onclick="Page.clearAttachedFile(\''+citation_suffix+'\')">[Clear]</span>';
 	
 	//Status label
-//	var clear_attached_file_html = '&nbsp;&nbsp;<span class="pointerhand" style="color:#7D110C"; onclick="Page.clearAttachedFile(\''+citation_suffix+'\')">[Clear]</span>';
-	
 	html += '<div id="'+status_div+'" align="center" class="f1_upload_status">';
-
-	html += '<span></span>';
-	//	html += clear_attached_file_html;
-	
+	if(status != '') 
+	{	
+		html += '<span>' + status + '</span>';
+		html += clear_attached_file_html;
+	}
 	html += '</div>';
 
 	// Can't have nested forms in HTML
@@ -1353,8 +1337,8 @@ Page.printFileUploadDiv = function(citation_id, citation_suffix, filepath, filen
 	var onchange_html = 'document.cForm.'+submit_button+'.disabled=false';
 	html += '<label>File:  <input id="myfile'+citation_suffix+'" name="myfile'+citation_suffix+'" type="file" size="30" onchange="'+onchange_html+'"/></label>';
 	
-	onclick_html = 'onclick="Page.updateUploadGlobals(\''+citation_suffix+'\');"';
-	html += '<input type="submit" id="'+submit_button+'" name="'+submit_button+'" value="Attach" ' + onclick_html + ' disabled=true /><br />';
+	var onclick_html = 'onclick="Page.updateUploadGlobals(\''+citation_suffix+'\');"';
+	html += '<input type="submit" name="'+submit_button+'" value="Attach" ' + onclick_html + ' disabled=true /><br />';
 	html += '<label>(File size limit: 10 MB.)</label>';
 	html += '</div>';
 	
@@ -1429,17 +1413,6 @@ function print_r2(theObj){
   return text;
 }
 
-Page.return_current_owner_fullname = function()
-{
-	for (var i=0; i<Page.proxies.length; i++) {
-		if (Page.owner == Page.proxies[i].username)	{
-			if (Page.proxies[i].username == 'sep')  return "Standford Encylopedia of Philosophy";
-			else return Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname;
-		}
-	}
-	return "No Owner";
-}
-
 Page.writeOptionsForListCitations = function()
 {
 	var html = '';
@@ -1451,16 +1424,16 @@ Page.writeOptionsForListCitations = function()
 	
 	html += '<table width="100%">';
 	html += '<tr style="vertical-align:top">';
-	html += '<td style="text-align:left;vertical-align=middle">View&nbsp;Collections:&nbsp;</td>';
-	html += '<td>' + Page.printCollectionNamesMenuForViewing() + '</td>';
-	html += '<td width="49%">&nbsp;belonging to <b><em><u>' + Page.return_current_owner_fullname() + '</u></em></b></td>';
-	html += '<td width="50%" style="text-align:right;vertical-align=top">';
-	//html += 'Enter new citations by ' + Page.printInputOptionsMenu();
+	html += '<td style="text-align:left;vertical-align=top">View:&nbsp;</td><td>' + Page.printCollectionNamesMenuForViewing() + '</td>';
+
+	html += '<td style="text-align:right;vertical-align=top">';
+	html += 'Enter new citations by ' + Page.printInputOptionsMenu();
 	html += '</td>';
 	
 	html += '</tr>';
 	
 	html += '</table>';		
+//	if (Page.owner != "")
 	if (Page.loggedIn && Page.hasProxy)
 	{
 		document.getElementById('options').innerHTML = html;
@@ -1476,13 +1449,9 @@ Page.writeOptionsForListCitations = function()
 	html = '';
 	Page.selectAllOrNone = "select";
 	
-	if (Page._citations.length >= 0)
+	if (Page._citations.length > 0)
 	{
 		html = Page.print_ViewOptions_rm_div();	
-		if (Page.loggedIn && Page.hasProxy)
-		{
-			html += Page.print_ImportCitations_rm_div();
-		}
 		html += Page.print_ExportCitations_rm_div();
 	}
 	//if (Page.owner != "")
@@ -1490,7 +1459,6 @@ Page.writeOptionsForListCitations = function()
 	{
 		html += Page.print_Collections_rm_div();
 		html += Page.print_CompareMergeCitations_rm_div();
-		html += Page.print_WorkAs_rm_div();
 	}	
 	if (navigator.userAgent.indexOf("Firefox") == -1)
 	{
@@ -1620,6 +1588,12 @@ Page.listCitations = function()
 		html += 'No results were found.';
 	}
 
+	//var highlight = 'class="white_bgcolor grey_highlight"';  // Will highlight <tr> and <td>
+//	var pointer_style = 'class="pointerhand"';
+//	var td_highlight = '';
+
+//	html += '<table style="background-color:#FFF">';
+
 	var highlight = 'class="white_bgcolor grey_highlight"';  // Will highlight <tr> and <td>
 	var pointer_style = 'class="pointerhand"';
 	var td_highlight = '';
@@ -1647,12 +1621,13 @@ Page.listCitations = function()
 		html += '<a id="a_'+cit_copy[i].citation_id+'" name="a_'+cit_copy[i].citation_id+'"></a>';  // Anchor used by moveWindow()
 		
 		
-		html += '<tr id="row_' + i + '" align=\"left\" ' + highlight +'>';
+	//	html += '<tr id="row_' + i + '" align=\"left\" ' + highlight +'>';
 		
 	//	html += '<tr id="row_' + i + '" align=\"left\">';
-		
+		html += '<tr id="row_' + i + '" align=\"left\" ' + highlight +'>';
+	
 		/**************************************************/
-		html += '<td style="width:100%;border:0px"><table border=0><tr>';
+		html += '<td style="width:100%"><table><tr>';
 		// unverified icon
 		if (cit_copy[i].verified == 0)
 		{
@@ -1713,15 +1688,24 @@ Page.listCitations = function()
 		// Check for LOOP success
 		if ((missing_field_exist) && (Page.highlight_citations_with_missing_info_flag == 1)) {
 			//td_highlight = 'style="background-color:#FFCC99;"';
-			td_highlight = 'class="missing_field"';
+			//td_highlight = 'class="missing_field"';
+			html += '<td width="95%" style="background-color:#FFCC99;" id="cell_' + i + '" ' + pointer_style;
+			
 		}
 		else {
-			td_highlight = 'class="white_bgcolor"';	// Not needed but for consistency
+			
+			//td_highlight = 'class="white_bgcolor"';	// Not needed but for consistency
+			html += '<td width="95%"  id="cell_' + i + '" ' + pointer_style;
 		}
+		//html += '<td width="95%" td_highlight id="cell_' + i + '" ' + pointer_style;
 		
+		if (Page.loggedIn && Page.hasProxy)
+		{
+			html += ' onMouseUp="Page.state=3; Page.current_row_num=' + i + '; Page.editOneCitation(' + i + ');"';
+		}
+		html += '>';
 	//	html += '<td width="95%" id="cell_' + i + '" ' + td_highlight +' style="vertical-align:top">';
-		html += '<td width="95%" id="cell_' + i + '" ' + pointer_style + ' onMouseUp="Page.state=3; Page.current_row_num=' + i + '; Page.editOneCitation(' + i + ');">';
-	
+		
 		html += '<a name="' + cit_copy[i].citation_id + '"></a>';
 
 		/*********************************/
@@ -1748,12 +1732,38 @@ Page.listCitations = function()
 		{			
 			Page.tt_col_arr.push("coll_td_"+i);  // Array for tooltips Page.tt_col.
 		//	html += '<td valign="top" ' + pointer_style + ' id="coll_td_' + i + '" title="" onmouseover="Page.getCollectionsGivenCitationID_request(' + cit_copy[i].citation_id + ');"><font color="red"><b>C</b></font></td>';
-			var vertical_or_horizontal = 'vertical';
+		var vertical_or_horizontal = 'vertical';
 			if (Page.set_compact_view_flag == 1)
 			{
 				vertical_or_horizontal = 'horizontal';
 			}
-			html += '<td style="width:100%;border:0px">&nbsp;</td><td>' + Page.writeListCitationsRightTable(vertical_or_horizontal, i, cit_copy, pointer_style) + '</td>';
+			html += '<td width="10%">&nbsp;</td><td>' + Page.writeListCitationsRightTable(vertical_or_horizontal, i, cit_copy, pointer_style) + '</td>';
+	/*		html += '<td width="10%">&nbsp;</td><td><table>';
+			
+			html += '<tr><td valign="top" ' + pointer_style + ' onMouseUp="Page.state=3; Page.current_row_num=' + i + '; Page.editOneCitation(' + i + ');">Edit</td></tr>';
+		
+			// if (Page.inArray(cit_copy[i].citation_id, Page.similar_citations_array))
+			if (Page.similar_citations_array[cit_copy[i].citation_id])
+			{				
+				html += '<tr><td id="similar' + i + '" valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.showSimilarCitations(' + i + ', ' + cit_copy[i].citation_id + ');">Show&nbsp;Similar&nbsp;Citations</td></tr>';
+			}
+		
+			if ((Page.currentCollection == 'all') || (Page.currentCollection == 'unverified'))
+			{
+				html += '<tr><td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">';
+				html += 'Delete</td></tr>';
+			}
+			else
+			{
+				html += '<tr><td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">';
+				html += 'Remove&nbsp;from&nbsp;Collection</td></tr>';
+			}
+			
+			if (Page.show_collections_flag == 1)
+			{
+				html += '<tr><td valign="top" ' + pointer_style + ' id="coll_td_' + i + '">All&nbsp;Collections</td></tr>';
+			}
+			html += '</table></td>';*/
 		}
 		html += '</tr>'; //Page.setCitationHighlight(' + i + ');
 
@@ -1815,8 +1825,10 @@ Page.listCitations = function()
 				if(document.getElementById('tt_col'))
 				{
 					var context = args[0].id;
+					//alert(context);
 					var temp_row = context.split('_')[2];
 					Page.getCollectionsGivenCitationID_request(Page._citations[temp_row].citation_id);
+				//	this.cfg.setProperty("text", "new");
 					var highest_index = getNextHighestZindex(document.body);
 					document.getElementById('tt_col').style.zIndex = highest_index;
 				}		
@@ -1834,7 +1846,7 @@ Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, 
 	var html = '';
 	
 	var td_1 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.state=3; Page.current_row_num=' + i + '; Page.editOneCitation(' + i + ');">Edit</td>';
-	var td_2 = '<td id="similar' + i + '" valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page._current_citation = Page._citations[' + i + ']; Page.similar_on_left_or_right = \'left\'; Page.getSimilarCitations(' + cit_copy[i].citation_id + ');">Show&nbsp;Similar&nbsp;Citations</td>';
+	var td_2 = '<td id="similar' + i + '" valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.showSimilarCitations(' + i + ', ' + cit_copy[i].citation_id + ');">Show&nbsp;Similar&nbsp;Citations</td>';
 	var td_3 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">Delete</td>';
 	var td_4 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">Remove&nbsp;from&nbsp;Collection</td>';
 	var td_5 = '<td valign="top" ' + pointer_style + ' id="coll_td_' + i + '">All&nbsp;Collections</td>';
@@ -1861,7 +1873,7 @@ Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, 
 		html += tr_open + td_1 + tr_close;	
 	}
 	
-	if ((Page.similar_citations_exist_array[cit_copy[i].citation_id]) && (Page.similar_citations_exist_array[cit_copy[i].citation_id] == 1))
+	if (Page.similar_citations_array[cit_copy[i].citation_id])
 	{	
 		html += tr_open + td_2 + tr_close;
 	}
@@ -1889,37 +1901,12 @@ Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, 
 	return html;
 }
 
-Page.getSimilarCitations = function(citation_id)
+Page.showSimilarCitations = function(row, citation_id)
 {
-	var jsonStr = '{"request": {"type": "get_similar",  "citation_id": "' + citation_id + '"}}';
-	Ajax.SendJSON('services/citations.php', Page.showSimilarCitations, jsonStr);	
-}
-
-Page.showSimilarCitations = function()
-{
-	if (Ajax.CheckReadyState(Ajax.request)) 
-	{	
-		var responseObj = eval("(" + Ajax.request.responseText + ")");
-		
-		if (Page.similar_on_left_or_right == 'left')
-		{
-			Page.panel2.setHeader("The citations on the left are similar to the citation you clicked on (on the right).");
-			Page.citations_array_a =  responseObj.similar_citations_array; 
-			Page.citations_array_b = new Array(Page._current_citation);
-		}
-		else if (Page.similar_on_left_or_right == 'right')
-		{
-			Page.panel2.setHeader("Your new citation is on the left.  Similar citations already in the database are on the right.");
-			Page.citations_array_a = new Array(Page._current_citation);
-			Page.citations_array_b = responseObj.similar_citations_array;
-		}
-		else
-		{
-			Page.panel2.setHeader("");
-		}
-		
-		Page.editTwoCitations();
-	}
+	Page._current_citation = Page._citations[row];
+	Page.panel2.setHeader("The citations on the left are similar to the citation you clicked on (on the right).");
+	var current_citation_array = new Array(Page._current_citation);
+	Page.editTwoCitations(Page.similar_citations_array[Page._current_citation.citation_id], current_citation_array);
 }
 
 Page.printPagingAndFormatTable = function()
@@ -2132,7 +2119,6 @@ Page.getCitations = function(page, type, citation_id)
 	if ((type == 'getCitations_byFac_all') || (type == 'getCitations_byFac_unverified'))
 	{
 		var jsonStr = '{"request": {"type": "' + type + '",  "page": "' + page + '", "citation_id_page": "' + citation_id + '", "citations_per_page": "' + Page.citations_per_page + '", "sort_order": "' + Page.sort_order + '", "citations": {"submitter": "' + Page.submitter + '",  "owner": "' + Page.owner + '", "entryTime": ""}}}';
-		//alert("Page.getCitations: " + jsonStr);
 		Ajax.SendJSON('services/citations.php', Page.onResponse, jsonStr);	
 	}
 	else if  ((type == 'journal') || (type == 'title') || (type == 'author') || (type == 'all'))
@@ -2144,6 +2130,7 @@ Page.getCitations = function(page, type, citation_id)
 	else if  (type == 'getCitations_byTimestamp_all')
 	{
 		var jsonStr = '{"request": {"type": "'+ type +'",  "page": "' + page + '", "citations_per_page": "' + Page.citations_per_page + '",  "citations": {"submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "entryTime": "' + Page.parsed_timestamp + '"}}}';
+		//alert("Page.getCitations: " + jsonStr);
 		Ajax.SendJSON('services/citations.php', Page.pageThroughCitations_response, jsonStr);	
 	}
 	else if (type == 'getCollection')
@@ -2160,6 +2147,7 @@ Page.searchCitations_response = function()
 		Page.rewritePage(responseObj);
 	}
 }
+
 
 Page.listCollections = function()
 {	
@@ -2179,64 +2167,23 @@ Page.listCollections = function()
 
 	html += '<table style="border: 4px solid #7D110C; width:60%;">';
 	
-	var id_count = 0; // for continuous numbering through both loops
-	
-	// Print special collections at the top
-	for (var i=0; i < Page.special_collections.length; i++) 
-	{
-		//	html += '<tr id="row_' + i + '" align=\"left\" ' + highlight +'>';
-			html += '<tr id="row_' + id_count + '" align=\"left\">';
-					
-			// check box	
-			html += '<td valign="top"><input type="checkbox" name="collection_checkboxes_' + Page.special_collections[i].collection_id + '" id="collection_cb_' + Page.special_collections[i].collection_id + '" value="' + Page.special_collections[i].collection_id + '"></td>';
-			
-			html += '<td valign="top" width="90%" id="collection_cell_' + id_count + '" ' + pointer_style + ' onMouseUp="Page.current_page=1;Page.current_viewable_pages=new Array();Page.currentCollection=' + Page.special_collections[i].collection_id + ';  Page.getCitationsGivenCollectionID();">';
-
-			if(Page.special_collections[i].collection_name == 'misc') {
-				html += 'My Citations Not in a Collection';
-			}
-			else {
-				html += Page.special_collections[i].collection_name; 
-			}
-				
-			html += ' &nbsp; <b>(' + Page.special_collections[i].count + ' citations)</b></td>';
-			//if(Page.special_collections[i].collection_name == 'misc' || Page.special_collections[i].collection_name == 'My Representative Publications' || Page.special_collections[i].collection_name == 'My CV Publications') {
-			html += '<td valign="top"><font style="color:grey">[Rename]</font></td>';
-			html += '<td valign="top"><font style="color:grey">[Delete]</font></td></tr>'; 
-			html += '<tr><td></td><td></td><td></td><td></td></tr>';
-			id_count++;
-	}
-	
-	// Print other collections
 	for (var i=0; i < Page.collections.length; i++) 
 	{
 		//	html += '<tr id="row_' + i + '" align=\"left\" ' + highlight +'>';
-			html += '<tr id="row_' + id_count + '" align=\"left\">';
+			html += '<tr id="row_' + i + '" align=\"left\">';
 					
 			// check box	
-			html += '<td valign="top"><input type="checkbox" name="collection_checkboxes_' + Page.collections[i].collection_id + '" id="collection_cb_' + Page.collections[i].collection_id + '" value="' + Page.collections[i].collection_id + '"></td>';
+			html += '<td valign="top"><input type="checkbox" name="collection_checkboxes' + Page.collections[i].collection_id + '" id="collection_cb_' + Page.collections[i].collection_id + '" value="' + Page.collections[i].collection_id + '"></td>';
 			
-			html += '<td valign="top" width="90%" id="collection_cell_' + id_count + '" ' + pointer_style + ' onMouseUp="Page.current_page=1;Page.current_viewable_pages=new Array();Page.currentCollection=' + Page.collections[i].collection_id + ';  Page.getCitationsGivenCollectionID();">';
-
-			if(Page.collections[i].collection_name == 'misc') {
-				html += 'My Citations Not in a Collection';
-			}
-			else {
-				html += Page.collections[i].collection_name; 
-			}
-				
-			html += ' &nbsp; <b>(' + Page.collections[i].count + ' citations)</b></td>';
+			html += '<td valign="top" width="90%" id="collection_cell_' + i + '" ' + pointer_style + ' onMouseUp="Page.current_page=1;Page.current_viewable_pages=new Array();Page.currentCollection=' + Page.collections[i].collection_id + ';  Page.getCitationsGivenCollectionID();">';
 			
-			if(Page.collections[i].collection_name == 'misc' || Page.collections[i].collection_name == 'My Representative Publications' || Page.collections[i].collection_name == 'My CV Publications') {
-				html += '<td valign="top"><font style="color:grey">[Rename]</font></td>';
-				html += '<td valign="top"><font style="color:grey">[Delete]</font></td></tr>'; 
-			}
-			else {
-				html += '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.renameCollection_request(' + i + ');">[Rename]</td>';
-				html += '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCollection_request(' + i + ');">[Delete]</td></tr>'; 
-			}
+			html += Page.collections[i].collection_name + ' &nbsp; <b>(' + Page.collections[i].count + ' citations)</b></td>';
+			
+			//html += '<td valign="top">' + Page.collections[i].count + '</td>';
+			html += '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.renameCollection_request(' + i + ');">[Rename]</td>';
+			html += '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCollection_request(' + i + ');">[Delete]</td></tr>'; 
 			html += '<tr><td></td><td></td><td></td><td></td></tr>';
-			id_count++;
+			//html += '<tr><td></td><td></td><td></td><td></td><td></td></tr>';
 	}
 	
 	html += '</table>';
@@ -2371,6 +2318,7 @@ Page.setCompactView = function()
 	return html;
 }
 
+
 Page.showCollections = function() 
 {
 	var html = '';
@@ -2501,6 +2449,26 @@ Page.setShowAbstractsCB = function()
 	Page.listCitations();
 }
 
+//abhinav
+
+Page.highlightMissingInfoCB = function() 
+{
+	var html = '';
+	html += '<input type="checkbox" name="highlight_missing_info_cb" id="highlight_missing_info_cb"';
+	if (Page.highlight_citations_with_missing_info_flag == 1)
+	{
+		html += ' checked';
+	}
+	html += ' onclick="Page.setMissingInfoCB();"';
+	html += '>';
+	
+	return html;
+}
+
+
+
+
+
 Page.setShowURLsCB = function()
 {
 	if (document.getElementById("show_URLs_cb").checked == true)
@@ -2513,14 +2481,6 @@ Page.setShowURLsCB = function()
 	}
 	Page.listCitations();
 }
-
-Page.printImportMenu = function()
-{
-	var html = '';
-	html += 'Enter new citations by ' + Page.printInputOptionsMenu();
-	return html;
-}
-
 
 Page.printExportMenu = function() 
 {
@@ -2717,18 +2677,21 @@ Page.deleteCitationHelper_request = function(citation_id)
 		var jsonStr = '{"request": {"type": "delete",  "current_get_type": "' + Page.current_get_type + '", "sort_order": "' + Page.sort_order + '", "citations_per_page": "' + Page.citations_per_page + '", "page": "' + Page.current_page + '", "keyword": "' + Page.keywords + '", "citations": {"submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "entryTime": "' + Page.parsed_timestamp + '", "citation_id": "' + citation_id + '"}}}';
 		Ajax.SendJSON('services/citations.php', Page.deleteCitation_response, jsonStr);	
 	}	
+//	Ajax.SendJSON('services/citations.php', callback_function, jsonStr);
 }
 
 Page.deleteCitation_response = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
+	//	alert("Page.deleteCitation_response : Ajax.request.responseText : " + Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
+						
 		if(responseObj.error == 0)
 		{
 			if (Page.panel_open == 1)
 			{
-				//Page.updateCitationsArraysAndTabs_after_delete();
+				Page.updateCitationsArraysAndTabs_after_delete();
 				Page.panel1_alert_message('Citation was deleted successfully.', '');
 
 			}
@@ -3062,29 +3025,37 @@ Page.checkAuthorFirstnameForInitials = function()
 
 Page.alertOnSavingFirstnameAsInitials = function()
 {
-	var result = Page.checkAuthorFirstnameForInitials();
-	if(result.length > 0)
-	{
-		var info = '';
-		for(var i in result) {
-			info += 'Author ' + (parseInt(i)+1) + ' firstname contains initials. \n';	
-		}
-		info += '\nSave anyways? \n';
-		return info;
-	}
-	else return false;
+
+        var result = Page.checkAuthorFirstnameForInitials();
+    if(result.length > 0)
+        {
+                var info = '';
+                for(var i in result) {
+            if (document.getElementById('author'+i+'ln_checkbox') && (document.getElementById('author'+i+'ln_checkbox').checked == true))
+                        {
+                                info += 'Author ' + (parseInt(i)+1) + ' firstname contains initials. \n';
+                        }
+                }
+                if (info != '')
+        {
+                        info += '\nSave anyways? \n';
+                }
+            return info;
+        }
+        else return false;
 }
 
 Page.checkInputAndSave = function(type, merge, timestamp)
 {	
 	var response;
 	if (type == "check_authors")
-	{
+	{	
 		// Continue 
 		Page.create_page_dot_sentData(timestamp);
 	}
 	else if (type == "create_authors")
 	{		
+	
 		if (Page.getCheckedValue(document.forms['cForm'].elements['verified']) == 1) 
 		{
 			if(Page.validate_verified_entry() == 0)
@@ -3096,6 +3067,7 @@ Page.checkInputAndSave = function(type, merge, timestamp)
 						return false;
 					}
 					Page.sentData['verified'] = 0;
+			//		Page.panel1.hide();
 				}
 				else
 				{
@@ -3104,18 +3076,22 @@ Page.checkInputAndSave = function(type, merge, timestamp)
 			}
 			else
 			{
+				
 				if (Page.update_page_dot_sentData(timestamp) == false)
 				{
 					return false;
 				}
+			//	Page.panel1.hide();
 			}
 		}
 		else
 		{
+			
 			if (Page.update_page_dot_sentData(timestamp) == false)
 			{
-				return false;
+				//return false;
 			}
+		//	Page.panel1.hide();	
 		}
 	}
 	var pre_merge_ids = "";
@@ -3124,8 +3100,10 @@ Page.checkInputAndSave = function(type, merge, timestamp)
 		pre_merge_ids = '"pre_merge_id1": "' + Page.pre_merge_id1 + '", "pre_merge_id2": "' + Page.pre_merge_id2 + '", ';
 	}
 	Page.panel1.hide();
+	//var jsonStr = '{"request": {"type": "' + type + '",  ' + pre_merge_ids + '"citations": ' + YAHOO.lang.JSON.stringify(Page.sentData) + '}}';
 	
-	var jsonStr = '{"request": {"type": "' + type + '",  "working_owner":"' + Page.owner + '", "coll_id":"' + Page.currentCollection + '", ' + pre_merge_ids + '"citations": ' + YAHOO.lang.JSON.stringify(Page.sentData) + '}}';
+	var jsonStr = '{"request": {"type": "' + type + '",  "coll_id":"' + Page.currentCollection + '", ' + pre_merge_ids + '"citations": ' + YAHOO.lang.JSON.stringify(Page.sentData) + '}}';
+	
 	Ajax.SendJSON('services/citations.php', Page.onResponseCheckAuthors, jsonStr);		
 }
 
@@ -3153,24 +3131,17 @@ Page.create_page_dot_sentData = function(timestamp)
 	Page.sentData["verified"] = Page.getCheckedValue(document.forms['cForm'].elements['verified']);
 	Page.sentData["representative"] = Page.getCheckedValue(document.forms['cForm'].elements['representative']);
 	Page.sentData["submitter"] = Page.submitter;
-	Page.sentData["owner"] = Page._current_citation['owner'];
+	Page.sentData["owner"] = Page.owner;
 	Page.sentData["entryTime"] = timestamp;
 	
 	// Check for attached_filename.
-	if (document.getElementById('attached_filename').value != "") 
+	if(document.getElementById('attached_filename').value != "") 
 	{
-		if (document.getElementById('attached_filename').value == 'NO_FILE_ATTACHED') // Unattach button has been clicked and no file is to be sent through, not even the original
-		{
-			Page.sentData["filename"] = "";	
-		}
-		else 
-		{
-			Page.sentData["filename"] = document.getElementById('attached_filename').value;
-		}
+		Page.sentData["filename"] = document.getElementById('attached_filename').value;
 	}
-	else
+	else	// Send empty filename to indicate no change in filename
 	{
-		// Original filename is sent since filename is a key in element_array	
+		Page.sentData["filename"] = "";	
 	}
 	
 	if (Page.savingCitationEnteredByHandIntoCollection == true)
@@ -3221,11 +3192,11 @@ Page.update_page_dot_sentData = function(timestamp)
 		{
 			if (document.getElementById('author'+i+'ln_checkbox').checked)
 			{
-				Page.sentData['author'+i+'id'] = -1; // php reads -1 as create new author
+				Page.sentData['author'+i+'id'] = -1; // php reads -1 as verify
 			}
 			else
 			{
-				Page.sentData['author'+i+'id'] = -2; // php reads -2 as unverified author
+				Page.sentData['author'+i+'id'] = -2; // php reads leave unverified
 			}
 			Page.sentData['author'+i+'ln'] = document.getElementById('author'+i+'ln_check').value;
 			Page.sentData['author'+i+'fn'] = document.getElementById('author'+i+'fn_check').value;
@@ -3294,7 +3265,7 @@ Page.compareTwoCitations = function(cit1, cit2)
 		}
 		else if (cit1_value != cit2_value)
 		{
-			if (Page.data_keys[i] == "citation_id" || Page.data_keys[i] == "owner") 
+			if (Page.data_keys[i] == "citation_id" && cit2[Page.data_keys[i]] == "-1") // Check for -1 citation_id => new citation
 			{
 				// Skip
 			}
@@ -3376,18 +3347,7 @@ Page.print_ViewOptions_rm_div = function()
 	html += Page.showCitationID() + 'Show Citation IDs<br>';
 	html += Page.setCompactView() + 'Compact View<br>';
 
-	html += '</td></tr></table>';
-	html += '</div>';
-	return html;
-}
-
-Page.print_ImportCitations_rm_div = function()
-{
-	var html = '<div id="export_citations_rm">';
-	html += '<table style="margin-top:4px; width:100%; border:2px solid #7D110C;">';
-	html += '<th style="background-color:#f8f3d2"><b>Import citations</b></th>';
-	html += '<tr style="background-color:#FFFFFF"><td>';
-	html += '<p></p>' + Page.printImportMenu();
+//	html += Page.showCollections() + 'Show Collections<br><br>';
 	html += '</td></tr></table>';
 	html += '</div>';
 	return html;
@@ -3399,7 +3359,7 @@ Page.print_ExportCitations_rm_div = function()
 	html += '<table style="margin-top:4px; width:100%; border:2px solid #7D110C;">';
 	html += '<th style="background-color:#f8f3d2"><b>Export citations</b></th>';
 	html += '<tr style="background-color:#FFFFFF"><td>';
-	html += '<p></p>' + Page.printExportMenu();
+	html += '<p></p>' + Page.printExportMenu() + '<br><br>';
 	html += '</td></tr></table>';
 	html += '</div>';
 	return html;
@@ -3428,18 +3388,6 @@ Page.print_CompareMergeCitations_rm_div = function()
 	html += '<th style="background-color:#f8f3d2"><b>Compare / Merge</b></th>';
 	html += '<tr style="background-color:#FFFFFF"><td>';
 	html += '<p></p><center><input type="button" name="compareCitations" value="Compare / Merge Citations" onMouseUp="Page.compareCitations();"></center><br>';
-	html += '</td></tr></table>';
-	html += '</div>';
-	return html;
-}
-
-Page.print_WorkAs_rm_div = function()
-{
-	var html = '<div id="export_citations_rm">';
-	html += '<table style="margin-top:4px; width:100%; border:2px solid #7D110C;">';
-	html += '<th style="background-color:#f8f3d2"><b>Work as ... </b></th>';
-	html += '<tr style="background-color:#FFFFFF"><td>';
-	html += '<p></p>' + Page.printWorkAsMenu() + '<br><br>';
 	html += '</td></tr></table>';
 	html += '</div>';
 	return html;

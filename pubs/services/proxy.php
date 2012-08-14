@@ -66,9 +66,23 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		
 			$result = $user->get_all_proxies($arr['submitter']);
 		
-			$jsonString = '{"error": "'.$user->error.'", "viewproxy":'.json_encode($result).'}';
+			$jsonString = '{"error22": "'.$user->error.'","error888": "'.$jsonObj->{'request'}->{'submitter'}.'", "viewproxy":'.json_encode($result).'}';
 			echo $jsonString;
 		}
+		
+		//Abhinav
+		
+		else if($type == "sortview")
+		{
+			$arr = array();
+			$arr['submitter'] = $jsonObj->{'request'}->{'submitter'}; 
+		
+			$result = $user->get_all_sortproxies($arr['submitter']);
+		
+			$jsonString = '{"error333": "'.$user->error.'", "error333": "'.$jsonObj->{'request'}->{'submitter'}.'","viewproxy":'.json_encode($result).'}';
+			echo $jsonString;
+		}
+		
 		else if($type == "manage")
 		{
 			$arr = array();

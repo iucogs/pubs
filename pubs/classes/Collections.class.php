@@ -18,7 +18,7 @@ class Collections
 		$this->table = "collections";
 		$this->limit = "LIMIT 0,200";
 		$this->error = 0;
-	} 
+	}
 	
 	// Create connection to database.
 	function connectDB()
@@ -47,7 +47,7 @@ class Collections
 	function createAndAddCollection($collection_name, $citation_ids, $submitter, $owner, $FORCE_CREATE = false)  
 	{
 		$result_arr;
-		if(($result_arr=$this->return_collection_id_and_create_collection_if_nonexistent($collection_name, $submitter, $owner)) != false)
+		if(($result_arr=$this->createCollection($collection_name, $submitter, $owner)) != false)
 		{
 			$collection_status = $result_arr[0];
 			$new_or_existing_collection_id = $result_arr[1];
@@ -106,15 +106,15 @@ class Collections
 		}			
 	}
 	
-	function return_collection_id_and_create_collection_if_nonexistent($collection_name, $submitter, $owner)
+	function createCollection($collection_name, $submitter, $owner)
 	{
 		$this->link = $this->connectDB();
 
 		$collection_name = trim($collection_name);
 		
-		if(empty($collection_name))  // Check for empty collection name. Return false
+		if(empty($collection_name))  // Check for empty collection name. Give default name
 		{
-			return false;
+			$collection_name = "new_collection";
 		}
 			
 		if(($collection_id = $this->checkCollection($collection_name, $submitter, $owner)) != false)
@@ -142,7 +142,7 @@ class Collections
 		$insert_count = 0;
 		$duplicates = 0;
 		$insert_error = false;
-			
+		
 		foreach($citation_ids as $citation_id)
 		{
 			$query = "SELECT * FROM member_of_collection WHERE collection_id='$collection_id' AND citation_id='$citation_id'";
@@ -227,27 +227,10 @@ class Collections
 	{
 		$this->link = $this->connectDB();
 		
-		// Get special collections ids. Misc, My representative pubs and My CV pubs.
-		$query = "SELECT collection_id FROM collections WHERE owner = '$owner' AND (collection_name = 'misc' OR collection_name = 'My CV Publications' OR collection_name = 'My Representative Publications');";
-		$result = $this->doQuery($query, $this->link);
-		$special_coll_arr = array();
-		if(mysql_num_rows($result) > 0) {
-			while($row = mysql_fetch_assoc($result)) {
-				$special_coll_arr[] = $row['collection_id'];  // Copy result into an array
-			}
-		}
-		
-		// New collection comes in as the string name. Create new collection.
 		if (!is_numeric($collection_id))
 		{
-			$new_name = $collection_id; // Make a copy of the new name.
-			
-			foreach($collection_ids as $coll_id) {
-				if(!in_array($coll_id, $special_coll_arr)) { // Make sure the collection is not a special collection
-					$collection_id = $coll_id;	// Use one of current collection as the new collection.
-					break;
-				}
-			}
+			$new_name = $collection_id;
+			$collection_id = $collection_ids[0];
 			$collection_rename_result = $this->renameCollection($collection_id, $new_name, $submitter, $owner);
 		}
 		
@@ -262,9 +245,8 @@ class Collections
 			// Select all citation_ids except the one we're inserting into.
 			if($coll_id != $collection_id) 
 			{ 	
-				$select_ids .= "collection_id='".mysql_real_escape_string($coll_id)."' OR ";
-				// if coll_id is not a special collection, then proceed to delete.
-				if(!in_array($coll_id, $special_coll_arr)) $collection_ids_to_be_deleted[] = $coll_id; 
+				$select_ids .= "collection_id='".mysql_real_escape_string($coll_id)."' OR "; 
+				$collection_ids_to_be_deleted[] = $coll_id; 
 			}
 		}
 		$select_ids = substr($select_ids, 0, -3);	 // Take out last "OR"
@@ -277,20 +259,11 @@ class Collections
 		{
 			// Delete old merged collections
 			$delete_result = $this->deleteCollections($collection_ids_to_be_deleted);  // return [true|false]
-			if($delete_result != false) {
-				
-				// Update collections_table
-				require_once('Citations.class.php');
-				$citation_obj = new Citations();
-				foreach($collection_ids as $coll_id) {
-					$citation_obj->createAndUpdateOneCollectionInCollectionsTable($coll_id, $submitter, $owner);
-				}
+			if($delete_result != false)			
 				return $collection_id;
-			}
-			else {
+			else
 				$this->error .= 2;
 				return -1;
-			}
 		}
 		else
 		{
@@ -403,38 +376,6 @@ class Collections
 		}
 	}
 	
-	// Grab Misc, My Representative Pubs and My CV Pubs
-	function getSpecialCollectionNamesAndIds($submitter, $owner)
-	{
-		$this->link = $this->connectDB();
-			
-		// Put Misc, Rep Pubs and CV Pubs at the top
-		// Misc
-		$query = "";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'misc'))";
-		
-		// My Representative Publications
-		$query .= " UNION ";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'My Representative Publications'))";
-		
-		// My CV Publications
-		$query .= " UNION ";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'My CV Publications'))";
-						
-		$result = $this->doQuery($query, $this->link);
-
-		if(mysql_num_rows($result) > 0)
-		{
-			$result_arr = array();
-			while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
-			return $result_arr;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
 	function getCollectionNamesAndIds($submitter, $owner)
 	{
 		$this->link = $this->connectDB();
@@ -442,28 +383,11 @@ class Collections
 		$WHERE_clause = "";
 		if ($owner != "")
 		{
-			$WHERE_clause = "WHERE owner='".$owner."' ";
-			// Do not include misc, My Representative Publications and My CV Publications since it will be included in defaultCollections
-			$WHERE_clause .= "AND c.collection_name != 'misc' AND c.collection_name != 'My Representative Publications' AND c.collection_name != 'My CV Publications'";
+			$WHERE_clause = "WHERE owner='".$owner."'";
 		}
+			
+		$query = "SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c ".$WHERE_clause." ORDER BY LTRIM(c.collection_name)";
 		
-		// Put Misc, Rep Pubs and CV Pubs at the top
-		// Misc
-		$query = "";
-		/*$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'misc'))";
-		
-		// My Representative Publications
-		$query .= " UNION ";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'My Representative Publications'))";
-		
-		// My CV Publications
-		$query .= " UNION ";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c WHERE owner='".$owner."' AND (c.collection_name = 'My CV Publications'))";*/
-		
-		// The rest
-		//$query .= " UNION ";
-		$query .= "(SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c ".$WHERE_clause." ORDER BY LTRIM(c.collection_name))";
-				
 		$result = $this->doQuery($query, $this->link);
 
 		if(mysql_num_rows($result) > 0)
@@ -513,16 +437,6 @@ class Collections
 		return $result_arr;	
 	}
 	
-	function getCollectionIDGivenCollectionName($collection_name, $owner)
-	{
-		$this->link = $this->connectDB();
-					
-		$query = "SELECT * FROM collections col WHERE col.owner = '$owner' AND col.collection_name = '$collection_name'";		
-		$result = $this->doQuery($query, $this->link);
-		$row = mysql_fetch_assoc($result);
-		return $row['collection_id'];	
-	}
-	
 	function getCollectionsByCitationID($citation_id)
 	{
 		$this->link = $this->connectDB();
@@ -535,7 +449,6 @@ class Collections
 		}
 		return $temp;		
 	}
-	
 	
 	function deleteCitationByCollectionId($citation_id, $collection_id)
 	{
@@ -555,7 +468,7 @@ class Collections
 	}
 	
 	// Functions for collections_table
-	function deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id, $submitter, $owner)
+	function deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id)
 	{
 		$query = "DELETE FROM collections_table WHERE coll_id='$collection_id' AND citation_id='$citation_id'";
 		
@@ -567,25 +480,9 @@ class Collections
 		}
 		else 
 		{
-			// Check if the citation_id does not exist in collections_table for a particular owner.
-			$query = "SELECT * FROM collections_table WHERE citation_id='$citation_id' AND owner='$owner'";
-			$result = $this->doQuery($query, $this->link);
-			$row = mysql_fetch_assoc($result);
-			
-			if(mysql_num_rows($result) == 0) {
-				require_once('../classes/Citations.class.php');
-				$citations = new Citations();
-				$coll_id = $this->getCollectionIDGivenCollectionName("misc", $owner);
-				
-				// Move the citation to misc collection
-				return $citations->saveOneCitationToCollectionsTable($citation_id, $coll_id, $submitter, $owner);
-			}
-			
 			return true;
 		}
 	}
-	
-	
 	
 }	// End of class
 

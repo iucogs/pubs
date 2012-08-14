@@ -32,7 +32,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		else if (($type == "title") || ($type == "journal") || ($type == "author") || ($type == "all"))
 		{
 			$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, $keyword, $sort_order, 0); 
-			$responseObj = array("error" => $citations->error, "total_count" => $result[0], "citations" => $result[1], "similar_citations_exist_array" => $result[2]);
+			$responseObj = array("error" => $citations->error, "total_count" => $result[0], "citations" => $result[1], "similar_citations_array" => $result[2]);
 			//$responseObj = array("error" => $citations->error, "total_count" => $result[0], "citations" => $result[1], "similar_citations_array" => $result[2], "debug" => $citations->debug);
 			sendResponse($responseObj);
 		}

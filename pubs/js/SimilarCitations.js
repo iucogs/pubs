@@ -1,8 +1,9 @@
-Page.editTwoCitations = function()
+Page.editTwoCitations = function(citations_array_a, citations_array_b)
 {	
 	Page.panel3_open = 1;
 	Page.removeAllTabs();
-//	alert(Page.citations_array_b.length);
+	Page.citations_array_a = citations_array_a; // need to make global for movement between tabs
+	Page.citations_array_b = citations_array_b; // need to make global for movement between tabs
 	
 	Page.interval_value = window.setInterval("checkScroll(document.getElementById('scrollable_div_a0'), document.getElementById('scrollable_div_b0'))", 1);
 	
@@ -11,10 +12,12 @@ Page.editTwoCitations = function()
 	merge_div_html += '<table width="100%" border="0"><tr>';
 	merge_div_html += Page.printBackTD(pointer_style);
 
+	//merge_div_html += '<td align="center"><span class="link pointerhand" onclick="Page.swapPanel3Divs2And3();"><font size="+1">[ More Info ]</font></span><br>';
 	merge_div_html += '<td align="center">';
 	merge_div_html += '<span class="link pointerhand" onclick="Page.mergeCitations();"><font size="+3">Merge</font></span></td>';
 	merge_div_html += Page.printNextTD(pointer_style);
 	merge_div_html += '</tr></table>';
+	//document.getElementById('merge_div1').innerHTML = merge_div_html;
 	document.getElementById('merge_div').innerHTML = merge_div_html;
 
 	// **************************************
@@ -22,12 +25,12 @@ Page.editTwoCitations = function()
 	document.getElementById('panel1_div').style.display = 'none'; 		// Hide
 	Page.panel_open = 1;  
 	 
-	Page.create_tabs(tabView_b, '_b', Page.citations_array_b);
+	Page.create_tabs(tabView_b, '_b', citations_array_b);
 	
-	Page.create_tabs(tabView_a, '_a', Page.citations_array_a);
- 
+	Page.create_tabs(tabView_a, '_a', citations_array_a);
+
 	// Print buttons into 'buttons_div' and create tooltips
-	Page.printMoveRightButtons(Page.citations_array_b[0].pubtype, '_b0');
+	Page.printMoveRightButtons(citations_array_b[0].pubtype, '_b0');
 	Page.hideEmptyAuthorRowsAtEndOfTable();
 	var citation_suffix_of_active_tab = Page.get_citation_suffix_of_active_tab(tabView_b);
 	if ((citation_suffix_of_active_tab != '>') && (citation_suffix_of_active_tab != '<'))
@@ -35,7 +38,6 @@ Page.editTwoCitations = function()
 		initializeAutocompleteFields(citation_suffix_of_active_tab); 
 	}
 
-	Page.similar_on_left_or_right = '';
 	Page.panel2.show();	
 	
 }
@@ -208,10 +210,10 @@ Page.compareCitations = function()
 	}  
 	if (temp_citation_rows.length == 2)
 	{
+		var temp_array1 = new Array(Page._citations[temp_citation_rows[0]]);
+		var temp_array2 = new Array(Page._citations[temp_citation_rows[1]]);
 		Page.selected_citations = temp_citation_rows;
-		Page.citations_array_a = new Array(Page._citations[temp_citation_rows[0]]); 
-		Page.citations_array_b = new Array(Page._citations[temp_citation_rows[1]]);
-		Page.editTwoCitations();
+		Page.editTwoCitations(temp_array1, temp_array2);
 	}
 	else 
 	{
@@ -315,13 +317,8 @@ Page.get_citation_suffix_of_active_tab2 = function(tabView)
 
 Page.get_citation_suffix_of_active_tab = function(tabView)
 {
-	var citation_suffix = "";
-	if (tabView.get('activeTab'))
-	{
-		var label = tabView.get('activeTab').get('label');
-		citation_suffix = Page.get_citation_suffix_from_label(label);
-	}
-	return citation_suffix;
+	var label = tabView.get('activeTab').get('label');
+	return Page.get_citation_suffix_from_label(label); 
 }
 
 Page.get_citation_suffix_for_newly_added_tab = function(tabView)
@@ -354,8 +351,8 @@ Page.removeAllTabs = function()
 		tabView_b.removeTab(tabView_b.getTab(i)); 
 	} 
 	
-//	Page.citations_array_a = "";
-//	Page.citations_array_b = "";
+	Page.citations_array_a = "";
+	Page.citations_array_b = "";
 }
 
 Page.createCloseTabToolTips = function()
@@ -648,64 +645,4 @@ Page.getViewportHeightForScrollableDivs = function()
 Page.getTabAsDOMElement = function(tabView_container, num)
 {
 	document.getElementById(tabView_container).childNodes[0].childNodes[0].childNodes[num];
-}
-
-// Truncate SimilarTo Table
-Page.truncateSimilarTo_request = function()
-{
-	var jsonStr = '{"request": {"type": "truncate_similar_to"}}';
-	Ajax.SendJSON('services/admin.php', Page.truncateSimilarTo_response, jsonStr);	
-}
-
-Page.truncateSimilarTo_response = function()
-{
-	if (Ajax.CheckReadyState(Ajax.request)) 
-	{	
-		alert("Truncate response: "  + Ajax.request.responseText);
-		var responseObj = eval("(" + Ajax.request.responseText + ")");	
-	}
-}
-
-// Populate SimilarTo Table
-Page.populateSimilarTo_request = function()
-{
-	var jsonStr = '{"request": {"type": "populate_similar_to"}}';
-	Ajax.SendJSON('services/admin.php', Page.populateSimilarTo_response, jsonStr);
-}
-
-Page.populateSimilarTo_response = function()
-{
-	if (Ajax.CheckReadyState(Ajax.request)) 
-	{	
-		alert("Populate response: "  + Ajax.request.responseText);
-		var responseObj = eval("(" + Ajax.request.responseText + ")");	
-	}
-}
-
-// Update SimilarTo Table
-Page.updateSimilarTo_byID_request = function()
-{
-	var citation_id = document.getElementById("update_similar_by_id_text").value;
-	var isInteger = /^\d+$/;
-	
-	if(citation_id != "" && isInteger.test(citation_id)) {
-		citation_id = parseInt(citation_id);
-	}
-	else {
-		citation_id = "";
-		alert("Please enter a number!");
-		return false;
-	}
-	
-	var jsonStr = '{"request": {"type": "update_similar_to_by_id", "citation_id":"'+citation_id+'"}}';
-	Ajax.SendJSON('services/admin.php', Page.updateSimilarTo_byID_response, jsonStr);
-}
-
-Page.updateSimilarTo_byID_response = function()
-{
-	if (Ajax.CheckReadyState(Ajax.request)) 
-	{	
-		alert("Populate response: "  + Ajax.request.responseText);
-		var responseObj = eval("(" + Ajax.request.responseText + ")");	
-	}
 }

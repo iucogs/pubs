@@ -14,7 +14,7 @@ function getNextHighestZindex(obj){
 	return(highestIndex+1);  
 }
 
-function inViewPort(el) 
+function inViewPort(el)
 { 
 	var Dom = YAHOO.util.Dom;
 	var y = Dom.getY(el);
@@ -54,12 +54,6 @@ function clearAllRadios(radioName) {
 // Loading Using Panel
 function startUploadPanel()
 {
-	// Check if dropdown menu is "New Collection"
-	var obj = document.getElementById('entryName');
-	if(obj.selectedIndex == 0) {
-		obj.options[obj.selectedIndex].value = document.getElementById('entryName_inputtext').value;
-	}
-	
 	if(Page.panel4) Page.panel4.show(); // Show loading panel
 	if(Page.panel1) Page.panel1.hide(); // Hide panel1
     return true;
@@ -117,26 +111,15 @@ function stopUpload(success, filename)
 function stopUpload2(success, filename, elements)
 {
 	var responseObj = eval("(" + elements + ")");
-	alert(success + " " + filename + " " + elements);
 	var result = '';
 	
 	if (success == 1){
 		//var currentDirectory = unescape(document.URL.substring(0,(document.URL.lastIndexOf("/")) + 1));
 		//html += '<b>Attached file:</b> <a href="' + currentDirectory + 'pdfs/temp/' + attached_filename_obj.value + '" target="_blank">' + attached_filename_obj.value + '</a>' + clear_attached_file_html + '<br>';
-		result = 'The file was attached successfully.<br/>To save the file, click on "Save".';
+		result = 'The file <b>' + filename + '</b> was attached successfully.<br/>To save the file, click on "Save".';
 		
 		document.getElementById('attached_filename'+responseObj['citation_suffix']).value = filename;
 		document.getElementById('attached_filename').value = filename;
-		
-		if(document.getElementById('submit_button'+responseObj['citation_suffix'])) 
-		{
-			document.getElementById('submit_button'+responseObj['citation_suffix']).disabled = true;	
-		}
-		
-		if(document.getElementById('revert_button'+responseObj['citation_suffix'])) 
-		{
-			document.getElementById('revert_button'+responseObj['citation_suffix']).disabled = false;	
-		}
 		
 		//alert('stopUpload2 [' + 'attached_filename'+responseObj['citation_suffix'] + ']: ' + document.getElementById('attached_filename'+responseObj['citation_suffix']).value);
 	}
@@ -150,76 +133,8 @@ function stopUpload2(success, filename, elements)
 		result = 'There was an error during file upload!';
 	}
 	
-	var filepath = Page.basePdfDirectory + 'temp/' + filename;
-//	var upload_html = Page.printFileUploadDiv(responseObj['citation_id'], responseObj['citation_suffix'], filepath, filename, result);
-	
-	var citation_suffix = responseObj['citation_suffix'];
-	/****************/
-	var label_div = 'label_div'+citation_suffix;
-	var filename_div = 'filename_div'+citation_suffix;
-	var status_div = 'status_div'+citation_suffix;
-	var loading_div = 'loading_div'+citation_suffix;
-//	var submit_button = 'submit_button'+citation_suffix;
-	var clear_button = 'clear_button'+citation_suffix;
-	var revert_button = 'revert_button'+citation_suffix;
-	
-	// Reset
-//	if(document.getElementById(upload_div)) document.getElementById(upload_div).innerHTML = '';
-	if(document.getElementById('upload_citation_suffix')) document.getElementById('upload_citation_suffix').value = 'initial';
-	
-//	var html = '';	
-//	html += '<table width="100%"><tr><td>';
-	
-	// Filename label
-//	html += '<div id="'++'">';
-	var filename_html = '';
-	if ((filename == "") || (filename == undefined)) 
-	{
-		filename_html += '<b>File:</b> None.';
-	}
-	else 
-	{
-		filename_html += '<b>File:</b> <a href="' + filepath + '" target="_blank">' + filename + '</a>';
-	}
-	document.getElementById(filename_div).innerHTML = filename_html;
-	
-	document.getElementById(clear_button).disabled = false;
-	document.getElementById(revert_button).disabled = false;
-	document.getElementById(status_div).innerHTML = result;
-	//Status label
-//	var clear_attached_file_html = '&nbsp;&nbsp;<span class="pointerhand" style="color:#7D110C"; onclick="Page.clearAttachedFile(\''+citation_suffix+'\')">[Clear]</span>';
-	
-	
-
-	// Can't have nested forms in HTML
-//	html += '<div id="'+label_div+'" align="center" class="f1_upload_form">';
-//	html += 'Attach a PDF (*.pdf) file.<br/>';
-	
-	// Hidden inputs to send to PHP via POST
-//	html += '<input type="hidden" name="upload_citation_id' + citation_suffix + '" value="' + citation_id + '">';  // Pass citation_id through.
-	
-	// Decide onchange html. Check for b only since a is always text.
-//	var onchange_html = 'document.cForm.'+submit_button+'.disabled=false';
-//	html += '<label>File:  <input id="myfile'+citation_suffix+'" name="myfile'+citation_suffix+'" type="file" size="30" onchange="'+onchange_html+'"/></label>';
-	
-//	onclick_html = 'onclick="Page.updateUploadGlobals(\''+citation_suffix+'\');"';
-//	html += '<input type="submit" name="'+submit_button+'" value="Attach" ' + onclick_html + ' disabled=true /><br />';
-//	html += '<label>(File size limit: 10 MB.)</label>';
-//	html += '</div>';
-	
-	// Note for debugging. Only one cForm target (upload_target2 iframe) is used.
-//	html += '<div id="'+loading_div+'" class="f1_upload_process">Loading...<br/><img src="' + Page.document_root + 'images/loading.gif" /><br/></div>';
-	
-	document.getElementById('myfile'+citation_suffix).value = '';
-	document.getElementById(loading_div).style.visibility = '';
-	document.getElementById(label_div).style.display = ''; // show
-	/*****/
-	
-	
-	
-	
-	
-//	document.getElementById(responseObj['upload_div']).innerHTML = upload_html;
+	var upload_html = Page.printFileUploadDiv(responseObj['citation_id'], responseObj['citation_suffix'], result);
+	document.getElementById(responseObj['upload_div']).innerHTML = upload_html;
   
 	return true;   
 }
@@ -279,7 +194,7 @@ function initializeAutocomplete(name) {
 
 	
 	auto.generateRequest = function(sQuery) {  
-		if (name == 'author0fn') {tempAuthorLN = document.getElementById('author0ln'+citation_suffix).value;}
+		if (name == 'author0fn') {if(document.getElementById('author0ln'+citation_suffix).value!=" ")tempAuthorLN = document.getElementById('author0ln'+citation_suffix).value;}
 		else if (name == 'author1fn') {tempAuthorLN = document.getElementById('author1ln'+citation_suffix).value;}
 		else if (name == 'author2fn') {tempAuthorLN = document.getElementById('author2ln'+citation_suffix).value;}
 		else if (name == 'author3fn') {tempAuthorLN = document.getElementById('author3ln'+citation_suffix).value;}
@@ -546,16 +461,17 @@ function returnSelectionText(html_element) {
 	var obj = document.getElementById(html_element);
 	var startPos = obj.selectionStart;
 	var endPos = obj.selectionEnd;
-	var doc = document.selection;
-
+	var doc = document.selection;	
 	if (doc && doc.createRange().text.length != 0) {  //IE
 		return doc.createRange().text;
 	}
 	else if (!doc && obj.value.substring(startPos,endPos).length != 0) {  // Mozilla & Safari
+
 		return obj.value.substring(startPos,endPos);
 	}
 	else {
-		alert("The context menu works only on Firefox browsers.");
+		
+		alert("Empty " + Page.safariSelection);
 		//return "Error";  // Return empty string instead of "Error" string.
 		return "";
 	}
@@ -947,11 +863,6 @@ function checkScroll(div1, div2) {
 	}
 	lastSeen[0] = div1.scrollTop;
 	lastSeen[1] = div2.scrollTop;
-}
-
-function update_div()
-{
-	document.getElementById('secondary').innerHTML = "Update";
 }
 
 

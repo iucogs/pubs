@@ -1,6 +1,6 @@
 var Ajax = new Object();
 
-// Debug purposes
+// Debug purposes 
 //var time_object = new timestamp_class(0, 0, 0, 0);	//create new time object and initialize it
 
 Ajax.Request = function(url, callbackMethod)

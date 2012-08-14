@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<script type="text/javascript">
+function getSelectedText(el) {
+    if (typeof el.selectionStart == "number") {
+        alert(el.selectionStart);
+        return el.value.slice(el.selectionStart, el.selectionEnd);
+    } else if (typeof document.selection != "undefined") {
+        var range = document.selection.createRange();
+        if (range.parentElement() == el) {
+            return range.text;
+        }
+    }
+    return "";
+}
+
+function copySelected() {
+    var srcTextarea = document.getElementById("input");
+    var destTextarea = document.getElementById("selection");
+    destTextarea.value = getSelectedText(srcTextarea);
+}
+</script>
+</head>
+
+<body>
+<textarea rows="5" cols="80" id="input" onchange="alert(1);">One two three</textarea>
+<textarea rows="5" cols="80" id="selection"></textarea>
+<input type="button" onclick="copySelected()" value="copy selected">
+</body>
+</html>
+
+

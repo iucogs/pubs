@@ -88,12 +88,15 @@ function regularize($string) {
   //global $stoppers;  
   $stoppers = array("the","and","a","an","as","in","at","to","on","of"); # common words
   foreach ($stoppers as $stop) {
+	  //abhinav
+	  set_time_limit(0);
     $string = preg_replace("/\b$stop\b\s*/i", "",$string);
   }
-  
+
   $string = preg_replace("/[!?:,]/","",$string);
   $string = preg_replace("/n\'t\b/i"," not",$string);
   $string = preg_replace("/\'s\b/i","s",$string);
+
   return $string;
 }
 

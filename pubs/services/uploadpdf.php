@@ -2,25 +2,9 @@
 
 require_once('../lib/constants.php');	// Definition for PDF_DIRECTORY
 
-$submitter = $_POST["submitter"];
 // Edit upload location here
-//$destination_path = PDF_DIRECTORY."/".PUBS_VERSION."/temp/"; 
+$destination_path = PDF_DIRECTORY."/".PUBS_VERSION."/temp/"; 
 //$filename = tempnam(sys_get_temp_dir(),''); // Create unique temp file in OS temp folder.
-
-$destination_path = PDF_DIRECTORY."/".PUBS_VERSION."/temp/".$submitter."/"; 
-
-if (!file_exists($destination_path)) 
-{
-	if (mkdir($destination_path, 0777))  // Somehow directory stays at 0755
-	{
-		chmod($destination_path, 0777);  // For directory permission change.
-	} 
-	else 
-	{
-		$this->error .= 9;
-		return false;
-	}
-}
 
 // Clear temporary directory of files older than 1 day.
 // TO-DO: Clear deleted directory as well.
@@ -47,7 +31,7 @@ if (($_FILES[$myfile]["type"] == "application/pdf") && ($_FILES[$myfile]["size"]
 	
 	// Check / Limit filename length
 	$uploaded_filename = substr($uploaded_filename, 0, 100);
-	$filename = $citation_id."_".time()."_".$uploaded_filename.".pdf";	// Reinsert file extension.
+	$filename = $citation_id."_".$uploaded_filename.".pdf";	// Reinsert file extension.
 	
 	$target_path = $destination_path . $filename;
 	

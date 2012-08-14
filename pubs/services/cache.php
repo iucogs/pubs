@@ -6,7 +6,7 @@ $citations = new Citations();
 
 $type = '';
 
-if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
+if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) 
 {
 	$jsonObj = json_decode($GLOBALS['HTTP_RAW_POST_DATA']);
 		
@@ -42,7 +42,10 @@ if($type == "cache_all")
 {	
 	foreach ($owner as $key)
 	{
-		$result = $citations->get_citations_JSON_collections_table($page, $submitter, $key, $citations_per_page, $sort_order, 'all');
+		// Ruth 4/12
+	//	$result = $citations->get_citations_JSON_collections_table($page, $submitter, $key, $citations_per_page, $sort_order, 'all');
+	//	$result = $citations->getCitations_byFac_all($submitter, $owner);
+
 	}
 }
 ?>

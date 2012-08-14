@@ -2,7 +2,7 @@
 Page.mergeSelectedCollections = function()
 {
 	var html = '';
-	var selected = 'selected';
+	var selected = '';
 	var merge_array = Page.getSelectedCheckBoxesCollectionIds();
 	
 	var collection_ids = merge_array[0];
@@ -16,23 +16,14 @@ Page.mergeSelectedCollections = function()
 	{	
 		html += '<center>Select a name for the merged collection: <br><br>'; 
 		html += '<select id="mergeCollectionsSelect" onchange="Page.clearNewNameTextbox();">';
-		html += '<option value="none">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>';
-		
+		html += '<option value="none"></option>';
 		for(var i in collection_ids)
 		{ 
-			// Get collection name based on collection id 
-			var get_collection_field_value = function(collection_id, field) {
-				for(var i in Page.collections) {
-					if(Page.collections[i].collection_id == collection_id)	return Page.collections[i][field];
-				}
-				return null;
-			};
-		
-			var collection_name = get_collection_field_value(collection_ids[i], 'collection_name');
-			var c_count = get_collection_field_value(collection_ids[i], 'count');
-			if(collection_name != null) {	
-				html += '<option value="'+collection_ids[i]+'" ' + selected + '>' + collection_name + ' &nbsp;(' + c_count + ')</option>';
-			}
+			var collection_name = Page.collections[collection_keys[i]].collection_name;
+			var c_count = Page.collections[collection_keys[i]].count;
+			if(i == 0) selected = 'selected'; else selected = "";
+			
+			html += '<option value="'+collection_ids[i]+'" ' + selected + '>' + Page.collections[collection_keys[i]].collection_name + ' &nbsp;(' + c_count + ')</option>';
 		}
 		html += '</select>';
 		html += '<br /><br />';
@@ -108,30 +99,26 @@ Page.pageThroughCitations_response = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-	//alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.newly_added_citations = responseObj.citations;
 		Page.currentTimestamp = Page.newly_added_citations[0]['entryTime'];
-		Page.newly_added_similar_citations_exist_array = responseObj.similar_citations_exist_array;
+		Page.newly_added_similar_citations_array = responseObj.similar_citations_array;
 
-		for (var i in Page.newly_added_similar_citations_exist_array) {
-			if (!Page.similar_citations_exist_array[i])
+		for (var i in Page.newly_added_similar_citations_array) {
+			if (!Page.similar_citations_array[i])
 			{
-				Page.similar_citations_exist_array[i] = Page.newly_added_similar_citations_exist_array[i];
+				Page.similar_citations_array[i] = Page.newly_added_similar_citations_array[i];
 			}
 		}
 		
 		Page.state = 2; // Paging through newly edited citations
 		Page.current_newly_added_num = 0;
 
-		if ((Page.similar_citations_exist_array[Page.newly_added_citations[0].citation_id]) && (Page.similar_citations_exist_array[Page.newly_added_citations[0].citation_id] == 1))
-		{			
-			Page._current_citation = Page.newly_added_citations[0];
-			Page.similar_on_left_or_right = 'right'; 
-			Page.getSimilarCitations(Page.newly_added_citations[0].citation_id);
-		//	Page.citations_array_a = new Array(Page.newly_added_citations[0]); 
-		//	Page.citations_array_b = Page.similar_citations_array[Page.newly_added_citations[0].citation_id];
-		//	Page.editTwoCitations();
+		if (Page.similar_citations_array[Page.newly_added_citations[0].citation_id])
+		{
+			Page.panel2.setHeader("Your new citation is on the left.");
+	
+			Page.editTwoCitations(new Array(Page.newly_added_citations[0]), Page.similar_citations_array[Page.newly_added_citations[0].citation_id]);
 		}
 		else
 		{
@@ -149,18 +136,10 @@ Page.printCollectionNamesMenuForViewing = function()
 	return html;
 }
 
-Page.printCollectionNamesMenuInMainWindow = function() 
-{
-	//var html = '<div id="collectionNamesMenuForViewing_div">';
-	var html = Page.printCollectionNamesMenuForViewing_helper_main_window();
-	///html += '</div>';
-	return html;
-}
-
 // Used by Page.updateCollectionFromList() and Page.printCollectionNamesMenuForViewing(). Page.updateCollectionFromList() is called from Page.listCollections everytime.
 Page.printCollectionNamesMenuForViewing_helper = function()  
 {
-	var html = '<select style="width:30em" name="collectionNamesMenuForViewing" id="collectionNamesMenuForViewing" onchange="Page.selectCollection(this);">';
+	var html = '<select style="width:92%" name="collectionNamesMenuForViewing" id="collectionNamesMenuForViewing" onchange="Page.selectCollection(this);">';
 	html += '<option value="none" id="none"'; 
 	if ((Page.currentCollection == 'none') || (Page.currentCollection == 'search'))
 	{
@@ -176,163 +155,41 @@ Page.printCollectionNamesMenuForViewing_helper = function()
 	}
 	html += '>All My Citations ' + ' &nbsp;(' + Page.default_collections[0].count + ')' + '</option>';
 	
-	html += Page.build_special_collections_html('My Representative Publications','id','');  // My Rep Pubs
-	html += Page.build_special_collections_html('My CV Publications','id','');  // My CV Pubs
-	
-	// Other collections
-	if(Page.collections.length > 0) { // Only show separation line when regular collection exist.
-		html += '<option value="none" id="none">------------------------------------------</option>';
+	html += '<option value="unverified" id="unverified"';
+	if (Page.currentCollection == 'unverified')
+	{
+		html += ' selected';
 	}
-	html += Page.build_collections_option_html(0,Page.collections.length,'id','');
-	
-	// Misc and Unverified
-	var get_misc_count = function() {
-		for(var i=0; i < Page.special_collections.length; i++) {
-			if(Page.special_collections[i].collection_name == 'misc') return parseInt(Page.special_collections[i].count);
+	html += '>All My Unverified Citations ' + ' &nbsp;(' + Page.default_collections[1].count + ')' + '</option>';
+
+	for (var i=0; i < Page.collections.length; i++) {
+		html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
+		html += 'value="' + Page.collections[i].collection_id + '" id="' + Page.collections[i].collection_id + '"';
+		if (Page.currentCollection == Page.collections[i].collection_id)
+		{
+			html += ' selected';	
 		}
-		return 0;
-	};
 	
-	if(get_misc_count() == 0 && Page.default_collections[1].count == 0) {
-		// Skip	
-	}
-	else {
-		html += '<option value="none" id="none">------------------------------------------</option>';
+		html += '>';
+
+		html += 'Collection: ';
 		
-		if (get_misc_count() > 0)
+		// Check collection's name length
+		var c_name = Page.collections[i].collection_name;
+		var c_count = Page.collections[i].count;
+		if(c_name.length > 60)
 		{
-			html += Page.build_special_collections_html('misc','id','');  // Misc	
+			c_name = c_name.substr(0,60) + ' ... (' + c_count+ ')';
 		}
-		if (Page.default_collections[1].count > 0)
+		else
 		{
-			html += '<option value="unverified" id="unverified"';
-			if (Page.currentCollection == 'unverified')
-			{
-				html += ' selected';
-			}
-			html += '>My Unverified Citations ' + ' &nbsp;(' + Page.default_collections[1].count + ')' + '</option>';
+			c_name = c_name + ' &nbsp;(' + c_count+ ')';	
 		}
+		
+		html += c_name + '</option>';
 	}
 	html += '</select>';
 	return html;
-}
-
-Page.printCollectionNamesMenuForViewing_helper_main_window = function()  
-{
-	var html = '';
-	
-	html += 'All My Citations<br> ' //+ ' &nbsp;(' + Page.default_collections[0].count + ')<br>';
-	
-	html += 'My Representative Publications';
-	alert(Page.special_collections[0].count);
-	html += Page.printCollectionCount(Page.special_collections[0].count);
-	html += '<br>';//Page.build_special_collections_html('My Representative Publications','id','');  // My Rep Pubs
-	/*html += Page.build_special_collections_html('My CV Publications','id','');  // My CV Pubs
-	
-	// Other collections
-	if(Page.collections.length > 0) { // Only show separation line when regular collection exist.
-		html += '------------------------------------------';
-	}
-	html += Page.build_collections_option_html(0,Page.collections.length,'id','');
-	
-	// Misc and Unverified
-	var get_misc_count = function() {
-		for(var i=0; i < Page.special_collections.length; i++) {
-			if(Page.special_collections[i].collection_name == 'misc') return parseInt(Page.special_collections[i].count);
-		}
-		return 0;
-	};
-	
-	if(get_misc_count() == 0 && Page.default_collections[1].count == 0) {
-		// Skip	
-	}
-	else {
-		html += '------------------------------------------';
-		
-		if (get_misc_count() > 0)
-		{
-			html += Page.build_special_collections_html('misc','id','');  // Misc	
-		}
-		if (Page.default_collections[1].count > 0)
-		{
-			html += 'My Unverified Citations ' + ' &nbsp;(' + Page.default_collections[1].count + ')';
-		}
-	}*/
-	return html;
-}
-
-Page.build_special_collections_html = function(coll_name, value_type, option_id_prefix)
-{
-	var html = '';
-	for (var i=0; i < Page.special_collections.length; i++) {
-		if(Page.special_collections[i].collection_name == coll_name) 
-		{
-			html += '<option onmouseover="this.parentNode.title=\''+Page.special_collections[i].collection_name+'\'" ';
-			if(value_type == 'name') {
-				html += 'value="' + Page.special_collections[i].collection_name + '" ';
-			}
-			else {
-				html += 'value="' + Page.special_collections[i].collection_id + '" ';
-			}
-			
-			html += 'id="' + option_id_prefix + Page.special_collections[i].collection_id + '"';
-			if (Page.currentCollection == Page.special_collections[i].collection_id) {
-				html += ' selected';	
-			}
-			html += '>';
-			
-			// Check collection's name length
-			var c_name = Page.special_collections[i].collection_name;
-			if(c_name == 'misc') c_name = 'My Citations Not in a Collection';
-		
-			html += Page.checkAndShortenStringLength(c_name,60) + Page.printCollectionCount(Page.special_collections[i].count);
-			html += '</option>';
-		}
-	}
-	return html;
-}
-
-Page.build_collections_option_html = function(start, end, value_type, option_id_prefix)
-{
-	var html = '';
-	for (var i=start; i < end; i++) {
-		if(!Page.collections[i]) continue;
-		html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
-		if(value_type == 'name') {
-			html += 'value="' + Page.collections[i].collection_name + '" ';
-		}
-		else {
-			html += 'value="' + Page.collections[i].collection_id + '" ';
-		}
-		
-		html += 'id="' + option_id_prefix + Page.collections[i].collection_id + '"';
-		if (Page.currentCollection == Page.collections[i].collection_id) {
-			html += ' selected';	
-		}
-		html += '>';
-		//html += 'Collection: ';
-		
-		var c_name = Page.collections[i].collection_name;
-		if(c_name == 'misc') c_name = 'My Citations Not in a Collection';
-		
-		html += Page.checkAndShortenStringLength(c_name,60) + Page.printCollectionCount(Page.collections[i].count);
-		
-		html += '</option>';
-	}
-	return html;
-}
-
-Page.checkAndShortenStringLength = function(str, max_length)
-{
-	if(str.length > max_length) {
-		str = str.substr(0,max_length) + ' ...';
-	}
-	return str;
-}
-
-Page.printCollectionCount = function(count)
-{
-	return '&nbsp;(' + count + ')';
 }
 
 Page.selectCollection = function(theMenu)
@@ -349,7 +206,7 @@ Page.selectCollection = function(theMenu)
 	}
 }
 
-Page.printImportMenu = function() 
+Page.printInputOptionsMenu = function() 
 {
 	var html = '';
 	html += '<select name="inputOptionsMenu" id="inputOptionsMenu" onchange="Page.citation_input_method = this.options[this.selectedIndex].value;">';
@@ -358,54 +215,35 @@ Page.printImportMenu = function()
 	{
 		html += ' selected';	
 	}
-	html += '">Paste into a field</option>';
-//	html += '">pasting APA or MLA citations into a field</option>';
+	html += '">pasting APA or MLA citations into a field</option>';
 	html += '<option value="2" id="upload_citations"';
 	if (Page.citation_input_method == '2')
 	{
 		html += ' selected';	
 	}
-//	html += '">uploading a textfile of APA or MLA citations</option>';
-
-	html += '">Upload a textfile</option>';
+	html += '">uploading a textfile of APA or MLA citations</option>';
 	html += '<option value="3" id="enter_citations_by_hand"';
 	if (Page.citation_input_method == '3')
 	{
 		html += ' selected';	
 	}
-//	html += '">entering citation information into fields by hand</option>';
-	html += '">Enter by hand</option>';
+	html += '">entering citation information into fields by hand</option>';
 	html += '</select>';
-	html += '<br><br>';
+	html += '&nbsp;&nbsp;<input type="button" name="showEnterCitations" value="Go" onclick="Page.showEnterCitations();">';
+	html += '<br>';
 	
-	//if ((Page.currentCollection != "all") && (Page.currentCollection != "unverified") && (Page.currentCollection != "search") && (Page.currentCollection != "none"))
-	//{
-		//html += '<input type="checkbox" name="add_to_current_collection_cb" id="add_to_current_collection_cb" value="1">'; 
-		//html += 'Add to current collection <div style="display:inline;margin-left:7.5em;"></div>';
-	//}
-	html += '<center><input type="button" name="showEnterCitations" value="Go" onclick="Page.showEnterCitations();"></center>';
-
+	if ((Page.currentCollection != "all") && (Page.currentCollection != "unverified") && (Page.currentCollection != "search") && (Page.currentCollection != "none"))
+	{
+		html += '<input type="checkbox" name="add_to_current_collection_cb" id="add_to_current_collection_cb" value="1">'; 
+		html += 'Add new citation(s) to current collection <div style="display:inline;margin-left:7.5em;"></div>';
+	}
 	return html;
-}
-
-Page.checkImportSelectMenu = function()
-{
-	// Index zero means importing new collection
-	if(document.getElementById('entryName').selectedIndex == 0)
-	{
-		document.getElementById('entryName_inputtext').value = '';	// Reset value
-		document.getElementById('entryName_inputtext').style.display = '';	// show
-	}
-	else
-	{
-		document.getElementById('entryName_inputtext').style.display = 'none'; // hide
-	}
 }
 
 Page.showEnterCitations = function()
 {
 	var html = '<p>' + Page.printBackToCitationsButton() + '</p>';
-	html += '<p>Citations must be in APA or MLA format.</p>';
+	
 	if (document.getElementById('inputOptionsMenu').value == "1")  //paste citations
 	{
 		Page.input_method = 1;
@@ -421,42 +259,23 @@ Page.showEnterCitations = function()
 		}
 
 		html += '<form name="textareaform" onsubmit="return false;" ';
-		html += 'onKeyPress="if(enter_pressed(event)){Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, textareaform.citationInput.value, textareaform.entryName.value);}">';
+		html += 'onKeyPress="if(enter_pressed(event)){Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, textareaform.citationInput.value, \'new\', textareaform.entryName.value);}">';
 		
-		//html += '<div align="left" id="myAutoComplete" style="vertical-align:middle; height:22px; z-index:' + Page.zCounter-- + '; width:50em" class="yui-ac">'; 
-		//html += 'Collection name:&nbsp;<input type="text" name="entryName" id="entryName" style="width:60%" value="' + temp_collection_name + '" class="yui-ac-input" autocomplete="off">';
-		//html += '<div align="left" style="vertical-align: middle; left: 0px; top: 22px; width:61%;" id="autocomplete_entryName" class="yui-ac-container"></div>';
-		//html += '</div><br>';
-		
-		html += '<table align="left" border=0><tr>';
-		html += '<td>Collection name:&nbsp;</td>';
-		// Start of SELECT
-		html += '<td><select class="" style="width:20em" name="entryName" id="entryName" onchange="Page.checkImportSelectMenu();">';
-		html += '<option value="" id="entryName_new">New collection</option>';
-		html += Page.build_special_collections_html('My Representative Publications','name','entryName_');  // My Rep Pubs
-		html += Page.build_special_collections_html('My CV Publications','name','entryName_');  // My CV Pubs		
-		html += Page.build_collections_option_html(0,Page.collections.length,'name','entryName_');  // Other collections
-		html += '</select></td>';
+		html += '<div align="left" id="myAutoComplete" style="vertical-align:middle; height:22px; z-index:' + Page.zCounter-- + '; width:50em" class="yui-ac">'; 
+		html += 'Collection name:&nbsp;<input type="text" name="entryName" id="entryName" style="width:60%" value="' + temp_collection_name + '" class="yui-ac-input" autocomplete="off">';
+		html += '<div align="left" style="vertical-align: middle; left: 0px; top: 22px; width:61%;" id="autocomplete_entryName" class="yui-ac-container"></div>';
+		html += '</div><br>';
+					
+		html += '<textarea name="citationInput" id="citationInput" style="width:99%;height:300px;" onFocus="disableSubmit=true;" onBlur="disableSubmit=false;"></textarea>';
 
-		if(Page.currentCollection == 'all' || Page.currentCollection == 'unverified' || Page.currentCollection == 'misc') {
-			html += '<td>&nbsp;&nbsp;&nbsp;&nbsp;New Collection Name: <input type="text" name="entryName_inputtext" id="entryName_inputtext" style="width:20em;" value="" /></td>'
-		}
-		else {
-			html += '<td>&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="entryName_inputtext" id="entryName_inputtext" style="display:none;width:20em;" value="" /></td>'
-		}
-		html += '</tr></table><br><br>';
-		// End of SELECT
-		
-		html += '<textarea name="citationInput" style="width:99%;height:300px;" onFocus="disableSubmit=true;" onBlur="disableSubmit=false;"></textarea>';
-
-		html += '<p><input type="button" onclick="polling_start();Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, textareaform.citationInput.value, textareaform.entryName.value);" value="Import Citation(s)"></p>';
+		html += '<p><input type="button" onclick="Page.parsetext(textareaform.citationInput.value);Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, textareaform.citationInput.value, \'new\', textareaform.entryName.value);" value="Insert citation(s)"></p>';
 		html += '</form>';
 		
 		document.getElementById('secondary').innerHTML = html;			// Set
 		document.getElementById('citations').style.display = 'none';	// Hide
 		document.getElementById('secondary').style.display = '';		// Show	
 		Page.right_column_display('none');
-		//initializeAutocompleteCollectionNames("entryName");
+		initializeAutocompleteCollectionNames("entryName");
 
 	}
 	else if (document.getElementById('inputOptionsMenu').value == "2") //upload citations
@@ -475,28 +294,10 @@ Page.showEnterCitations = function()
 		
 		html += '<form name="uploadForm" action="'+Page.document_root+'services/parser.php" method="post" enctype="multipart/form-data" target="upload_target" onsubmit="startUploadPanel();" >';
 		//html += 'Collection name: <input type="text" name="entryName" size=30 value="' + temp_collection_name + '"><br><br>';
-		//html += '<div align="left" id="myAutoComplete" style="vertical-align:middle; height:22px; z-index:' + Page.zCounter-- + '; width:50em" class="yui-ac">'; 
-		//html += 'Collection name:&nbsp;<input type="text" name="entryName" id="entryName" style="width:60%" value="' + temp_collection_name + '" class="yui-ac-input" autocomplete="off">';
-		//html += '<div align="left" style="vertical-align: middle; left: 0px; top: 22px; width:61%;" id="autocomplete_entryName" class="yui-ac-container"></div>';
-		//html += '</div><br>';
-		
-		html += '<table align="left" border=0><tr>';
-		html += '<td>Collection name:&nbsp;</td>';
-		// Start of SELECT
-		html += '<td><select class="" style="width:20em" name="entryName" id="entryName" onchange="Page.checkImportSelectMenu();">';
-		html += '<option value="" id="entryName_new">New collection</option>';
-		html += Page.build_special_collections_html('My Representative Publications','name','entryName_');  // My Rep Pubs
-		html += Page.build_special_collections_html('My CV Publications','name','entryName_');  // My CV Pubs
-		html += Page.build_collections_option_html(0,Page.collections.length,'name','entryName_');  // Other collections
-		html += '</select></td>';
-		if(Page.currentCollection == 'all' || Page.currentCollection == 'unverified' || Page.currentCollection == 'misc') {
-			html += '<td>&nbsp;&nbsp;&nbsp;&nbsp;New Collection Name: <input type="text" name="entryName_inputtext" id="entryName_inputtext" style="width:20em;" value="" /></td>'
-		}
-		else {
-			html += '<td>&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="entryName_inputtext" id="entryName_inputtext" style="display:none;width:20em;" value="" /></td>'
-		}
-		html += '</tr></table><br><br>';
-		// End of SELECT
+		html += '<div align="left" id="myAutoComplete" style="vertical-align:middle; height:22px; z-index:' + Page.zCounter-- + '; width:50em" class="yui-ac">'; 
+		html += 'Collection name:&nbsp;<input type="text" name="entryName" id="entryName" style="width:60%" value="' + temp_collection_name + '" class="yui-ac-input" autocomplete="off">';
+		html += '<div align="left" style="vertical-align: middle; left: 0px; top: 22px; width:61%;" id="autocomplete_entryName" class="yui-ac-container"></div>';
+		html += '</div><br>';
 		
 		// Hidden input as arguments for parser.php during file upload.
 		html += '<input type="hidden" name="parse_action" size=30 value="new">';
@@ -521,7 +322,7 @@ Page.showEnterCitations = function()
 		document.getElementById('citations').style.display = 'none';	// Hide
 		document.getElementById('secondary').style.display = '';	// Show
 		Page.right_column_display('none');
-		//initializeAutocompleteCollectionNames("entryName");
+		initializeAutocompleteCollectionNames("entryName");
 	}
 	else if (document.getElementById('inputOptionsMenu').value == "3") //enter citations by hand
 	{
@@ -547,6 +348,50 @@ Page.showEnterCitations = function()
 		}
 	}
 }
+
+//abhinav
+
+Page.parsetext = function(txt) 
+{
+	var stringArray = new Array();
+    	stringArray=txt.split("\n");
+	
+	//alert(stringArray[0]);
+	//alert(stringArray[1]);
+	//alert(stringArray[2]);
+	
+	var tempArray =new Array();
+	var flag1=0;
+	var flag2=0;
+		
+	for(var i=0;i < stringArray.length -1; i++)
+	{
+		if(flag1==1)
+			i=i+1;
+			//alert(stringArray[i]);
+		var count1= stringArray[i].split('(').length-1;
+		var count2= stringArray[i].split(')').length-1;
+		
+		if (count1!=0 && count1 != count2)
+		{
+			//alert(1111);
+		tempArray[i]=stringArray[i].concat(stringArray[i+1]);
+		flag1=1;
+		flag2=1;
+		}
+		else{
+		tempArray[i]=stringArray[i];
+		flag1=0;
+		}
+			
+	}
+	if(flag2==1)
+	document.getElementById("citationInput").value = tempArray.join("\n");
+
+//document.getElementById("citationInput").value=txt.replace(/(\r\n|\n|\r)/gm," ");
+}
+
+
 
 Page.set_current_get_type = function(type)
 {
@@ -583,38 +428,25 @@ Page.printCollectionNamesMenuForManagingCitations_helper = function()
 	//onchange="Page.currentCollectionForManagingCitations=this.options[this.selectedIndex].value;">';
 	html += '<option value="new" id="new" >New Collection</option>';
 	
-	var shorten_coll_name = function(c_name) 
-	{
-		if(c_name == 'misc') c_name = 'My Citations Not in a Collection';
-		if(c_name.length > 20) c_name = c_name.substr(0,20) + ' ...';
-		return c_name;
-	}
-	
-	// Print special collections
-	for (var i=0; i < Page.special_collections.length; i++) {
-		if(Page.special_collections[i].collection_name == 'misc') continue; // Skip misc collection
-		html += '<option onmouseover="this.parentNode.title=\''+Page.special_collections[i].collection_name+'\'" ';
-		html += 'value="' + Page.special_collections[i].collection_id + '" id="' + Page.special_collections[i].collection_id + '"';
-		if (Page.currentCollectionForAddingCitations == Page.special_collections[i].collection_id)
-		{
-			html += ' selected';	
-		}
-		html += '>';
-		var c_name = shorten_coll_name(Page.special_collections[i].collection_name);
-		html += c_name + '</option>';
-	}
-	
-	// Print other collections
 	for (var i=0; i < Page.collections.length; i++) {
-		html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
-		html += 'value="' + Page.collections[i].collection_id + '" id="' + Page.collections[i].collection_id + '"';
-		if (Page.currentCollectionForAddingCitations == Page.collections[i].collection_id)
-		{
-			html += ' selected';	
-		}
-		html += '>';
-		var c_name = shorten_coll_name(Page.collections[i].collection_name); 
-		html += c_name + '</option>';
+	  html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
+	  html += 'value="' + Page.collections[i].collection_id + '" id="' + Page.collections[i].collection_id + '"';
+	  if (Page.currentCollectionForAddingCitations == Page.collections[i].collection_id)
+	  {
+		  html += ' selected';	
+	  }
+  
+	  html += '>';
+	  
+	  // Check collection's name length
+	  var c_name = ""+Page.collections[i].collection_name;
+	  if(c_name.length > 20)
+	  {
+		  c_name = c_name.substr(0,20) + ' ...';
+	  }
+	  else{}
+  
+	  html += c_name + '</option>';
 	}
 	html += '</select>';
 	return html;
@@ -627,48 +459,24 @@ Page.getCollectionInfoAndListCitations = function()
 	Ajax.SendJSON('services/collections.php', Page.onResponseCollections, jsonStr);
 }
 
-Page.getCollectionNamesAndIds = function(display_citations_or_display_collections)
+Page.getCollectionNamesAndIds = function()
 {
 	//get collection info
 	var jsonStr = '{"request": {"type": "getCollectionNamesAndIds", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '"}}';
-	if (display_citations_or_display_collections == 'display_citations')
-	{
-		Ajax.SendJSON('services/collections.php', Page.onResponseCollections, jsonStr);
-	}
-	else
-	{
-		Ajax.SendJSON('services/collections.php', Page.onResponseCollections_display_collections, jsonStr);
-	}
+	Ajax.SendJSON('services/collections.php', Page.onResponseCollections, jsonStr);
 }
 
 Page.onResponseCollections = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-	//	alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.collections = responseObj.collections;
 		Page.default_collections = responseObj.default_collections; // all and unverified count.
-		Page.special_collections = responseObj.special_collections; // all and unverified count.
 		Page.writeOptionsForListCitations();
 		Page.listCitations();
 	}
 }
-
-Page.onResponseCollections_display_collections = function() 
-{
-	if (Ajax.CheckReadyState(Ajax.request)) 
-	{	
-	alert(Ajax.request.responseText);
-		var responseObj = eval("(" + Ajax.request.responseText + ")");
-		Page.collections = responseObj.collections;
-		Page.default_collections = responseObj.default_collections; // all and unverified count.
-		Page.special_collections = responseObj.special_collections; // all and unverified count.
-	//	Page.writeOptionsForListCitations();
-	//	Page.listCitations();
-	}
-}
-
 
 Page.getSelectedCheckBoxesCitationIds = function()  // Get selected/checked checkboxes on citations listing.
 {
@@ -689,25 +497,14 @@ Page.getSelectedCheckBoxesCollectionIds = function()  // Get selected/checked ch
 	var temp_collection_keys = new Array(); 
 	var temp_collection_ids = new Array();
 	var temp_citation_id;
-	var id_count = 0;
-	for (var i=0; i<Page.special_collections.length; i++)  
-	{
-		temp_collection_id = Page.special_collections[i].collection_id;
-		if (document.getElementById('collection_cb_'+temp_collection_id).checked)  {
-			temp_collection_ids.push(document.getElementById('collection_cb_'+temp_collection_id).value);
-			temp_collection_keys.push(id_count);
-		}
-		id_count++
-	}
 	for (var i=0; i<Page.collections.length; i++)  
 	{
 		temp_collection_id = Page.collections[i].collection_id;
 		if (document.getElementById('collection_cb_'+temp_collection_id).checked)  {
 			temp_collection_ids.push(document.getElementById('collection_cb_'+temp_collection_id).value);
-			temp_collection_keys.push(id_count);
+			temp_collection_keys.push(i);
 		}
-		id_count++;
-	}	
+	}
 	Page.temp_collection_ids = temp_collection_ids;
 	return Array(temp_collection_ids, temp_collection_keys);
 }
@@ -770,6 +567,7 @@ Page.getCollectionsGivenCitationID_response = function()
 		//alert("response: " + Ajax.request.responseText); 
 		Page.tooltip_request_count = 0;
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
+		//alert(responseObj.collections[30]);
 		if (responseObj.collections.length > 0)
 		{
 			var tt_str = '';
@@ -819,7 +617,6 @@ Page.onResponseGetCitationsGivenCollectionID = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-	alert('here2');
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
  		Page.rewritePage(responseObj);
 	}
@@ -1055,11 +852,6 @@ Page.selectedIntoCollection_response = function()
 /************** Parse into Collections [START] ******************/
 Page.parseFileIntoCollection_request = function(action, collection_name)
 {
-	// Check if dropdown menu is "New Collection"
-	if(document.getElementById('entryName').selectedIndex == 0) {
-		collection_name = document.getElementById('entryName_inputtext').value;
-	}
-	
 	if(collection_name == "")
 	{
 		Page.panel1_alert_message('Please enter a collection name.', '');
@@ -1074,76 +866,26 @@ Page.parseFileIntoCollection_request = function(action, collection_name)
 	}	
 }
 
-Page.parseTextIntoCollection_request = function(callbackmethod, str, collection_name)
+
+
+Page.parseTextIntoCollection_request = function(callbackmethod, str, action, collection_name)
 {
 	// Save info before checking collection_name exist.
 	Page.newEntries = str;
 	
-	// Check if dropdown menu is "New Collection"
-	var new_collection_name_exists = false;
-	var new_collection_name_protected = false;
-	if(document.getElementById('entryName').selectedIndex == 0) {
-		collection_name = trim(document.getElementById('entryName_inputtext').value);
-
-		for(var i = 0; i < Page.collections.length; i++)
-		{
-			if( (Page.collections[i].collection_name.toLowerCase() == collection_name.toLowerCase()))
-			{
-				new_collection_name_exists = true;
-				break;
-			}
-		}
-		
-		for (var i = 0; i < Page.FIXED_COLLECTIONS.length; i++)
-		{
-			if( (Page.FIXED_COLLECTIONS[i].toLowerCase() == collection_name.toLowerCase()))
-			{
-				new_collection_name_exists = true;
-				break;
-			}
-		}
-		
-		for (var i = 0; i < Page.PROTECTED_GROUPINGS.length; i++)
-		{
-			if( (Page.PROTECTED_GROUPINGS[i].toLowerCase() == collection_name.toLowerCase()))
-			{
-				new_collection_name_protected = true;
-				break;
-			}
-		}
-	}
-	
-	if(collection_name == "") {
+	if(collection_name == "") 
 		Page.panel1_alert_message('Please enter a collection name.', '');
-	}
 	else if(str == "")
-	{
 		Page.panel1_alert_message('Please insert APA or MLA citation(s) in the field.', '');
-	}
-	else if (new_collection_name_protected)
-	{
-		Page.panel1_alert_message("'" + collection_name + "' is not permitted as a user-created collection name.  Please choose a different collection name.");
-	}
 	else {
-		// Check for existing collection_name if "New Collection"
-		if(new_collection_name_exists)
-		{
-			var answer = confirm("A collection with the name '" + collection_name + "' exists.  Your citations will be added to that collection.")
-			if (answer){
-				Page.parseTextIntoCollectionHelper_request(callbackmethod, collection_name);
-			}
-		}
-		else 
-		{
-			Page.parseTextIntoCollectionHelper_request(callbackmethod, collection_name);
-		}
+		Page.parseTextIntoCollectionHelper_request(callbackmethod, action, collection_name);
 	}
 }
 
-Page.parseTextIntoCollectionHelper_request = function(callbackmethod, collection_name)
+Page.parseTextIntoCollectionHelper_request = function(callbackmethod, action, collection_name)
 {
 	var str = Page.newEntries;  // Could be sent as an argument.
-	var jsonStr = '{"request": {"entries": '+ YAHOO.lang.JSON.stringify(str) +', "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "collection_name": ' + YAHOO.lang.JSON.stringify(collection_name) + ', "entryTime": ""}}';
+	var jsonStr = '{"request": {"entries": '+ YAHOO.lang.JSON.stringify(str) +', "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "action": "' + action + '", "collection_name": ' + YAHOO.lang.JSON.stringify(collection_name) + ', "entryTime": ""}}';
 	Ajax.SendJSON('services/parser.php', callbackmethod, jsonStr);	
 }
 
@@ -1151,9 +893,7 @@ Page.parseTextIntoCollection_response = function()
 {	
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-		polling_stop();
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
-	//	alert(Ajax.request.responseText);
 		Page.panelIntoCollection_response(responseObj, 'text');	
 	}
 }
@@ -1186,8 +926,65 @@ Page.panelIntoCollection_response = function(responseObj, mode) // mode is eithe
 		collection_name = responseObj.collection_name;
 	}
 		
-	if(responseObj.collection_status == "inserted")  // Insertion successful. status: inserted
+	// If collection exist. Ask for a new collection name or insert. Send to the same callbackmethod (this function).
+	if(responseObj.collection_status == "exists")  // -1 means a collection exists. status: exists
 	{
+		html = new_collection_exists_message_html(collection_name);
+		html += collection_exists_options_html(collection_id, collection_name, mode);
+		
+	}
+	else if(responseObj.collection_status == "new_inserted")  // 1 means a collection does not exists. Insertion successful. status: new_inserted
+	{
+		//Added by Abhinav on 03/07/2012
+		html += '<div class="panel1_message">';
+		html += '<p> A new collection has been created</p>';
+		html += '<input type="button" class="panel1_button" value="OK" onclick="Page.setFlag(\'responseObj\',\'collection_id\',\'collection_name\',\'mode\');Page.panel1.hide()"/>';	
+
+	}
+	else if(responseObj.collection_status == "ti") 	// "TI:" entries upload or paste. "ti" cases are handle in parser.php itself.
+	{
+		Page.parsed_timestamp = responseObj.parsed_timestamp;
+		html = ti_html(Page.parsed_timestamp, mode);
+		
+	}
+	else if((responseObj.collection_status == "exists_inserted") && (responseObj.collection_id != -1)) 	// collection_exists 0 means insert into existing collection successful.  status: exists_inserted
+	{																					// collection_id -1 means error inserting into existing collection.	
+		var duplicates = responseObj.duplicates;
+		var insert_count = responseObj.insert_count;
+	//	Page.newCollectionName = collection_name;
+		
+		html = insert_into_existing_collection_html(duplicates, insert_count, collection_name);
+		html += created_collection_successfully_options_html(collection_id, collection_name, mode);
+		
+		Page.currentCollection = collection_id;  
+		Page.currentCollection_name = collection_name; //might be redundant
+		if ((mode == 'file') || (mode == 'text'))
+		{
+			Page.parsed_timestamp = responseObj.parsed_timestamp;
+		}
+	}
+	else if(responseObj.collection_status == "empty_name")  // Means empty collection_name submitted during regular file upload. status: empty_name
+	{
+		html = Page.panel1_alert_message('Please enter a collection name.', '');
+	
+	}
+	else
+	{
+		html = 'Error in: Page.panelIntoCollection_response('+mode+').';	
+		
+	}
+		// Show message on panel1 
+	Page.panel1.setBody(html);
+	Page.panel1.show();
+	//Page.newpanel1.show();
+	Page.getCollectionNamesAndIds();
+	
+	}
+
+//Added by Abhinav on 03/07/2012
+Page.setFlag = function(responseObj,collection_id,collection_name,mode)
+{
+	
 		var duplicates = responseObj.duplicates;
 		var insert_count = responseObj.insert_count;
 		
@@ -1200,22 +997,8 @@ Page.panelIntoCollection_response = function(responseObj, mode) // mode is eithe
 		{
 			Page.parsed_timestamp = responseObj.parsed_timestamp;
 		}
-	}
-	else if(responseObj.collection_status == "ti") 	// "TI:" entries upload or paste. "ti" cases are handle in parser.php itself.
-	{
-		Page.parsed_timestamp = responseObj.parsed_timestamp;
-		html = ti_html(Page.parsed_timestamp, mode);
-	}
-	else
-	{
-		html = 'Error in: Page.panelIntoCollection_response('+mode+').';	
-	}
-	
-	// Show message on panel1 
-	Page.panel1.setBody(html);
-	Page.panel1.show();
-	Page.getCollectionNamesAndIds('display_citations');
 }
+
 /************** Citations Into Collection Panel1 response [END] ******************/
 
 	/************ Declare html functions [START] **************/
@@ -1290,7 +1073,7 @@ Page.panelIntoCollection_response = function(responseObj, mode) // mode is eithe
 		else if(option == 'text')
 		{
 			onclick_insert = 'onclick="Page.parseTextIntoCollectionHelper_request(Page.parseTextIntoCollection_response, \'insert\', \'' + collection_name + '\');"';
-			onclick_new = 'onclick="Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, Page.newEntries, document.getElementById(\'new_collection_name\').value);"';
+			onclick_new = 'onclick="Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, Page.newEntries, \'new\', document.getElementById(\'new_collection_name\').value);"';
 		}
 			
 		html = '<br><input type="button" name="add_citations_to_existing_collection" value="Add citations to \'' + collection_name + '\'" ' + onclick_insert + '><br>';

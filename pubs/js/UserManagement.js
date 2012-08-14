@@ -1,6 +1,8 @@
+var cogsvalue;
+
 Page.print_user_back_button = function()
 {
-	var admin_back_html = '<input type="button" value="Back to admin" onclick="Page.adminPage();" /><br><br>';
+	var admin_back_html = '<input type="button" value="Back to admin" onclick="Page.adminPage(0,\''+ cogsvalue +'\');" /><br><br>';
 	var user_back_html = '<input type="button" value="Back to user" onclick="Page.myAccount();" /><br><br>';
 	
 	if(Page.user_back_button_state == 'admin')	return admin_back_html;
@@ -16,7 +18,7 @@ Page.proxy_table = function(proxies, selected_username)
 	var count = proxies.length;
 	html += '<p><center>Current Proxies:</center></p><br />';
 	html += '<table style="border: 2px solid #7D110C; width:25%; text-align:left"><th>Count</th><th>id</th>';
-	html += '<th>Firstname</th><th>Lastname</th><th>Username</th><th>Edit</th><th>Delete</th>';
+	html += '<th>Firstname</th><th>Lastname</th><th class="pointerhand" onclick="Page.inputMethod(0)" value="0" name="input_method">Username</th><th>Edit</th><th>Delete</th>';  //Abhinav
 	var toggle = true; 
 	var highlight1 = 'onMouseOver="this.bgColor = \'#C0C0C0\'" onMouseOut ="this.bgColor = \'#DDDDDD\'" bgcolor="#DDDDDD"';
 	var highlight2 = 'onMouseOver="this.bgColor = \'#C0C0C0\'" onMouseOut ="this.bgColor = \'#FFFFFF\'" bgcolor="#FFFFFF"';
@@ -166,10 +168,6 @@ Page.clear_createproxyfrm = function()
 //				- Called by inputMethod(), create proxy page
 Page.createuser_request = function(account, username, firstname, lastname, submitter)
 {
-	var option_admin = Page.getCheckedValue(document.getElementsByName('option_admin'));
-	var option_cogs = Page.getCheckedValue(document.getElementsByName('option_cogs'));
-	var option_self_proxy = Page.getCheckedValue(document.getElementsByName('option_self_proxy'));
-	
 	if(username == "" && firstname == "" && lastname == "")
 	{
 		var html = '<center>Please enter a Username or a Last Name.</center>';
@@ -177,8 +175,7 @@ Page.createuser_request = function(account, username, firstname, lastname, submi
 	}
 	else
 	{	
-		var jsonStr = '{"request": {"type": "create",  "account": "' + account + '", "username": "' + username + '", "lastname": "' + lastname + '", "firstname": "' + firstname + '", "option_admin": "' + option_admin + '", "option_cogs": "' + option_cogs + '", "option_self_proxy": "' + option_self_proxy + '", "submitter": "' + submitter + '"}}';
-		//alert(jsonStr);
+		var jsonStr = '{"request": {"type": "create",  "account": "' + account + '", "username": "' + username + '", "lastname": "' + lastname + '", "firstname": "' + firstname + '", "submitter": "' + submitter + '"}}';
 		Ajax.SendJSON('services/user.php', Page.createuser_response, jsonStr);
 	}
 }
@@ -210,7 +207,7 @@ Page.createuser_response = function()
 				else if(responseObj.createuser == "user_exist") { warning = "User exists."; }
 				else if(responseObj.createuser == "multiple_users") { warning = "Multiple Users Exists!"; }
 				else if(responseObj.createuser == "query_error") { warning = "Error in the query!"; }
-				else { warning = "Undefined Error!"; }
+				else { warning = "The submitter is not allowed to create the user."; }
 				html += '<center>'+warning+'</center>';
 				document.getElementById('secondary').innerHTML = html;
 			}
@@ -220,8 +217,14 @@ Page.createuser_response = function()
 
 // createproxy	- Send Ajax request to create a proxy
 //				- Called by inputMethod(), create proxy page
-Page.createproxy_request = function(account, username, firstname, lastname, submitter)
+Page.createproxy_request = function(account, username, facultyname, firstname, lastname, submitter)
 {
+	//abhinav
+	
+	if(!(facultyname == " ")) {
+		submitter= facultyname;
+	}
+	
 	if(username == "" && firstname == "" && lastname == "")
 	{
 		var html = '<center>Please enter a Username or a Last Name.</center>';
@@ -261,7 +264,7 @@ Page.createproxy_response = function()
 				else if(responseObj.createproxy == "proxy_equal_submitter") { warning = "Cannot create yourself as a proxy."; }
 				else if(responseObj.createproxy == "multiple_users") { warning = "Multiple Users Exists!"; }
 				else if(responseObj.createproxy == "query_error") { warning = "Error in the query!"; }
-				else { warning = "Undefined Error!"; }
+				else { warning = "The submitter or the faculty memeber is not authorized to create the proxy."; }   //abhinav
 				html += '<center>'+warning+'</center>';
 				document.getElementById('secondary').innerHTML = html;
 			}
@@ -302,6 +305,15 @@ Page.viewproxy_request = function(submitter)
 	var jsonStr = '{"request": {"type": "view", "submitter": "' + submitter + '"}}';
 	Ajax.SendJSON('services/proxy.php', Page.viewproxy_response, jsonStr);
 }
+
+//Abhinav
+
+Page.viewsortproxy_request = function(submitter)
+{
+	var jsonStr = '{"request": {"type": "sortview", "submitter": "' + submitter + '"}}';
+	Ajax.SendJSON('services/proxy.php', Page.viewproxy_response, jsonStr);
+}
+
 
 // viewproxy_response	- Callback method for viewproxy_request
 // 						- proxy.php - Return deleted proxy / show current proxies
@@ -372,7 +384,7 @@ Page.deleteuser_response = function()
 
 // checkproxy_update	- Callback method for checkproxy_request()
 //						- Retrieve search result of users and prints table
-Page.checkproxy_update = function()
+Page.checkproxy_update = function()    //abhinav
 {
 	if(Ajax.CheckReadyState(Ajax.request)) 
 	{	
@@ -390,14 +402,14 @@ Page.checkproxy_update = function()
 			Page.ldap_dom = responseObj;
 			
 			// Create table
-			Page.search_result(responseObj);
+			Page.search_result(responseObj);    //abhinav
 		}	
 	}
 }
 
 // search_result	- Prints table of users
 //					- Called by checkproxy_update()
-Page.search_result = function(response)
+Page.search_result = function(response)   //abhinav
 {
 	var toggle = true;
 	var count = response.users.length;
@@ -422,8 +434,8 @@ Page.search_result = function(response)
 		
 		var highlight1 = 'onMouseOver="this.bgColor = \'#C0C0C0\'" onMouseOut ="this.bgColor = \'#DDDDDD\'" bgcolor="#DDDDDD"';
 		var highlight2 = 'onMouseOver="this.bgColor = \'#C0C0C0\'" onMouseOut ="this.bgColor = \'#FFFFFF\'" bgcolor="#FFFFFF"';
-		
-		html += '<tr id="'+i+'" onclick="Page.search_update(this.id,\''+response.account+'\');" '
+
+		html += '<tr id="'+i+'" onclick="Page.search_update(this.id,\''+response.account+'\');" '   //abhinav
 		if(toggle) {
 			html += highlight1; 
 		}
@@ -441,16 +453,18 @@ Page.search_result = function(response)
 
 // search_update	- Called by search_result() table
 //					- Fill the selected user info into the search form
-Page.search_update = function(id, account)
+Page.search_update = function(id, account)   
 {
-	document.getElementById('proxy_firstname').value = Page.ldap_dom.users[id].firstname;
-	document.getElementById('proxy_lastname').value = Page.ldap_dom.users[id].lastname;
-	if(account == "guest") {
-		document.getElementById('proxy_username').value = Page.ldap_dom.users[id].mail;
-	}
-	else {  // "ads"
-		document.getElementById('proxy_username').value = Page.ldap_dom.users[id].username;
-	}
+		document.getElementById('proxy_firstname').value = Page.ldap_dom.users[id].firstname;
+		document.getElementById('proxy_lastname').value = Page.ldap_dom.users[id].lastname;
+		if(account == "guest")
+		 {
+			document.getElementById('proxy_username').value = Page.ldap_dom.users[id].mail;
+		 }
+		else 
+		 {  // "ads"
+			document.getElementById('proxy_username').value = Page.ldap_dom.users[id].username;
+		 }
 }
 
 // checkproxy_request	- Called by inputMethod(), create proxy page 
@@ -462,7 +476,7 @@ Page.checkproxy_request = function()
 	var value_firstname = document.getElementById('proxy_firstname').value;
 	var value_lastname = document.getElementById('proxy_lastname').value;
 	var value_account = Page.getCheckedValue(document.getElementsByName('account_type'));
-	var callbackmethod = Page.checkproxy_update;
+	var callbackmethod = Page.checkproxy_update();
 	
 	if(value_username != "") 
 	{
@@ -482,7 +496,6 @@ Page.checkproxy_request = function()
 		document.getElementById('search_result').innerHTML = html;	
 	}	
 }
-
 Page.viewOwners_request = function()
 {
 	var jsonStr = '{"request": {"type": "viewOwners", "submitter": "' + Page.submitter + '"}}';
@@ -508,59 +521,53 @@ Page.viewOwners_response = function()
 				Page.owner = owners[0].username;		
 			}
 			Page.setHasProxy();
-		//	Page.printWorkAsMenu();
+			Page.rewriteSelectMenu();
 		}
 		Page.current_page=1; 
 		Page.current_viewable_pages=new Array();
-	//	if (Page.loggedIn)
-	/*	{
-			alert('before');
-			Page.getCollectionNamesAndIds('display_collections');
-			alert('middle: ' + Page.special_collections);
-			Page.homePage_loggedIn();
-
+		if (Page.loggedIn)
+		{
+			Page.getCitationsGivenCollectionID();
 		}
 		else
-		{*/
+		{
 			Page.get_faculty_request();
-	//	}
+		}
 		
 	}
 	return '';
 }
 
-Page.printWorkAsMenu = function()
+Page.rewriteSelectMenu = function()
 {
 	var html = '';
-	html += 'Show collections belonging to:&nbsp;&nbsp;<select id="setOwner" onchange="Page.changeSetOwnerSelectMenu(this);">';
+	html += 'Show collections belonging to: <select id="setOwner" onclick="Page.changeSetOwnerSelectMenu(this) ;">';
 		
-	if(!Page.hasProxy) {
+	//Commented by Abhinav		
+	/*if(!Page.hasProxy) {
 		html += '<option value=""></option>';
-	}
+	} */
 	
 	for (var i=0; i<Page.proxies.length; i++) {
 		if (Page.proxies[i].username == 'sep') {
-			html += '<option onmouseover="this.parentNode.title=\'Stanford Encyclopedia of Philosophy\'" value="' + Page.proxies[i].username + '"';
+			html += '<option value="' + Page.proxies[i].username + '"';
 			if (Page.owner == Page.proxies[i].username)	{
 				html += ' selected="selected"';
 			}
-			html += '>Stanford Encyclopedia ...</option>';
+			html += '>Stanford Encyclopedia of Philosophy</option>';
 		}
 		else {
-			var user_name = Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname;
-			html += '<option onmouseover="this.parentNode.title=\''+user_name+'\'" value="' + Page.proxies[i].username + '"';
+			html += '<option value="' + Page.proxies[i].username + '"';
 			if (Page.owner == Page.proxies[i].username)	{
 				html += ' selected="selected"';
 			}
-			// Check if the full name is more than 20 characters and cut it.
-			if(user_name.length > 20) user_name = user_name.substr(0,20) + ' ...';
-			html += '>' + user_name + '</option>';
-		}	
+			html += '>' + Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname + '</option>';
+		}
 	}
 	html += '</select>';
-//	document.getElementById('owner_div').innerHTML = html;				//set	
+	document.getElementById('owner_div').innerHTML = html;				//set	
 	Page.cache_all_request('proxies');
-	return html;
+
 }
 
 Page.changeSetOwnerSelectMenu = function(myselect)
@@ -589,6 +596,7 @@ Page.get_faculty_response = function()
 	var html = '';
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	 
+		//alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.homePage(responseObj.get_faculty);
 	}
@@ -616,7 +624,7 @@ Page.homePage = function(faculty)
 	// Reset owner then rewrite proxy select menu
 	Page.owner = '';
 	if (Page.loggedIn) { 
-		Page.printWorkAsMenu();
+		Page.rewriteSelectMenu();
 	}
 	
 	var html = 'Welcome to Publications, sponsored by the Indiana University Cognitive Science Program.<br><br>';
@@ -631,21 +639,14 @@ Page.homePage = function(faculty)
 	Page.hideCitations();
 }
 
-Page.homePage_loggedIn = function()
-{
-	var html = Page.printCollectionNamesMenuInMainWindow();
-	document.getElementById('secondary').innerHTML = html;
-	Page.hideCitations();
-}
-
 Page.getFacultyRepresentativePublications = function(faculty_username)  // essentially same as getCitationsGivenCollectionID, but don't set owner
 {
 	var citation_id = 0;
 	
 	// Rewrite proxy select menu
-	/*if(Page.loggedIn) {
+	if(Page.loggedIn) {
 		Page.rewriteSelectMenu();
-	}*/
+	}
 	Page.current_get_type = 'getCollection';
 	
 	Page.getCitations(Page.current_page, Page.current_get_type);
@@ -678,9 +679,9 @@ Page.myAccount = function()
 	html += '<tr><td width="10">&nbsp;</td><td><b>Proxy management</b></td></tr>';
     html += '<tr><td></td><td>';
  	html += '<table border="0">';
-    //html += '<tr><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod(6)" value="6" name="input_method"/></td><td align="left">Create Proxy</td></tr>';
-    //html += '<tr><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
+    html += '<tr><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
+    html += '<tr><td><input type="radio" onclick="onclick="Page.inputMethod_createproxy(6,\''+ cogs +'\')" value="6" name="inputMethod_createproxy"/></td><td align="left">Create Proxy</td></tr>';
+    html += '<tr><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
     html += '<tr><td><input type="radio" onclick="Page.inputMethod(7)" value="7" name="input_method"/></td><td align="left">View / Manage Current Proxies</td>';
 	html += '</table>';
 	html += '</td></tr>';
@@ -694,8 +695,9 @@ Page.myAccount = function()
 
 
 
-Page.createproxy_html = function(selected_username, print_back_button)
+Page.createproxy_html = function(selected_username, print_back_button,cogs)  //abhinav
 {
+	
 	var html = '';
 	if(print_back_button) html += Page.print_user_back_button(); 
 	html += '<center>Create Proxy</center>';
@@ -712,20 +714,47 @@ Page.createproxy_html = function(selected_username, print_back_button)
 	html += '<tr><td>Last Name</td><td>' + Page.printTextBox('proxy_lastname', '', '30') + '</td><td>(starts with)</td><tr>';
 	html += '<tr><td>First Name</td><td>' + Page.printTextBox('proxy_firstname', '', '30') + '</td><td></td><tr>';
 	html += '<tr><td></td><td><center>OR</center></td><td></td></tr>';
-	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';															  
+	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';	
+	
+	//abhinav
+	if(cogs!=1)
+	{
+	//html += '<form name="createproxy1" onkeyup="Page.checkproxy_request();">';
+	//html += '<table style="border: 2px solid #7D110C;"><th></th><th></th><th></th>';
+	//html += '<tr><td></td><td>';
+	html += '<tr><td>Faculty Username:</td><td>' + Page.printTextBox('proxy_facultyname', ' ', '20')+ '</td><td></td></tr>';	
+	//html += '</table>';
+	//html += '</form>';
+	
+	}
 	html += '<tr><td></td><td><p><input type="button" onclick="Page.checkproxy_request();" value="Search">&nbsp;&nbsp;';
 	html += '<input type="button" onclick="Page.clear_createproxyfrm();" value="Clear">&nbsp;&nbsp;';
+	if(cogs!=1)
+	{
 	html += '<input type="button" onclick="Page.createproxy_request(';
 	html += 'Page.getCheckedValue(document.getElementsByName(\'account_type\')),';
 	html += 'document.getElementById(\'proxy_username\').value,';
+	html += 'document.getElementById(\'proxy_facultyname\').value,';  //abhinav
 	html += 'document.getElementById(\'proxy_firstname\').value,';
 	html += 'document.getElementById(\'proxy_lastname\').value, \'' + selected_username + '\');" value="Create"></p>';
+	}
+	else
+	{
+	html += '<input type="button" onclick="Page.createproxy_request(';
+	html += 'Page.getCheckedValue(document.getElementsByName(\'account_type\')),';
+	html += 'document.getElementById(\'proxy_username\').value,';
+	html += "";  //abhinav
+	html += 'document.getElementById(\'proxy_firstname\').value,';
+	html += 'document.getElementById(\'proxy_lastname\').value, \'' + selected_username + '\');" value="Create"></p>';
+	}
 	html += '</td></tr>';
 	html += '</table>';
 	html += '</form>';
 	html += '<p></p><div id="search_result"></div>';
+	
 	return html;
 }
+
 
 Page.createuser_html = function(selected_username)
 {
@@ -745,14 +774,7 @@ Page.createuser_html = function(selected_username)
 	html += '<tr><td>Last Name</td><td>' + Page.printTextBox('proxy_lastname', '', '30') + '</td><td>(starts with)</td><tr>';
 	html += '<tr><td>First Name</td><td>' + Page.printTextBox('proxy_firstname', '', '30') + '</td><td></td><tr>';
 	html += '<tr><td></td><td><center>OR</center></td><td></td></tr>';
-	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';	
-	
-	html += '<tr><td>Options</td><td>';
-	html += '<input type="checkbox" id="option_admin" name="option_admin" value="admin"><label for="option_admin">Admin</label>&nbsp;&nbsp;';
-	html += '<input type="checkbox" id="option_cogs" name="option_cogs" value="cogs"><label for="option_cogs">Cogs</label>&nbsp;&nbsp;';
-	html += '<input type="checkbox" id="option_self_proxy" name="option_self_proxy" value="self_proxy" checked disabled><label for="option_self_proxy">Proxy to self</label>&nbsp;&nbsp;';
-	html += '</td><td></td><tr>';
-	
+	html += '<tr><td>Username</td><td>' + Page.printTextBox('proxy_username', '', '20')	+ '</td><td></td><tr>';															  
 	html += '<tr><td></td><td><p><input type="button" onclick="Page.checkproxy_request();" value="Search">&nbsp;&nbsp;';
 	html += '<input type="button" onclick="Page.clear_createproxyfrm();" value="Clear">&nbsp;&nbsp;';
 	html += '<input type="button" onclick="Page.createuser_request(';
@@ -803,7 +825,7 @@ Page.manageproxy_html = function(selected_username, proxies) // Submitter is cur
 	
 	html += '<br />';
 	
-	html += Page.createproxy_html(selected_username, false);
+	html += Page.createproxy_html(selected_username, false,0);
 	
 	return html;
 }
@@ -830,38 +852,25 @@ Page.manageproxy_response = function()
 	}
 }
 
-Page.adminPage = function()
+Page.adminPage = function(flag,cogs)  //Abhinav
 {
 	Page.hideCitations();
 	
 	Page.user_back_button_state = 'admin';
+	cogsvalue=cogs;
 	
 	var html = '';
 	html += '<div id="user_div"></div>';
 	
-	// Collections Table Management
 	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
-	html += '<tr><td align="center"><b>Collections Table Management</b></td></tr>';
+	html += '<tr><td align="center"><b>Collections Table</b></td></tr>';
     html += '<tr><td>';
 	html += '<div id="populate_div">'
+	html += '<input type="button" onclick="Page.populateCollectionsTable_request();" value="Populate" name="populate_button"/>';
 	html += '&nbsp;&nbsp;';
-	html += '<b>1.</b>&nbsp;<input type="button" onclick="Page.truncateCollectionsTable_request();" value="Truncate" name="truncate_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
-	html += '<b>2.</b>&nbsp;<input type="button" onclick="Page.populateCollectionsTable_request();" value="Populate" name="populate_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
-	html += '<b>3.</b>&nbsp;<input type="button" onclick="Page.createMiscCollectionsTable_request();" value="Create Misc" name="create_misc_button"/>&nbsp;&nbsp;';
-	html += '</div>';
-	html += '</td></tr>';
-	html += '</table>';
-	
-	// Similar Citations Management
-	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
-	html += '<tr><td align="center"><b>Similar Citations Management</b></td></tr>';
-    html += '<tr><td>';
-	html += '<div id="populate_div">'
+	html += '<input type="button" onclick="Page.truncateCollectionsTable_request();" value="Truncate" name="truncate_button"/>';
 	html += '&nbsp;&nbsp;';
-	html += '<b>1.</b>&nbsp;<input type="button" onclick="Page.truncateSimilarTo_request();" value="Truncate" name="truncate_similar_button"/>&nbsp;&nbsp;&nbsp;&nbsp;';
-	html += '<b>2.</b>&nbsp;<input type="button" onclick="Page.populateSimilarTo_request();" value="Populate" name="populate_similar_button" disabled/>&nbsp;&nbsp;&nbsp;&nbsp;';
-	html += '<b>3.</b>&nbsp;<input type="button" onclick="Page.updateSimilarTo_byID_request();" value="Update By ID" name="update_similar_by_id_button"/>&nbsp;&nbsp;';
-	html += '<b>:</b>&nbsp;<input type="text" id="update_similar_by_id_text" name="update_similar_by_id_text"/>&nbsp;&nbsp;';
+	html += '<input type="button" onclick="Page.createMiscCollectionsTable_request();" value="Create Misc" name="create_misc_button"/>';
 	html += '</div>';
 	html += '</td></tr>';
 	html += '</table>';
@@ -879,9 +888,9 @@ Page.adminPage = function()
 	html += '<tr><td width="10">&nbsp;</td><td><b>User management</b></td></tr>';
     html += '<tr><td></td><td>';
  	html += '<table border="0">';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod(6)" value="6" name="input_method"/></td><td align="left">Create Proxy</td></tr>';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
+    html += '<tr id="user_create"><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
+    html += '<tr><td><input type="radio" onclick="Page.inputMethod_createproxy(6,\''+ cogs +'\')" value="6" name="inputMethod_createproxy"/></td><td align="left">Create Proxy</td></tr>';  //abhinav
+    html += '<tr id="user_view"><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
     html += '<tr><td><input type="radio" onclick="Page.inputMethod(7)" value="7" name="input_method"/></td><td align="left">View / Manage Current Proxies</td>';
 	html += '</table>';
 	html += '</td></tr>';
@@ -889,5 +898,37 @@ Page.adminPage = function()
 	html += '</td></tr>';
 	html += '</table>';
 	document.getElementById('user_div').innerHTML = html;
-	Page.get_feedback_request();
+	//abhinav
+	if(cogs==1){
+	document.getElementById('user_create').style.visibility = "hidden";
+	document.getElementById('user_view').style.visibility = "hidden";
+	}
+	//Abhinav 
+	if(flag==1)
+	Page.get_sortedfeedback_request(cogs);
+    else
+	Page.get_feedback_request(cogs);
+	
+}
+//abhinav
+
+Page.inputMethod_createproxy = function(input_method,cogs)
+{
+	var html = "";
+
+
+	 if(input_method == 6)
+	{
+		html += Page.createproxy_html(Page.submitter, true,cogs);
+	}
+	
+	
+	if ((input_method == 6) ) 
+	{
+		document.getElementById('citations').style.display = 'none';
+		Page.right_column_display('none');
+		document.getElementById('secondary').innerHTML = html;
+		document.getElementById('secondary').style.display = '';
+	}
+	
 }

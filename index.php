@@ -73,6 +73,7 @@ function query_user($user, $document_root)
 	{
 		$user_info = mysql_fetch_array($result, MYSQL_ASSOC);
 		$user_info['username'] = $user;
+		$_SESSION['cogs']=$user_info['cogs'];
 		LoggedIn($user_info, $document_root);
 	}
 	else
@@ -120,7 +121,6 @@ function LoggedIn($user_info, $document_root)
 <script type="text/javascript" src="<?php echo $document_root;?>js/PrintFormats.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/EditLayout.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/SimilarCitations.js"></script>
-<script type="text/javascript" src="<?php echo $document_root;?>js/Progress.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/Feedback.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/debug.js"></script>
 <!-- Menu source file -->
@@ -192,21 +192,14 @@ else
 	<div id="top" style="display:none; text-align:left">
     <table style="width:100%"><tr>
     
-      <td>
+    <!--<td>
+    <input type='button' id="homeButton" value='Home' onclick='Page.homePage()'/>
+	</td>-->
     
-    
-    <?php
-	echo "<table><tr>";
-	echo "<td class='pointerhand' onclick='Page.get_faculty_request();'><b>Home</b></td>";	
-	echo "</tr></table>";
-	?>
-     
-     </td>
-    
-    <td  align="right">
+    <td>
 	<form name="searchForm">		
 	<table><tr>
-    <td><b>Search:</b>&nbsp;</td>
+    <td>Search:&nbsp;</td>
     <td>
 	<input text="text" size="30" id="search_keywords" name="search_keywords">
 	<input type="submit" value="All" onclick="Page.searchCitations_request('all');return false;">
@@ -226,32 +219,44 @@ else
     
    
      
-     <td  align="right">    
-	 <?php
+     <td><div id="owner_div"></div></td>
+     
+      <td align="right">
+    
+    
+    <?php
 	echo "<table><tr>";
+	echo "<td class='pointerhand' onclick='Page.get_faculty_request();'>Home</td>";
+	echo '<td>::</td>';
 	
 	if ($user_info == "") 
 	{
-		echo "<td class='pointerhand' onclick='Page.register();'><b>Register</b></td>";
+		echo "<td class='pointerhand' onclick='Page.register();'>Register</td>";
 		echo '<td>::</td>';
-    	echo "<td> <form action='cas.php'><input type='hidden' id='owner' name='owner' value='' /><input type='hidden' id='currentCollection' name='currentCollection' value='' /><input type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;' /></form></td>";		 
+    	echo "<td> <form action='cas.php'><input type='hidden' id='owner' name='owner' value='' /><input type='hidden' id='currentCollection' name='currentCollection' value='' /><input type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;' /></form></td>";
+		 
 	}
 	else
 	{
+		
 		if ($user_info['admin'] == 1)
 		{
-			echo "<td class='pointerhand' onclick='Page.adminPage();'><b>Admin</b></td>";
+			echo "<td class='pointerhand' onclick='Page.adminPage(0,0);'>Admin</td>"; //Abhinav
 			echo '<td>::</td>';
 		}
-		echo "<td class='pointerhand' onclick='Page.myAccount();'><b>My Account</b></td>";
+		if ($user_info['cogs'] == 1 && !($user_info['cogs'] == 1 && $user_info['admin'] == 1) )
+		{
+			echo "<td class='pointerhand' onclick='Page.adminPage(0,1);'>Admin</td>"; //Abhinav 
+			echo '<td>::</td>';
+		}
+		echo "<td class='pointerhand' onclick='Page.myAccount();'>My Account</td>";
 		echo '<td>::</td>';
-		echo '<td><a style="color:black" href="'.$document_root.'logout.php" ><b>Logout</b></a></td>';
+		echo '<td><a href="'.$document_root.'logout.php" >Logout</a></td>';
 	}
 	echo "</tr></table>";
 	?>
-    </td>
      
-    
+     </td>
      
      </tr></table>
      

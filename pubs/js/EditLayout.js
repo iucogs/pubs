@@ -8,7 +8,7 @@ Page.printAuthorRowText = function(_citation)
 	{
 		lnValue = _citation['author'+i+'ln'];
 		fnValue = _citation['author'+i+'fn']; 
-		
+			
 		for (var j=0; j<Page.authorNameSubstitutions.length; j++)
 		{
 			if ((Page.authorNameSubstitutions[j].orig_ln == lnValue) && (Page.authorNameSubstitutions[j].orig_fn == fnValue))
@@ -17,7 +17,7 @@ Page.printAuthorRowText = function(_citation)
 				fnValue = Page.authorNameSubstitutions[j].new_fn;	
 			}
 		}
-		 
+		
 		var style = 'style="padding-left:30px"';
 		html += '<tr height="26px" align="left" style="vertical-align:middle">';
 		html += '<td width="8%" align="center">' + (i+1) + '</td>';
@@ -140,6 +140,7 @@ Page.enterChangingByPubtypeInfo = function(_citation, pubtype, flagField, citati
 				var size = Page.fields_arr[field_name][1];
 				var label = Page.fields_arr[field_name][0];
 				
+			//	var cit_temp = Page.citations_array_b[temp];
 				if(_citation[field_name] == undefined) {					// If the citation field is undefined, treat it as empty
 					html += Page.printTableRow(label, field_name, "", size, citation_suffix, 0, pubtype);
 				}
@@ -178,10 +179,15 @@ Page.changePubtypeInfoInTab = function(pubtype, citation_suffix)
 	return Page.enterChangingByPubtypeInfo(Page.citations_array_b[active_index-1], pubtype, "", citation_suffix); 
 }
 
+Page.refreshRaw = function() // needed for context menu to function in safari
+{
+}
+
 
 Page.enterRawInfo = function(_citation, fieldFlag, citation_suffix) 
 {
 	var html = '';
+	Page.rawTemporary = _citation.raw;
 	html += Page.printTableTop('raw', citation_suffix);
 	
 	html += '<input size="10" type="hidden" id="citation_id'+citation_suffix+'" name="citation_id'+citation_suffix+'" value="'+_citation.citation_id+'">';
@@ -201,7 +207,7 @@ Page.enterRawInfo = function(_citation, fieldFlag, citation_suffix)
 		html += '<div style="z-index:' + Page.zCounter-- + '">';
 		html += '<textarea id="raw'+citation_suffix+'" name="raw'+citation_suffix+'" rows="2" cols="65" readonly="readonly">' + _citation.raw + '</textarea>';
 		html += '</div>';
-		html += '</td></tr>';
+		html += '</td></tr>'; 
 	}
 	else
 	{
@@ -209,7 +215,9 @@ Page.enterRawInfo = function(_citation, fieldFlag, citation_suffix)
 		
 		html += '<b>Raw:</b></td><td>';
 		html += '<div id="the_raw_div" style="z-index:' + Page.zCounter-- + '">';
-		html += '<textarea id="raw" name="raw" rows="3" cols="52" readonly="readonly">' + _citation.raw + '</textarea>'; //readonly="readonly"
+		html += '<textarea id="raw" name="raw" rows="3" cols="52" onchange="this.value=Page.rawTemporary;" onkeyup="this.value=Page.rawTemporary;">' + _citation.raw + '</textarea>'; //readonly="readonly"
+			//	html += '<textarea id="raw" name="raw" rows="3" cols="52" onselect="Page.safariSelection=this.value.substring(this.selectionStart,this.selectionEnd);alert(this.selectionStart);">' + _citation.raw + '</textarea>'; //readonly="readonly"
+
 		html += '</div>';
 		html += '</td></tr>';
 		
@@ -326,6 +334,7 @@ Page.printAuthorRow = function(_citation, citation_suffix)
 	{
 		lnValue = _citation['author'+i+'ln'];
 		fnValue = _citation['author'+i+'fn'];
+		
 		for (var j=0; j<Page.authorNameSubstitutions.length; j++)
 		{
 			if ((Page.authorNameSubstitutions[j].orig_ln == lnValue) && (Page.authorNameSubstitutions[j].orig_fn == fnValue))
@@ -337,12 +346,12 @@ Page.printAuthorRow = function(_citation, citation_suffix)
 		
 		if ((i == 0) && (lnValue == ""))
 		{
-			lnValue = 'HIGHLIGHT_BACKGROUND';
+			lnValue = '';
 		}
 		
 		if ((i == 0) && (fnValue == ""))
 		{
-			fnValue = 'HIGHLIGHT_BACKGROUND';
+			fnValue = '';
 		}
 		
 		idValue = (_citation['author'+i+'id'] == undefined) ? "" : _citation['author'+i+'id'];
