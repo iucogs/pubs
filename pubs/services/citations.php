@@ -188,7 +188,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		
 		// Ruth 4/12
 		//$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, 'all');
-		$result = $citations->getCitations_byFac_all($submitter, $owner);
+		$result = $citations->getCitations_byFac_all($submitter, $owner, 'all', '', '',$sort_order);
 
 		$jsonString = '{"error11": "'.$citations->error.'", "pageeeeeee": "'.$submitter.'","pageeeeeee": "'.$owner.'","page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
 		//Logger::instance()->clear();
@@ -197,7 +197,8 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		}
 	else if($type == "getCitations_byFac_unverified")
 	{	
-		$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
+		$result = $citations->getCitations_byFac_all($submitter, $owner, 'unverified', '', '',''); 
+	//	$result = $citations->get_citations_JSON1($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
 		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "citation_id_page": "'.$citation_id_page.'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
 	
 		echo $jsonString;

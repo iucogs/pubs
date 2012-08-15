@@ -67,7 +67,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			list($collection_status, $collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
-			$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
+			//$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
 			
 			$collection_array = $collection->getCollectionByID($collection_id);
 			$responseObj = array("error" => $collection->error, "collection_status" => $collection_status, "collection_id" => $collection_id, 
@@ -81,7 +81,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			list($collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
-			$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
+			//$citation->createAndUpdateCollectionsTable($collection_id, $submitter, $owner);
 			
 			$collection_array = $collection->getCollectionByID($collection_id);
 			$collection_name = $collection_array['collection_name'];

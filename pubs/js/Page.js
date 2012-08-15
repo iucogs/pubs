@@ -2107,7 +2107,7 @@ Page.inArray = function(val, arr)
 }
 
 Page.getCitations = function(page, type, citation_id)
-{
+{ 
 	Page.current_get_type = type;
 	Page.current_page = page;
 	
@@ -2128,7 +2128,7 @@ Page.getCitations = function(page, type, citation_id)
 		Ajax.SendJSON('services/search.php', Page.searchCitations_response, jsonStr);	
 	}	
 	else if  (type == 'getCitations_byTimestamp_all')
-	{
+	{ 
 		var jsonStr = '{"request": {"type": "'+ type +'",  "page": "' + page + '", "citations_per_page": "' + Page.citations_per_page + '",  "citations": {"submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "entryTime": "' + Page.parsed_timestamp + '"}}}';
 		//alert("Page.getCitations: " + jsonStr);
 		Ajax.SendJSON('services/citations.php', Page.pageThroughCitations_response, jsonStr);	

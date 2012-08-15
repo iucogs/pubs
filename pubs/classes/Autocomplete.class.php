@@ -76,12 +76,12 @@ class Autocomplete
 		$query = '';
 		if (($field == 'author0ln') || ($field == 'author1ln') || ($field == 'author2ln') || ($field == 'author3ln')|| ($field == 'author4ln') || ($field == 'author5ln'))  
 		{
-			$query = "SELECT DISTINCT lastname, firstname, author_id FROM authors WHERE lastname LIKE '".$str."%' ORDER BY lastname ASC $this->limit";
+			$query = "SELECT DISTINCT lastname, firstname, author_id FROM authors WHERE lastname LIKE '".$str."%' and verified = 1 ORDER BY lastname ASC $this->limit";
 			$typeOfField = 1; //author lastname
 		}
 		else if (($field == 'author0fn') || ($field == 'author1fn') || ($field == 'author2fn') || ($field == 'author3fn')|| ($field == 'author4fn') || ($field == 'author5fn'))  
 		{
-			$query = "SELECT DISTINCT firstname FROM authors WHERE authors.lastname LIKE '".$authorLNVal."' ORDER BY firstname ASC $this->limit";
+			$query = "SELECT DISTINCT firstname FROM authors WHERE authors.lastname LIKE '".$authorLNVal."' and verified = 1 ORDER BY firstname ASC $this->limit";
 			$typeOfField = 2; //author firstname
 		}
 		else if ($field == 'collection_name') 

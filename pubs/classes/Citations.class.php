@@ -939,13 +939,29 @@ class Citations
 	
 	function getCitations_byFac_unverified($submitter, $owner)
 	{
-		$this->link = $this->connectDB();
+		/*$this->link = $this->connectDB();
 
 		$query = "SELECT * FROM $this->table WHERE owner='".mysql_real_escape_string($owner)."' AND verified='0' ORDER BY citation_id ASC $this->limit";
 		
 		$result_arr = $this->getJSON($query);
 		$this->sortCitations($result_arr);
-		return $result_arr;
+		return $result_arr;*/
+		
+		$page = 1;
+		$total_count = 100;
+		$this->limit = " LIMIT 0, 100";
+		$this->link = $this->connectDB();
+
+		$query = "SELECT * FROM $this->table where owner='".$owner."' AND verified=0 ORDER BY citation_id ASC $this->limit";   //abhinav
+		
+		$result_arr = $this->getJSON($query);
+	//	print_r($result_arr);
+		$citations = $this->sortCitations($result_arr);
+		
+		// Get similar citations
+		$similar_citations_array = $this->getSimilarCitations($citations);
+		
+		return array($total_count, $citations, $similar_citations_array, $page);
 	}
 	
 /*	function getCitationByID($citation_id)
@@ -973,19 +989,60 @@ class Citations
 	
 		// Ruth 4/12
 	
-		function getCitations_byFac_all($submitter, $owner)
-	{
+		function getCitations_byFac_all($submitter, $owner,$search,$type,$keyword,$sort_order)
+	{ 
 		$page = 1;
 		$total_count = 100;
 		$this->limit = " LIMIT 0, 100";
 		$this->link = $this->connectDB();
 
 	//	$query = "SELECT * FROM $this->table WHERE submitter='".$submitter."' ORDER BY citation_id ASC $this->limit";
-		$query = "SELECT * FROM $this->table where owner='".$owner."'ORDER BY citation_id ASC $this->limit";   //abhinav
+	
+		if($search=='search')
+		{
+			if($type=='title')
+			{
+		$query = "SELECT * FROM $this->table where title='".$keyword."' ORDER BY citation_id ASC $this->limit"; 
+			}
+			if($type=='journal')
+			{
+		$query = "SELECT * FROM $this->table where journal='".$keyword."' ORDER BY citation_id ASC $this->limit"; 
+			}
+			if($type=='author')
+			{
+		$query = "SELECT * FROM $this->table where author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+			}
+			if($type=='all')
+			{
+		$query = "SELECT * FROM $this->table where title='".$keyword."'OR journal='".$keyword."' OR author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+			}
+		}
+		
+		if($search=='all')
+		{
+			if($sort_order == 'year_desc')
+			{
+			$query = "SELECT * FROM $this->table where owner='".$owner."' ORDER BY year $this->limit";
+			}
+			else
+			{
+			$query = "SELECT * FROM $this->table where owner='".$owner."'ORDER BY citation_id ASC $this->limit";  
+			}
+		}
+		
+		if($search=='unverified')
+		$query = "SELECT * FROM $this->table where owner='".$owner."' AND verified=0 ORDER BY citation_id ASC $this->limit";
 		
 		$result_arr = $this->getJSON($query);
 	//	print_r($result_arr);
+		if($sort_order != 'year_desc')
+		{
 		$citations = $this->sortCitations($result_arr);
+		}
+		else
+		{
+		$citations = $result_arr;
+		}
 		
 		// Get similar citations
 		$similar_citations_array = $this->getSimilarCitations($citations);
@@ -1216,7 +1273,38 @@ class Citations
 		// Use the same function / same algorithm / same result
 		return $this->get_current_max_page($counter, $citations_per_page);
 	}
+	
+	
+	
+	function get_citations_JSON1($submitter, $owner) 
+	{
+		/*$this->link = $this->connectDB();
+	$query = "SELECT * FROM citations WHERE title= '$keyword'";
+					echo('00000000'.$query);
+					$result = $this->doQuery($query, $this->link);
+					echo('11111111111'.$result);
+					return array(0,$result,array(), 1);*/
+					
+		$page = 1;
+		$total_count = 100;
+		$this->limit = " LIMIT 0, 100";
+		$this->link = $this->connectDB();
+
+		$query = "SELECT * FROM $this->table where owner='".$owner."' AND title='Title One' ORDER BY citation_id ASC $this->limit";   //abhinav
+		//echo $query;
+		$result_arr = $this->getJSON($query);
+		//print_r($result_arr);
+		$citations = $this->sortCitations($result_arr);
 		
+		// Get similar citations
+		$similar_citations_array = $this->getSimilarCitations($citations);
+		
+		return array($total_count, $citations, $similar_citations_array, $page);
+	
+	}
+	
+	
+	
 	function get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, $keyword, $sort_order, $collection_id = 0, $citation_id = 0) 
 	{		
 		$this->link = $this->connectDB();
@@ -1658,7 +1746,7 @@ class Citations
 	}
 	
 	function write_query_order($sort_order)
-	{
+	{ 
 		//$author_str = "author0ln, author0fn, author1ln, author1fn, author2ln, author2fn, author3ln, author3fn, author4ln, author4fn, author5ln, author5fn";
 		
 		$author_str = "author0ln";
