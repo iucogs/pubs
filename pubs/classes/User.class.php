@@ -13,9 +13,10 @@ class User
 	{
 		require_once('../lib/mysql_connect.php');
 		require_once('../lib/adLDAP.php');
-		$this->table = 'users';
+        require_once('Collections.class.php');
+        $this->table = 'users';
 		$this->proxy = 'proxy_of';
-		$this->error = 0;
+        $this->error = 0;
 		$this->ldap=new adLDAP();
 	}
 	
@@ -101,6 +102,10 @@ class User
 		else return false;
 	}
 	
+
+    // PJC 8.22 on creation of users, collection My Representative Publications
+    // is created and assigned to new user.
+
 	function create_user($account, $username, $firstname, $lastname, $submitter)
 	{
 		$this->link = $this->connectDB();
@@ -128,8 +133,15 @@ class User
 				if (mysql_num_rows($result) <= 0) 		// User doesn't exist - Add / Insert
 				{
 					$value_str = "'".mysql_real_escape_string($username)."','".mysql_real_escape_string($firstname)."','".mysql_real_escape_string($lastname)."'";
-					$query = "INSERT INTO $this->table (username, firstname, lastname) VALUES (".$value_str.")";
-					$result = $this->doQuery($query, $this->link);
+                    $query = "INSERT INTO $this->table (username, firstname, lastname) VALUES (".$value_str.")";
+				
+                    $collections = new Collections();
+                    $collections_result = $collections->createCollection("My Representative Publications", $username, $username);
+                    if (!$collections_result){
+                        return false;
+                    }
+                    
+                    $result = $this->doQuery($query, $this->link);
 					if (!$result) { 
 						$this->error .= 2; 
 						return array(false, "query_error");	
@@ -139,6 +151,13 @@ class User
 						//$this->error .= "New user added successfully [".$new_user_id."].<br />"; 				
 						return array(true, $new_user_id);
 					}
+                    $collection_result = $this->doQuery($collections_query, $this->link);
+                    if (!$collection_result) {
+                        $this->error .=2;
+                    }
+                    else {
+                        ;
+                    }
 				}
 				else if(mysql_num_rows($result) == 1)	// Found one user - return user
 				{
