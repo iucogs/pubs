@@ -135,6 +135,9 @@ class User
 					$value_str = "'".mysql_real_escape_string($username)."','".mysql_real_escape_string($firstname)."','".mysql_real_escape_string($lastname)."'";
                     $query = "INSERT INTO $this->table (username, firstname, lastname) VALUES (".$value_str.")";
 				
+                    // Collection created if user needs to be added. Script on
+                    // ~cogs pulls from "My Representative Publications", so the
+                    // first arg should never change.
                     $collections = new Collections();
                     $collections_result = $collections->createCollection("My Representative Publications", $username, $username);
                     if (!$collections_result){
@@ -151,13 +154,6 @@ class User
 						//$this->error .= "New user added successfully [".$new_user_id."].<br />"; 				
 						return array(true, $new_user_id);
 					}
-                    $collection_result = $this->doQuery($collections_query, $this->link);
-                    if (!$collection_result) {
-                        $this->error .=2;
-                    }
-                    else {
-                        ;
-                    }
 				}
 				else if(mysql_num_rows($result) == 1)	// Found one user - return user
 				{
