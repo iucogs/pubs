@@ -10,7 +10,7 @@ require_once($document_root.'lib/adLDAP.php');
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
-<title>Publications<?php if(DB_NAME != "pubs") echo " [".DB_NAME."]";?></title>
+<title>Publications Type<?php if(DB_NAME != "pubs") echo " [".DB_NAME."]";?></title>
 
 <?php
 // Variable declarations
@@ -212,6 +212,9 @@ else
 	</td>
     <td>
 	<input type="submit" value="Journal" onclick="Page.searchCitations_request('journal'); return false;">
+	</td>
+    <td>
+	<input type="submit" value="Citation Id" onclick="Page.searchCitations_request('citation_id'); return false;">
 	</td></tr>
 	</table>		
 	</form>
