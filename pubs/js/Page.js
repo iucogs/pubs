@@ -415,7 +415,6 @@ Page.onResponse = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
-		//alert("Page.onResponse : " + Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 
 		var temp = "author" + 1 + "ln";
@@ -1847,7 +1846,7 @@ Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, 
 	
 	var td_1 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.state=3; Page.current_row_num=' + i + '; Page.editOneCitation(' + i + ');">Edit</td>';
 	var td_2 = '<td id="similar' + i + '" valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.showSimilarCitations(' + i + ', ' + cit_copy[i].citation_id + ');">Show&nbsp;Similar&nbsp;Citations</td>';
-	var td_3 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">Delete</td>';
+	var td_3 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');" >Delete</td>';
 	var td_4 = '<td valign="top" ' + pointer_style + ' onMouseUp="Page.current_row_num=' + i + '; Page.deleteCitation_request('+ Page._citations[i].citation_id +');">Remove&nbsp;from&nbsp;Collection</td>';
 	var td_5 = '<td valign="top" ' + pointer_style + ' id="coll_td_' + i + '">All&nbsp;Collections</td>';
 	
@@ -2014,11 +2013,9 @@ Page.printPageViews = function()
 	// Print total count
 	var first_citation_on_page = ((Page.current_page - 1) * Page.citations_per_page) + 1;	
 	var last_citation_on_page = first_citation_on_page + Page._citations.length - 1;
-	
-	//alert("Page.current_page: " + Page.current_page 
-	//	  + "\nPage.total_count: " + Page.total_count 
-	//	  + "\nPage.current_viewable_pages.length: " + Page.current_viewable_pages.length
-	//	  + "\nPage.max_pages_displayed: " + Page.max_pages_displayed);
+
+//alert("Page.current_page: "+ Page.current_page + "\nPage.total_count: " + Page.total_count + "\nPage.current_viewable_pages.length: "+ Page.current_viewable_pages.length
+	 // + "\nPage.max_pages_displayed: " + Page.max_pages_displayed);
 	
 	if(Page.total_count == undefined || Page.total_count <= 0)
 	{
@@ -2032,11 +2029,11 @@ Page.printPageViews = function()
 	if (Page.current_viewable_pages.length == 0)
 	{	
 		var tempInt = parseInt(Page.current_page) + parseInt(Page.max_pages_displayed);
-				
 		for (var i=Page.current_page; i < tempInt && i <= max_page; i++)
 		{
 			Page.current_viewable_pages.push(i);
 		}	
+		
 	}
 	
 	html += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Page: ';
@@ -2069,6 +2066,10 @@ Page.printPageViews = function()
 	{
 		alert('Problem with pages: ' + Page.current_page);
 	}
+	
+	
+	//alert("Page.current_page: "+ Page.current_page + "\nPage.total_count: " + Page.total_count + "\nPage.current_viewable_pages.length: "+ Page.current_viewable_pages.length
+	  //+ "\nPage.max_pages_displayed: " + Page.max_pages_displayed);
 
 	return html;
 }
@@ -2115,13 +2116,13 @@ Page.getCitations = function(page, type, citation_id)
 	{
 		citation_id = 0;	
 	}
-		
+	
 	if ((type == 'getCitations_byFac_all') || (type == 'getCitations_byFac_unverified'))
 	{
 		var jsonStr = '{"request": {"type": "' + type + '",  "page": "' + page + '", "citation_id_page": "' + citation_id + '", "citations_per_page": "' + Page.citations_per_page + '", "sort_order": "' + Page.sort_order + '", "citations": {"submitter": "' + Page.submitter + '",  "owner": "' + Page.owner + '", "entryTime": ""}}}';
 		Ajax.SendJSON('services/citations.php', Page.onResponse, jsonStr);	
 	}
-	else if  ((type == 'journal') || (type == 'title') || (type == 'author') || (type == 'all'))
+	else if  ((type == 'journal') || (type == 'title') || (type == 'author') || (type == 'all') || (type == 'citation_id'))
 	{
 		var jsonStr = '{"request": {"type": "'+ type +'",  "keyword": ' + YAHOO.lang.JSON.stringify(Page.keywords) + ', "sort_order": "' + Page.sort_order + '", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "page": "' + page + '", "citations_per_page": "' + Page.citations_per_page + '"}}';
 		//alert("Page.getCitations: " + jsonStr);
@@ -2130,7 +2131,7 @@ Page.getCitations = function(page, type, citation_id)
 	else if  (type == 'getCitations_byTimestamp_all')
 	{ 
 		var jsonStr = '{"request": {"type": "'+ type +'",  "page": "' + page + '", "citations_per_page": "' + Page.citations_per_page + '",  "citations": {"submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "entryTime": "' + Page.parsed_timestamp + '"}}}';
-		//alert("Page.getCitations: " + jsonStr);
+		
 		Ajax.SendJSON('services/citations.php', Page.pageThroughCitations_response, jsonStr);	
 	}
 	else if (type == 'getCollection')
@@ -2266,7 +2267,14 @@ Page.printSortOrderMenu = function()
 	{
 		html += ' selected';	
 	}
-	html += '>Year</option>';
+	html += '>Latest Year</option>';
+	
+	html += '<option value="year_asc"';
+	if (Page.sort_order == "year_asc")
+	{
+		html += ' selected';	
+	}
+	html += '>Oldest Year</option>';
 
 	html += '</select>';
 	return html;
@@ -2640,7 +2648,7 @@ Page.deleteCitation_request = function(citation_id)
 		html += '<center><p>Remove citation  ' + citation_id + ' from collection "' + Page.currentCollection_name + '"?</p></center>';
 	}
 	//html += '<input type="button" '+style+' value="OK" onclick="Page.deleteCitationHelper_request('+i+',Page._citations[' + i + ']);"/>';
-	html += '<input type="button" '+style+' value="OK" onclick="Page.deleteCitationHelper_request(\'' + citation_id + '\');"/>';
+	html += '<input type="button" '+style+' value="OK" onclick="Page.deleteCitationHelper_request(\'' + citation_id + '\');Page.getCitationsGivenCollectionID();"/>';
 	html += '&nbsp;&nbsp;&nbsp;';
 	html += '<input type="button" '+style+' value="Cancel" onclick="Page.panel1.hide();"/></div>';
 	
