@@ -592,18 +592,22 @@ Page.getCitationsGivenCollectionID = function(citation_id)
 	
 	if (Page.currentCollection == "all")
 	{
+		//alert(1111111);
 		//Page.current_page = 1; //Commented so that page will stay at current page when panel closed
 		Page.input_method = 9;
-		Page.getCitations(Page.current_page, 'getCitations_byFac_all', citation_id);
+		//setTimeout("Page.getCitations(Page.current_page, 'getCitations_byFac_all', ' + citation_id +')", 1000);	
+		Page.getCitations(Page.current_page, Page.current_get_type, citation_id);	
 	}
 	else if (Page.currentCollection == "unverified")
 	{
 		//Page.current_page = 1; //Commented so that page will stay at current page when panel closed
 		Page.input_method = 9;
+		//setTimeout("Page.getCitations(Page.current_page, 'getCitations_byFac_all')", 1000);	
 		Page.getCitations(Page.current_page, 'getCitations_byFac_unverified');
 	}
 	else if (Page.currentCollection == "search")
 	{
+		//setTimeout("Page.getCitations(Page.current_page, 'getCitations_byFac_all', ' + citation_id +')", 1000);	
 		Page.getCitations(Page.current_page, Page.current_get_type, citation_id);	
 	}
 	else
