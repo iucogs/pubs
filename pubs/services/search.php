@@ -23,16 +23,15 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		$page = $jsonObj->{'request'}->{'page'};
 		$citations_per_page = $jsonObj->{'request'}->{'citations_per_page'};
 		$sort_order = $jsonObj->{'request'}->{'sort_order'};
-			
 		if(empty($keyword))
 		{
 			$responseObj = array("error" => 0, "total_count" => 0, "citations" => "", "similar_citations_array" => "");
 			sendResponse($responseObj);
 		}
-		else if (($type == "title") || ($type == "journal") || ($type == "author") || ($type == "all"))
+		else if (($type == "title") || ($type == "journal") || ($type == "author") || ($type == "all") || ($type == 'citation_id'))
 		{
-		//	$result = $citations->get_citations_JSON($type, $page, $submitter, $owner, $citations_per_page, $keyword, $sort_order, 0); 
-			$result = $citations->getCitations_byFac_all($submitter, $owner, 'search', $type, $keyword,'');  
+			
+			$result = $citations->getCitations_byFac_all($submitter, $owner, 'search', $type, $keyword,'', $citations_per_page, 1);  
 			$responseObj = array("error111" => $citations->error, "total_count" => $result[0], "citations" => $result[1], "similar_citations_array" => $result[2]);
 			//$responseObj = array("error" => $citations->error, "total_count" => $result[0], "citations" => $result[1], "similar_citations_array" => $result[2], "debug" => $citations->debug);
 			sendResponse($responseObj);
