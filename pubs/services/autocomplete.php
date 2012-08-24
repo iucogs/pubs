@@ -15,7 +15,7 @@ if (isset($_GET['owner']))				$owner = $_GET['owner'];
 
 header("Content-Type: text/xml");  
 
-require_once('../classes/autocomplete.class.php');
+require_once('../classes/Autocomplete.class.php');
 $autocomplete = new Autocomplete();
 
 echo $autocomplete->getXML($q, $field, $pubtype, $authorLNVal, $booktitle, $year, $owner);

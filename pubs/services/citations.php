@@ -6,14 +6,14 @@ require_once('../classes/Logger.class.php');
 
 $citations = new Citations();
 
-// Functions 
+// Functions  
 function echoJSONstr($result)
 {
 	global $citations;
 	$jsonString = '{"error11111": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 //	$jsonString = '{"error": "'.$citations->error.'", "total_citations": "'.$result[0].'", "citations":'.json_encode($result[1]).'}';
-	echo $jsonString; 
-}
+	echo $jsonString;  
+} 
 
 function get_and_return_citations($current_get_type, $submitter, $owner, $page, $citations_per_page, $sort_order, $entryTime, $citation_id_page = 0)
 {
@@ -188,7 +188,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		
 		// Ruth 4/12
 		//$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, 'all');
-		$result = $citations->getCitations_byFac_all($submitter, $owner, 'all', '', '',$sort_order);
+		$result = $citations->getCitations_byFac_all($submitter, $owner, 'all', '', '',$sort_order, $citations_per_page,$page);
 
 		$jsonString = '{"error11": "'.$citations->error.'", "pageeeeeee": "'.$submitter.'","pageeeeeee": "'.$owner.'","page": "'.$result[3].'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
 		//Logger::instance()->clear();
@@ -197,7 +197,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		}
 	else if($type == "getCitations_byFac_unverified")
 	{	
-		$result = $citations->getCitations_byFac_all($submitter, $owner, 'unverified', '', '',''); 
+		$result = $citations->getCitations_byFac_all($submitter, $owner, 'unverified', '', '','', $citations_per_page,$page); 
 	//	$result = $citations->get_citations_JSON1($type, $page, $submitter, $owner, $citations_per_page, "", $sort_order, 0, $citation_id_page); 
 		$jsonString = '{"error": "'.$citations->error.'", "page": "'.$result[3].'", "citation_id_page": "'.$citation_id_page.'", "total_count": "'.$result[0].'", "citations":'.json_encode($result[1]).', "similar_citations_array": '.json_encode($result[2]).'}';
 	
@@ -225,7 +225,8 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		else										// Delete permanently
 		{
 			$deleted = $citations->delete($citation_id, "DELETE", $submitter, $owner);
-			$coll_table_deleted = $citations->delete_collecitons_table($citation_id, $submitter, $owner);
+			// Ruth 08/17/12 - Removed since collections_table no longer exists.
+		//	$coll_table_deleted = $citations->delete_collecitons_table($citation_id, $submitter, $owner);
 		}
 		
 		// If deletetion is successful then proceed with response type
