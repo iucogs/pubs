@@ -616,7 +616,8 @@ Page.showCheckAuthorPanel = function(responseObj)
 {
 	var all_authors_empty = false;
 	var html = '';
-	for (var i = 0; i < 6; i++)
+  html += 'The following author(s) are unverified: <br />';		
+  for (var i = 0; i < 6; i++)
 	{
 		if (responseObj.citations[i][0] == -1)
 		{	
@@ -626,8 +627,7 @@ Page.showCheckAuthorPanel = function(responseObj)
 			
 			var current_fn = responseObj.citations[i][2];
 			var current_ln = responseObj.citations[i][1];
-			
-			html += 'Last Name:<input type="text" value="'+current_ln+'" id="author'+i+'ln_check"/>&nbsp;';
+	  	html += 'Last Name:<input type="text" value="'+current_ln+'" id="author'+i+'ln_check"/>&nbsp;';
 			html += 'First Name:<input type="text" value="'+current_fn+'" id="author'+i+'fn_check"/>';
 			html += '&nbsp;<input type="checkbox" id="author'+i+'ln_checkbox"/>';
 			if (responseObj.citations[i][3].length > 0)
@@ -660,9 +660,8 @@ Page.showCheckAuthorPanel = function(responseObj)
 	}
 	else
 	{
-		html += 'The following author(s) are not in the author database: <br>';
-		html += '<input type="button" value="Add Checked Authors Only" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,1);" />&nbsp;&nbsp;';
-		html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />';
+			html += '<input type="button" title="Unchecked authors will be saved as unverified."  value="Verify Checked Authors" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,1);" />&nbsp;&nbsp;';
+		//html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />';
 	}
 	
 	Page.panel1.setBody(html);
