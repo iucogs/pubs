@@ -2015,7 +2015,7 @@ Page.printPageViews = function()
 	var last_citation_on_page = first_citation_on_page + Page._citations.length - 1;
 
 //alert("Page.current_page: "+ Page.current_page + "\nPage.total_count: " + Page.total_count + "\nPage.current_viewable_pages.length: "+ Page.current_viewable_pages.length
-	 // + "\nPage.max_pages_displayed: " + Page.max_pages_displayed);
+	 //+ "\nPage.max_pages_displayed: " + Page.max_pages_displayed);
 	
 	if(Page.total_count == undefined || Page.total_count <= 0)
 	{
