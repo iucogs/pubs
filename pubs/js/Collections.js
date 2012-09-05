@@ -353,8 +353,11 @@ Page.showEnterCitations = function()
 
 Page.parsetext = function(txt) 
 {
-	var stringArray = new Array();
+	var stringArray = new Array()
+		//txt = txt.replace(/;/g, ",");
+		//alert('11111111'+txt);
     	stringArray=txt.split("\n");
+		//alert('2222222'+stringArray);
 	
 	//alert(stringArray[0]);
 	//alert(stringArray[1]);
@@ -388,6 +391,65 @@ Page.parsetext = function(txt)
 	if(flag2==1)
 	document.getElementById("citationInput").value = tempArray.join("\n");
 
+var tempArray1=new Array();
+tempArray1=document.getElementById("citationInput").value.split("\n"); 
+//alert('rrrrr0000000'+tempArray1[0]+'8888888'+tempArray1.length);
+var q=0;
+var start=0;
+var end;
+var startFlag =0;
+var count = 0;
+var finalArray=new Array();
+var flag =0;
+
+for(var j=0;j < tempArray1.length ; j++)
+{
+	var arr1= new Array();
+	
+	arr1=tempArray1[j].split("");
+	
+	for(i=0;i< arr1.length;i++)
+	{
+		if(arr1[i] == ';')
+			arr1[i]=',';
+		
+	}
+	//alert('arr1====='+arr1);
+	
+	if(arr1[arr1.length-1] =='.')
+	{
+	
+		
+		if(startFlag==0)
+	      start=0;
+		  
+	      end=j;
+	
+		for(z=start;z<=end;z++)
+		{
+			//alert('start'+start);
+			//alert('end'+end);
+			if (flag==0)
+			finalArray[count]="";
+			
+			finalArray[count]=finalArray[count].concat(tempArray1[z]);
+			finalArray[count+1]= "\n";
+			finalArray[count+2]=" ";
+			flag=1;
+			//alert('999999'+ finalArray);
+		}
+		flag=0;
+		start=end+1;
+		count=count+3;
+	
+	}
+	startFlag++;
+}
+txt=finalArray.join("");
+txt = txt.replace(/;/g, ",");
+document.getElementById("citationInput").value=txt;
+//alert(finalArray);
+//alert(document.getElementById("citationInput").value);
 //document.getElementById("citationInput").value=txt.replace(/(\r\n|\n|\r)/gm," ");
 }
 
