@@ -98,21 +98,24 @@
 			if($num_rows >= 1){  						// Exactly one copy of entry? exist
 				$row = mysql_fetch_array($result);			
 				$author_id = $row['author_id'];  		// Use existing author_id
-								
-				// Insert author_of
-				$query = "INSERT INTO author_of (author_id, citation_id, position_num) VALUES ('$author_id', '$citation_id', '$position_num')";
+			}
+			else
+			{
+				$query = "INSERT INTO authors (lastname, firstname,verified) VALUES ('".$slash_lastname."', '".$slash_firstname."',0)";
 				$result = mysql_query($query);
 				query_result($result, $query);
+				$author_id = (int)mysql_insert_id(); // New author id
 			}
-			else{  	
-					// Put unverified authors into an array
-					$queryArray[$position_num-1] = array($slash_lastname, $slash_firstname);
-			}
+								
+			// Insert author_of
+			$query = "INSERT INTO author_of (author_id, citation_id, position_num) VALUES ('$author_id', '$citation_id', '$position_num')";
+			$result = mysql_query($query);
+			query_result($result, $query);
 						
 			$position_num++;
 		}
 		
-		if (!empty($queryArray))
+		/*if (!empty($queryArray))
 		{
 			$query_keys = "";
 			$query_values = "";
@@ -123,7 +126,7 @@
 			}
 			$query = "INSERT INTO authors_unverified (citation_id".$query_keys.") VALUES ('".$citation_id."'".$query_values.")";
 			$result = mysql_query($query);
-		}
+		}*/
 			
 		// Citation ID
 		return $citation_id;
@@ -191,6 +194,7 @@
 		}
 	}
 	
+	// not used
 	function doFuzzyMatch($fuzzy_args, $citation_id)
 	{
 		define("FUZZY_MATCH_RATIO", 0.5);
