@@ -1,5 +1,6 @@
 <?php 
 
+
 // Read from the database and output it as an XML document.
 class Citations
 {
@@ -169,9 +170,7 @@ class Citations
 		{
 			if(is_string($str)) {
 				$str = trim($str);
-			//Added by Abhinav
-				$str = str_replace(";","\n",$str);
-			}
+		    }
 		}
 		// Unset reference since it is still exist.
 		unset($str);
