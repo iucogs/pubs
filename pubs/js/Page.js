@@ -2266,14 +2266,22 @@ Page.printSortOrderMenu = function()
 	{
 		html += ' selected';	
 	}
-	html += '>Latest Year</option>';
+	html += '>Most Recent</option>';
 	
 	html += '<option value="year_asc"';
 	if (Page.sort_order == "year_asc")
 	{
 		html += ' selected';	
 	}
-	html += '>Oldest Year</option>';
+	html += '>Oldest</option>';
+  
+  html += '<option value="citation_id"';
+  if (Page.sort_order == "citation_id")
+  {
+    html += ' selected';
+  }
+  html += '>Citation ID</option>';
+
 
 	html += '</select>';
 	return html;
