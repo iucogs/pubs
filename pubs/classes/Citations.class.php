@@ -176,7 +176,7 @@ class Citations
 			}
 	    }
 
-		}
+		
 		// Unset reference since it is still exist.
 		unset($str);
 		
