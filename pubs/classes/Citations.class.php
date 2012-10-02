@@ -170,8 +170,13 @@ class Citations
 		{
 			if(is_string($str)) {
 				$str = trim($str);
-		    }
-		}
+
+			//Added by Abhinav
+			//	$str = str_replace(";","\n",$str);
+			}
+	    }
+
+		
 		// Unset reference since it is still exist.
 		unset($str);
 		
@@ -693,6 +698,7 @@ class Citations
 		return array($author_id, $author_verified, $suggestions);
 	}
 	
+    // pjc
 	function addNewAuthor($firstname, $lastname, $submitter, $owner,$verified)
 	{
 		$this->link = $this->connectDB();
@@ -702,7 +708,7 @@ class Citations
 		$query = "SELECT * FROM authors WHERE firstname='".mysql_real_escape_string($firstname)."' AND lastname='".mysql_real_escape_string($lastname)."'";
 		$result = $this->doQuery($query, $this->link);
 		
-		if(mysql_num_rows($result) > 0)
+		if(mysql_num_rows($result) == 0)
 		{
 			$this->error .= 2; 
 			return false;
@@ -868,7 +874,7 @@ class Citations
 			$this->link = $this->connectDB();
 			$error_found = false;
 			
-			$query = "DELETE FROM member_of_collection WHERE citation_id=$citation_id "; 
+		/*	$query = "DELETE FROM member_of_collection WHERE citation_id=$citation_id "; 
 			$result = $this->doQuery($query, $this->link);
 			if(!$result) $error_found = true;
 	
@@ -877,9 +883,9 @@ class Citations
 			if(!$result) $error_found = true;
 		
 			//Commented by Abhinav on 06/27/2012
-		/*	$query = "DELETE FROM authors_unverified WHERE citation_id=$citation_id "; 
+			$query = "DELETE FROM authors_unverified WHERE citation_id=$citation_id "; 
 			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;  */
+			if(!$result) $error_found = true;  
 			
 			$query = "DELETE FROM similar_to WHERE citation_id1=$citation_id OR citation_id2=$citation_id"; 
 			$result = $this->doQuery($query, $this->link);
@@ -888,7 +894,7 @@ class Citations
 			$query = "DELETE FROM represent_pubs_of WHERE citation_id=$citation_id"; 
 			$result = $this->doQuery($query, $this->link);
 			if(!$result) $error_found = true;
-			
+			*/
 			$query = "DELETE FROM citations WHERE citation_id=$citation_id ";
 			$result = $this->doQuery($query, $this->link);
 			if(!$result) $error_found = true;
@@ -1017,7 +1023,7 @@ class Citations
 		$query = "SELECT * FROM $this->table WHERE citation_id = '$citation_id' ORDER BY citation_id ASC $this->limit";
 		
 		$result_arr = $this->getJSON($query);
-		$this->sortCitations($result_arr, '');
+	    $this->sortCitations($result_arr, '');
 		return $result_arr;
 	}
 	
@@ -1032,7 +1038,7 @@ class Citations
 		return $result_arr;
 	}
 
-	function getCitations_byIDs($submitter, $owner, $citation_id_array)
+	function getCitations_byIDs($submitter, $owner, $citation_id_array, $sort_order)
 	{		
 		$this->link = $this->connectDB();
 				
@@ -1050,7 +1056,7 @@ class Citations
 			$query.= ")";
 						
 			$result_arr = $this->getJSON($query);
-			$result_arr = $this->sortCitations($result_arr, '');
+			$result_arr = $this->sortCitations($result_arr, $sort_order);
 		}
 		else
 		{
@@ -1389,7 +1395,7 @@ class Citations
 	// getCitationsGivenCollectionID
 	
 	// Ruth 4/12
-	function getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner)
+	function getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner, $sort_order)
 	{
 		$citation_id_array = $this->getCitationIdsGivenCollectionId($collection_id);
 		$total_count = count($citation_id_array);
@@ -1397,7 +1403,7 @@ class Citations
 		{
 			require_once('../classes/Citations.class.php');
 			$citations = new Citations();
-			$citations_array = $citations->getCitations_byIDs($submitter, $owner, $citation_id_array);
+			$citations_array = $citations->getCitations_byIDs($submitter, $owner, $citation_id_array, $sort_order);
 			//echo "size 1: ".count($citations_array);
 		}
 		else
