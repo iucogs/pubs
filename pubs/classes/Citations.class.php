@@ -469,7 +469,7 @@ class Citations
 		
 		for($i = 0; $i < 6; $i++)
 		{
-				if(empty($args_authors['author'.$i.'ln']) && empty($args_authors['author'.$i.'fn'])) // RUTH 080210
+                if(empty($args_authors['author'.$i.'ln']) && empty($args_authors['author'.$i.'fn'])) // RUTH 080210
 				{
 					// Do nothing since the author is empty. To prevent empty author row with empty fn and ln to be verified authors.
 				}
@@ -478,7 +478,6 @@ class Citations
 					$query = "INSERT INTO author_of (author_id, citation_id, position_num) VALUES ('".mysql_real_escape_string($args_authors['author'.$i.'id'])."','".$current_citation_id."','".($i+1)."')";
 					$result = $this->doQuery($query, $this->link); 
 				}
-
 		}
 		
 		//Commented by Abhinav on 06/27/2012
@@ -708,20 +707,19 @@ class Citations
 		$query = "SELECT * FROM authors WHERE firstname='".mysql_real_escape_string($firstname)."' AND lastname='".mysql_real_escape_string($lastname)."'";
 		$result = $this->doQuery($query, $this->link);
 		
-		if(mysql_num_rows($result) == 0)
+		if(mysql_num_rows($result) > 0)
 		{
 			$this->error .= 2; 
 			return false;
 		}
 		else 
 		{
-		//	if($flag == 0)
-		//	{
-				if($verified == 0)
-					$query = "INSERT INTO authors (lastname, firstname,verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',0)";
-				else
-					$query = "INSERT INTO authors (lastname, firstname,verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',1)";
-		//	}
+		    if($verified == 0){
+				$query = "INSERT INTO authors (lastname, firstname, verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',0)";
+			}
+            else{
+				$query = "INSERT INTO authors (lastname, firstname, verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',1)";
+	        }
 			
 			$result = $this->doQuery($query, $this->link);
 		
