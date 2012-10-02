@@ -416,6 +416,8 @@ Page.onResponse = function()
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
+		
+		alert(Ajax.request.responseText);
 
 		var temp = "author" + 1 + "ln";
 	
