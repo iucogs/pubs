@@ -412,8 +412,15 @@ class User
 			$row = mysql_fetch_array($result, MYSQL_ASSOC);
 			$submitter_id = $row['id'];
 			
+			if ($row['admin'] == 1)
+			{
+				$query = "SELECT u.* FROM $this->table u";
+			}
+			else
+			{
 			// Get all proxies
-			$query = "SELECT u.* FROM $this->proxy p, $this->table u WHERE authorid='".mysql_real_escape_string($submitter_id)."' AND p.proxyid = u.id";
+				$query = "SELECT u.* FROM $this->proxy p, $this->table u WHERE authorid='".mysql_real_escape_string($submitter_id)."' AND p.proxyid = u.id";
+			}
 			$result = $this->doQuery($query, $this->link);
 			if(mysql_num_rows($result) > 0)
 			{
@@ -484,8 +491,15 @@ class User
 			$row = mysql_fetch_array($result, MYSQL_ASSOC);
 			$submitter_id = $row['id'];
 			
+			if ($row['admin'] == 1)
+			{
+				$query = "SELECT u.* FROM $this->table u ORDER BY lastname";
+			}
+			else
+			{
 			// Get all owners
-			$query = "SELECT u.* FROM proxy_of p, users u WHERE proxyid='".mysql_real_escape_string($submitter_id)."' AND p.authorid = u.id ORDER BY lastname";
+				$query = "SELECT u.* FROM proxy_of p, users u WHERE proxyid='".mysql_real_escape_string($submitter_id)."' AND p.authorid = u.id ORDER BY lastname";
+			}
 			$result = $this->doQuery($query, $this->link);
 			if(mysql_num_rows($result) > 0)
 			{
