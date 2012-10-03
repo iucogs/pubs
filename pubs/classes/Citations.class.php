@@ -1527,14 +1527,15 @@ class Citations
 		
 
 		#Main query ORDER BY.
-		if ($type == 'title' || $type == 'journal' || $type == 'author' || $type == 'all')
+	/*	if ($type == 'title' || $type == 'journal' || $type == 'author' || $type == 'all')
 		{
 			$query_ORDER = "ORDER BY relevance DESC";
 		}
 		else
-		{
+		{*/
 			$query_ORDER = $this->write_query_order($sort_order);
-		}	
+            echo $sort_order;
+	//	}	
 		
 		#Main query SELECT.
 		$query_SELECT = "SELECT "; 
@@ -1545,8 +1546,6 @@ class Citations
 		}
 		
 		$query_SELECT .= "'' AS coll_name, '' AS coll_id, c.* "; // Select all citations columns.
-		
-		//$query_SELECT .= " c.* "; // Select all citations columns.
 		
 		#Main Table query
 		$main_table_query_FROM = "FROM ( citations c ".$this->build_authors_table()." ) ";
@@ -1674,7 +1673,11 @@ class Citations
 		
 		$query_ORDER = '';
 		
-		if ($sort_order == 'year_asc')
+		if ($sort_order == 'citation_id')
+        {
+            $query_ORDER = "ORDER BY `citation_id` DESC";
+        }
+        else if ($sort_order == 'year_asc')
 		{
 			$query_ORDER = "ORDER BY year, ".$author_str.", title";
 		}
@@ -1686,10 +1689,7 @@ class Citations
 		{
 			$query_ORDER = "ORDER BY ".$author_str.", year, title";
 		}
-	    else if ($sort_order == 'citation_id')
-        {
-            $query_ORDER = "ORDER BY citation_id DESC, title";
-        }
+	    
 
 
 		return $query_ORDER;
@@ -1729,14 +1729,22 @@ class Citations
 	function sortCitations($citations, $sort_order)
 	{	
 		//usort($citations, array($this, 'compare_fullname'));
-		if ($sort_order == "author0ln")
+		
+        if ($sort_order == "citation_id"){
+            usort($citations, array($this, 'compare_by_citation_id'));
+        }
+        else if ($sort_order == "author0ln")
 		{
 			usort($citations, array($this, 'compare_by_author0ln'));
 		}
-		else
+		else if ($sort_order == "year_asc")
 		{
-			usort($citations, array($this, 'compare_by_year'));
+			usort($citations, array($this, 'compare_by_year_asc'));
 		}
+        else if ($sort_order == "year_desc") {
+            usort($citations, array($this, 'compare_by_year_desc'));
+        }
+    
 		
 		return($citations);	
 	}
@@ -1760,7 +1768,7 @@ class Citations
 		return $retval;  // Will return here if all elements match.
 	} 
 	
-	function compare_by_year($a, $b)
+	function compare_by_year_asc($a, $b)
 	{
 		$map = array('year','author0ln','author0fn','author1ln','author1fn','author2ln','author2fn','author3ln','author3fn','author4ln','author4fn','author5ln','author5fn','title');		
 		foreach($map as $key)
@@ -1777,7 +1785,27 @@ class Citations
 		}
 		return $retval;  // Will return here if all elements match.
 	} 
-	
+
+
+
+	function compare_by_year_desc($a, $b)
+	{
+		$map = array('year','author0ln','author0fn','author1ln','author1fn','author2ln','author2fn','author3ln','author3fn','author4ln','author4fn','author5ln','author5fn','title');		
+		foreach($map as $key)
+		{
+			$retval = strnatcmp($b[$key], $a[$key]);
+			if($retval == 0) // If the values are the same, compare the next element.
+			{
+				// Skip. Keep on comparing the next element.
+			}
+			else
+			{
+				return $retval;
+			}
+		}
+		return $retval;  // Will return here if all elements match.
+	} 
+
 	/*
 	function compare_fullname($a, $b) { 
 		$retval = strnatcmp($a['author0ln'], $b['author0ln']); 
@@ -2015,7 +2043,7 @@ class Citations
 		$this->link = $this->connectDB();
 		$return_value = true;
 		
-		$query = "SELECT citation_id FROM citations ORDER BY citation_ID ASC";
+		$query = "SELECT citation_id FROM citations ORDER BY citation_id ASC";
 		$result = $this->doQuery($query, $this->link);  
 		$citation_ids = array(); 
 	
