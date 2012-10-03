@@ -1686,7 +1686,12 @@ class Citations
 		{
 			$query_ORDER = "ORDER BY ".$author_str.", year, title";
 		}
-		
+	    else if ($sort_order == 'citation_id')
+        {
+            $query_ORDER = "ORDER BY citation_id DESC, title";
+        }
+
+
 		return $query_ORDER;
 	}
 	
