@@ -660,7 +660,7 @@ Page.showCheckAuthorPanel = function(responseObj)
 	}
 	else
 	{
-			html += '<input type="button" title="Unchecked authors will be saved as unverified."  value="Verify Checked Authors" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,1);" />&nbsp;&nbsp;';
+			html += '<input type="button" title="Unchecked authors will be saved as unverified."  value="Verify Checked Authors" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />&nbsp;&nbsp;';
 		//html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />';
 	}
 	
@@ -2275,8 +2275,18 @@ Page.printSortOrderMenu = function()
 	}
 	html += '>Oldest Year</option>';
 
-	html += '</select>';
-	return html;
+
+  html += '<option value="citation_id"';
+  if (Page.sort_order == "citation_id")
+  {
+    html += ' selected';
+  }
+  html += '>Citation ID</option>';
+
+ 	html += '</select>';
+ 
+
+  return html;
 }
 
 Page.sortCitations_request = function()
