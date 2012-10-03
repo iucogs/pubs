@@ -71,7 +71,7 @@ Page.max_pages_displayed = 10;
 Page.citations_per_page = 50;
 Page.current_viewable_pages = new Array();
 Page.keywords = '';
-Page.sort_order = 'author0ln';
+Page.sort_order = 'citation_id';
 Page.show_citation_id_flag = 0;
 Page.set_compact_view_flag = 0;
 Page.show_collections_flag = 1;
@@ -2259,21 +2259,21 @@ Page.printSortOrderMenu = function()
 	{
 		html += ' selected';	
 	}
-	html += '>First author</option>';
+	html += '>Author Names</option>';
 	
 	html += '<option value="year_desc"';
 	if (Page.sort_order == "year_desc")
 	{
 		html += ' selected';	
 	}
-	html += '>Latest Year</option>';
+	html += '>Most Recent</option>';
 	
 	html += '<option value="year_asc"';
 	if (Page.sort_order == "year_asc")
 	{
 		html += ' selected';	
 	}
-	html += '>Oldest Year</option>';
+	html += '>Earliest</option>';
 
 
   html += '<option value="citation_id"';
