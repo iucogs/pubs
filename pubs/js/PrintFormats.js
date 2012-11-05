@@ -576,6 +576,40 @@ Page.printEditors_MLA = function(_citation)
 	return html;	
 }
 
+Page.printVolume = function(_citation) {
+  var html = "";
+  if (_citation.volume != "") {
+    html += "<i>Vol. " + _citation.volume + ".</i>";
+  }
+  return html;
+}
+
+Page.printEdition = function(_citation){
+
+  var html = "";
+ // English is a stupid language so now we need this thing.
+  if (_citation.edition != "") {
+   // Last number of the edition determines the ordinal.
+   last_digit = _citation.edition.substring(_citation.edition.length-1, _citation.edition.length);
+   switch (last_digit) {
+     case '1':
+      ordinal = "st";
+      break;
+     case '2': 
+       ordinal = "nd";
+       break;
+     case '3':
+       ordinal = "rd";
+       break;
+     default:
+       ordinal = "th";
+    }
+     html+= " (" + _citation.edition + ordinal + " ed.).";
+    }
+  
+  return html;
+}
+
 Page.printAPAStyleCitation = function(_citation)
 {
 	var html = '';
@@ -637,6 +671,8 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printVolume(_citation);
+    html += Page.printEdition(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
@@ -644,7 +680,9 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html += title;
+    html += Page.printEdition(_citation);
 		html += Page.printEditorsAPAOrMLA(citation_req, 'apa');
+    html += Page.printVolume(_citation);
 		//html +=  "In " + citation_req.editor + "(Eds.), "
 		html +=  "<em>" +  citation_req.booktitle + "</em>. ";
 		html +=  citation_req.pages + ". ";
@@ -694,6 +732,7 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printEdition(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
@@ -701,7 +740,9 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += "(" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printEdition(_citation);
 		html +=  " (" +citation_req.translator + " Trans.) ";
+    html += Page.printVolume(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
