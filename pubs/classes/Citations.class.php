@@ -872,27 +872,6 @@ class Citations
 			$this->link = $this->connectDB();
 			$error_found = false;
 			
-		/*	$query = "DELETE FROM member_of_collection WHERE citation_id=$citation_id "; 
-			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;
-	
-			$query = "DELETE FROM author_of WHERE citation_id=$citation_id "; 
-			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;
-		
-			//Commented by Abhinav on 06/27/2012
-			$query = "DELETE FROM authors_unverified WHERE citation_id=$citation_id "; 
-			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;  
-			
-			$query = "DELETE FROM similar_to WHERE citation_id1=$citation_id OR citation_id2=$citation_id"; 
-			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;
-			
-			$query = "DELETE FROM represent_pubs_of WHERE citation_id=$citation_id"; 
-			$result = $this->doQuery($query, $this->link);
-			if(!$result) $error_found = true;
-			*/
 			$query = "DELETE FROM citations WHERE citation_id=$citation_id ";
 			$result = $this->doQuery($query, $this->link);
 			if(!$result) $error_found = true;
@@ -1390,12 +1369,13 @@ class Citations
 		return $search_query;
 	}
 	
-	// getCitationsGivenCollectionID
+	
 	
 	// Ruth 4/12
 	function getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner, $sort_order)
 	{
-		$citation_id_array = $this->getCitationIdsGivenCollectionId($collection_id);
+		
+        $citation_id_array = $this->getCitationIdsGivenCollectionId($collection_id);
 		$total_count = count($citation_id_array);
 		if (count($citation_id_array) > 0)
 		{
@@ -1429,7 +1409,7 @@ class Citations
 				}
 			}
 		}
-		
+		$citations_array = $this->sortCitations($citations_array, $sort_order);
 		return array($citations_array, $total_count, $similar_citations_array, 1);
 	}
 	
@@ -1445,7 +1425,8 @@ class Citations
         {				
 			$temp[] = $row['citation_id'];
 		}
-		return $temp;
+		
+        return $temp;
 	//	return $result_citation_ids;
 		
 	}
@@ -1865,7 +1846,7 @@ class Citations
 						$similar_citation_ids[]	= $row['citation_id1'];
 					}
 				}
-				$similar_citations = $this->getCitations_byIDs('', '', $similar_citation_ids);
+				$similar_citations = $this->getCitations_byIDs('', '', $similar_citation_ids, '');
 				return $similar_citations;
 			}
 			else
