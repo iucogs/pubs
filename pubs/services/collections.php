@@ -54,7 +54,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	}
 	
 	if ($type == "new") {
-		if(($result = $collection->createCollection($collection_name, $submitter, $owner)) != false) {
+		if(($result = $collection->createCollection($collection_name, $submitter)) != false) {
 			list($collection_status, $collection_id) = $result;
 			$collection_array = $collection->getCollectionByID($collection_id); 
 			$collection_name = $collection_array['collection_name'];
@@ -63,7 +63,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		}
 	}
 	else if ($type == "new_and_add") {
-		if(($result = $collection->createAndAddCollection($collection_name, $citation_ids, $submitter, $owner)) != false) {
+		if(($result = $collection->createAndAddCollection($collection_name, $citation_ids, $submitter)) != false) {
 			list($collection_status, $collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
@@ -77,7 +77,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 		}							 
 	}
 	else if ($type == "addTo") {
-		if(($result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner)) != false) {
+		if(($result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter)) != false) {
 			list($collection_id, $insert_count, $duplicates) = $result;
 			
 			// Update collections_table
@@ -113,7 +113,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	else if($type == "rename")
 	{
 		// TO-DO: Update collections_table?
-		$collection_result = $collection->renameCollection($collection_id, $collection_rename, $submitter, $owner);
+		$collection_result = $collection->renameCollection($collection_id, $collection_rename, $submitter);
 		$collection_id = $collection_result[0];
 		$collection_name = $collection_result[1];
 		$jsonString = '{"error": "'.$collection->error.'", "collection_id": "'.$collection_id.'", "collection_name": "'.$collection_name.'"}';
