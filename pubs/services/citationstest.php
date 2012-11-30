@@ -261,7 +261,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$collection_ids_array = array_merge($collection_ids_array1, $collection_ids_array2);
 			foreach ($collection_ids_array as $collection_id)
 			{
-				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']), $submitter, $owner);
+				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']), $submitter);
 			}
 			// to do maybe: return collections added to
 			
@@ -281,7 +281,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			require_once('../classes/Collections.class.php');
 			$collection = new Collections();
 			$citation_ids = array($result[0]['citation_id']);
-			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner);
+			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter);
 			$collection_id = $insert_result[0];
 			$jsonString = '{"error": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 		}
@@ -302,7 +302,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$collection_ids_array = array_merge($collection_ids_array1, $collection_ids_array2);
 			foreach ($collection_ids_array as $collection_id)
 			{
-				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']),$submitter, $owner);
+				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']),$submitter);
 			}
 			// to do maybe: return collections added to
 			
@@ -321,7 +321,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			require_once('../classes/Collections.class.php');
 			$collection = new Collections();
 			$citation_ids = array($result[0]['citation_id']);
-			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids,$submitter, $owner);
+			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids,$submitter);
 			$collection_id = $insert_result[0];
 		}
 		echoJSONstr($result);
