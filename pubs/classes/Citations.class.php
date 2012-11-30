@@ -302,7 +302,7 @@ class Citations
 					$value_str .= "'".mysql_real_escape_string($value)."',";
 				}
 			}
-				echo($value_str);
+				//echo($value_str);
 			$args_str = substr($args_str, 0, -1);
 			$value_str = substr($value_str, 0, -1);
 			
@@ -339,7 +339,7 @@ class Citations
 			//$this->createAndUpdateCollectionsTable($coll_id, $args['submitter'], $args['owner']);
 			
 			// Update similarTo table using doFuzzyMatch function. 
-			if($this->updateSimilarToWhenSaving($current_citation_id, $args['submitter'], $args['owner']))
+			if($this->updateSimilarToWhenSaving($current_citation_id, $args['submitter']))
 			{
 				return $current_citation_id;
 			}
@@ -360,19 +360,19 @@ class Citations
 	function createMiscCollectionForAllOwners()
 	{
 		$this->link = $this->connectDB();
-		$query = "SELECT DISTINCT owner FROM collections";
+		$query = "SELECT DISTINCT user_id FROM collections";
 		$result = $this->doQuery($query, $this->link);
 		$row = mysql_fetch_assoc($result);
 		
 		while ($row = mysql_fetch_assoc($result)) {
-			$return_arr[] = $this->createMiscCollectionForOneOwner($row['owner']);			
+			$return_arr[] = $this->createMiscCollectionForOneOwner($row['user_id']);			
 		}
 		
 		return !array_search(false,$return_arr);
 	}
 	
 	// For every owner, create a MISC collection.
-	function createMiscCollectionForOneOwner($owner)
+	function createMiscCollectionForOneOwner($user_id)
 	{
 		$this->link = $this->connectDB();
 		
@@ -381,12 +381,12 @@ class Citations
 		//$result = $this->doQuery($query, $this->link);
 		
 		// Create a misc collection.
-		$query = "SELECT * FROM collections WHERE owner = '".$owner."' AND collection_name = 'misc'";
+		$query = "SELECT * FROM collections WHERE user_id = '".$user_id."' AND collection_name = 'misc'";
 		$result = $this->doQuery($query, $this->link);
 		$misc_coll_id = "";
 		if (mysql_num_rows($result) == 0)  // Only insert when misc doesn't exist for the owner
 		{
-			$query = "INSERT INTO collections (`collection_id` ,`collection_name` ,`user_id` ,`submitter` ,`owner`) VALUES (NULL , 'misc', '0', '".$owner."', '".$owner."');";
+			$query = "INSERT INTO collections (`collection_id` ,`collection_name` ,`user_id` ,`submitter` ) VALUES (NULL , 'misc', 'user_id', 'user_id');";
 			$result = $this->doQuery($query, $this->link);
 			$misc_coll_id = mysql_insert_id();
 		}
@@ -437,11 +437,11 @@ class Citations
 	
 
 	
-	function determineMultipleCollectionOwners($citation_id, $submitter, $owner)
+	function determineMultipleCollectionOwners($citation_id, $submitter)
 	{
 		$this->link = $this->connectDB();
 		
-		$query = "SELECT citation_id FROM collections c, member_of_collection moc WHERE moc.collection_id = c.collection_id AND c.citation_id = moc.citation_id AND c.owner != $owner";
+		$query = "SELECT citation_id FROM collections c, member_of_collection moc WHERE moc.collection_id = c.collection_id AND c.citation_id = moc.citation_id";
 		$result = $this->doQuery($query, $this->link);
 		$return_arr = array();
 		if(mysql_num_rows($result) > 0) { // Citation in collection with different owner
@@ -494,10 +494,10 @@ class Citations
 		return $current_citation_id;
 	}
 	
-	function updateSimilarToWhenSaving($current_citation_id, $submitter, $owner)
+	function updateSimilarToWhenSaving($current_citation_id, $submitter)
 	{	
 		$return_value = true;
-		$citations_arr = $this->getCitation_byID($submitter, $owner, $current_citation_id);
+		$citations_arr = $this->getCitation_byID($submitter,$current_citation_id);
 		
 		$single_citation = $citations_arr[0];
 		
@@ -591,7 +591,7 @@ class Citations
 			}
 			else
 			{
-				$result = $this->getCitation_byID($args['submitter'],$args['owner'],$new_or_current_id);
+				$result = $this->getCitation_byID($args['submitter'],$new_or_current_id);
 				return $result;
 			}
 		}
@@ -618,7 +618,7 @@ class Citations
 				if ($author_id == -1) // not in author table
 				{
 					// add to author table, set to unverified
-					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'], $args['owner'],0);
+					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'],0);
 				}
 				else  // in author table
 				{
@@ -632,7 +632,7 @@ class Citations
 				if ($author_id == -1) // not in author table
 				{
 					// add to author table, set to verified
-					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'], $args['owner'],1);
+					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'],1);
 				}
 				else
 				{
@@ -654,7 +654,7 @@ class Citations
 		}
 		
 		$citation_id = $this->save($args, $args_authors, $coll_id);
-		$result = $this->getCitation_byID($args['submitter'], $args['owner'],$citation_id);
+		$result = $this->getCitation_byID($args['submitter'],$citation_id);
 		return $result;
 	}
 	
@@ -694,7 +694,7 @@ class Citations
 		return array($author_id, $author_verified, $suggestions);
 	}
 	
-	function addNewAuthor($firstname, $lastname, $submitter, $owner,$verified)
+	function addNewAuthor($firstname, $lastname, $submitter,$verified)
 	{
 		$this->link = $this->connectDB();
 		
@@ -760,7 +760,7 @@ class Citations
 	}
 
 	
-	function insert_into_deleted_citations_db($citation_id, $reason, $submitter, $owner)
+	function insert_into_deleted_citations_db($citation_id, $reason, $submitter)
 	{
 		$this->link = $this->connectDB();
 		
@@ -863,7 +863,7 @@ class Citations
 	
 	function delete($citation_id, $reason, $submitter, $owner)
 	{
-		if($this->insert_into_deleted_citations_db($citation_id, $reason, $submitter, $owner))
+		if($this->insert_into_deleted_citations_db($citation_id, $reason, $submitter))
 		{
 			
 			$this->link = $this->connectDB();
@@ -934,11 +934,10 @@ class Citations
 	{ 
 		$this->limit = ""; // get all at first 
 		$this->link = $this->connectDB();
-// Ruth put code into this function to simplify
-		$query = $this->selectQueryFor_byFac_all($owner, $type, $keyword, $search,$sort_order);
-		
-		$result_arr = $this->getJSON($query);
 
+		if($keyword==""){
+		$query = $this->selectQueryFor_byFac_all($owner, $type, $keyword, $search,$sort_order);
+		$result_arr = $this->getJSON($query);
 		if($sort_order != 'year_desc')
 		{
 			$citations = $this->sortCitations($result_arr, $sort_order);
@@ -947,8 +946,40 @@ class Citations
 		{
 			$citations = $result_arr;
 		}
-		
 		$total_count = count($citations);
+		}
+	
+	else {
+		
+			list($name1,$name2) = explode (',',$keyword);
+				if($name2 == "")
+				$name2= $name1;
+			list($name3,$name4) = explode (' ',$keyword);
+				if($name4 == "")
+				$name4= $name3;
+			//echo('111111'.$name1.'22222222'.$name2.'33333333'.$name3.'44444444'.$name4);
+			
+			$query = "SELECT * FROM $this->table where citation_id in ( SELECT citation_id FROM author_of where author_id in ( SELECT author_id FROM authors where 
+		          lastname='".$name1."' or firstname='".$name1."' or lastname='".$name2."' or firstname='".$name2."' or lastname='".$name3."' or firstname='".$name3."' or			        lastname='".$name4."' or firstname='".$name4."')) ";
+				  
+				  		
+	//	$query = "SELECT * FROM $this->table where author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+				  
+			$result_arr = $this->getJSON($query);
+		//echo('1111111'.$result_arr);
+			if($sort_order != 'year_desc')
+			{
+				$citations = $this->sortCitations($result_arr, $sort_order);
+			}
+			else
+			{
+				$citations = $result_arr;
+			}
+		
+			$total_count = count($citations);
+	}
+		
+		
 		if (count($citations) > $citations_per_page)
 		{
 			$total_count = count($citations);
@@ -957,7 +988,7 @@ class Citations
 		}
 		
 		// Get similar citations
-		$similar_citations_array = $this->getSimilarCitations($citations);
+		$similar_citations_array = ""; //$this->getSimilarCitations($citations);
 		return array($total_count, $citations, $similar_citations_array, $page);
 		
 	}
@@ -978,7 +1009,19 @@ class Citations
 			}
 			if($type=='author')
 			{
-		$query = "SELECT * FROM $this->table where author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+				list($name1,$name2) = explode (',',$keyword);
+				if($name2 == " ")
+				$name2= $name1;
+				list($name3,$name4) = explode (' ',$keyword);
+				if($name4 == " ")
+				$name4= $name3;
+				
+				//echo('111111'.$name1.'22222222'.$name2.'33333333'.$name3.'44444444'.$name4);
+				
+		$query = "SELECT * FROM $this->table where citation_id in ( SELECT citation_id FROM author_of where author_id in ( SELECT author_id FROM authors where 
+		          lastname='".$name1."' or firstname='".$name1."' or lastname='".$name2."' or firstname='".$name2."' or lastname='".$name3."' or firstname='".$name3."' or lastname='".$name4."' or firstname='".$name4."')) ";
+		
+		// author='".$keyword."' ORDER BY citation_id ASC $this->limit";
 			}
 			if($type=='all')
 			{
@@ -1023,7 +1066,7 @@ class Citations
 	}
 	
 	
-	function getCitation_byID($submitter, $owner, $citation_id)
+	function getCitation_byID($submitter,$citation_id)
 	{
 		$this->link = $this->connectDB();
 
@@ -1063,9 +1106,7 @@ class Citations
 	function getJSON($query) {
 
 		$citations = array();
-	
 		$result = $this->doQuery($query, $this->link);
-	
 	//	print_r(mysql_num_rows($result));
 		while($row = mysql_fetch_assoc($result))
         {
@@ -1082,7 +1123,6 @@ class Citations
 						$citation['author'.$pos_num.'fn'] = "";
 						$citation['author'.$pos_num.'id'] = "";
 					}
-					
 					$query_author = "SELECT DISTINCT a.*, ao.position_num FROM authors a, author_of ao, citations c 
 										WHERE c.citation_id = '$citation_id' AND ao.citation_id = '$citation_id' AND a.author_id = ao.author_id ORDER BY ao.position_num";
 					
@@ -1106,8 +1146,8 @@ class Citations
 				}
             }
 			$citations[] = $citation;
+			
         }
-		
 		mysql_free_result($result);
 		return $citations;
 	}
@@ -1502,7 +1542,7 @@ class Citations
 		}
 		
 		// This query should be copied to [Collections.class.php]->getDefaultCollectionNamesAndIds()
-		$query_in = "citation_id IN (SELECT moc.citation_id FROM member_of_collection moc, collections col WHERE moc.collection_id = col.collection_id AND col.owner = '".$owner."') ";
+		$query_in = "citation_id IN (SELECT moc.citation_id FROM member_of_collection moc, collections col WHERE moc.collection_id = col.collection_id AND col.submitter = '".$owner."') ";
 
 		// Set 'owner' condition on "all" or "unverified". Do not set 'owner' when doing searches!
 		if(empty($search_query))
