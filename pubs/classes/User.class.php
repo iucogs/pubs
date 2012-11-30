@@ -400,6 +400,28 @@ class User
 		
 	}
 	
+	function get_faculty_test()
+	{
+		$this->link = $this->connectDB();
+		
+		
+		$query = "SELECT u.*, c.collection_id FROM $this->table u, collections c where u.cogs=1 AND u.username=c.owner AND c.collection_name='My Representative Publications'  ORDER BY u.lastname, u.firstname";
+		$result = $this->doQuery($query, $this->link);
+		if(mysql_num_rows($result) > 0)
+		{
+			$result_arr = array();
+			while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
+			mysql_free_result($result);
+			return $result_arr;
+		}
+		else
+		{
+			$this->error .= 2;
+			return false;
+		}		
+		
+	}
+	
 	function get_all_proxies($submitter)
 	{
 		$this->link = $this->connectDB();
