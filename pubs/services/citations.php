@@ -12,7 +12,7 @@ function echoJSONstr($result)
 	global $citations;
 	$jsonString = '{"error11111": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 //	$jsonString = '{"error": "'.$citations->error.'", "total_citations": "'.$result[0].'", "citations":'.json_encode($result[1]).'}';
-	echo $jsonString;  
+	echo $jsonString;
 } 
 
 function get_and_return_citations($current_get_type, $submitter, $owner, $page, $citations_per_page, $sort_order, $entryTime, $citation_id_page = 0)
