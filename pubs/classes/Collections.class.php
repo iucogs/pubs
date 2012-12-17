@@ -44,10 +44,10 @@ class Collections
 	}
 	
 	// FORCE_CREATE = force unique collection name creation. (used by TI in parser.php)
-	function createAndAddCollection($collection_name, $citation_ids, $submitter, $owner, $FORCE_CREATE = false)  
+	function createAndAddCollection($collection_name, $citation_ids, $submitter,$FORCE_CREATE = false)  
 	{
 		$result_arr;
-		if(($result_arr=$this->createCollection($collection_name, $submitter, $owner)) != false)
+		if(($result_arr=$this->createCollection($collection_name, $submitter)) != false)
 		{
 			$collection_status = $result_arr[0];
 			$new_or_existing_collection_id = $result_arr[1];
@@ -60,7 +60,7 @@ class Collections
 					$unique_name = $this->getUniqueCollectionName($collection_name);
 
 					// Tail recursion using unique name.
-					return $this->createAndAddCollection($unique_name, $citation_ids, $submitter, $owner, $FORCE_CREATE);
+					return $this->createAndAddCollection($unique_name, $citation_ids, $submitter,$FORCE_CREATE);
 				}
 				else 					// Do not add citations!
 				{
@@ -68,7 +68,7 @@ class Collections
 				}
 			}
 			else {
-				$insert_result = $this->insert_member_of_collection($new_or_existing_collection_id, $citation_ids, $submitter, $owner);
+				$insert_result = $this->insert_member_of_collection($new_or_existing_collection_id, $citation_ids, $submitter);
 				if($insert_result[0]) {					
 					return array("new_inserted", $new_or_existing_collection_id, $insert_result[1], $insert_result[2]);  // Collection does not exists.
 				}
@@ -85,11 +85,11 @@ class Collections
 		}
 	}
 	
-	function checkCollection($collection_name, $submitter, $owner)
+	function checkCollection($collection_name, $submitter)
 	{
 		$this->link = $this->connectDB();
 		$collection_name = trim($collection_name);
-		$query = "SELECT * FROM collections WHERE collection_name='".mysql_real_escape_string($collection_name)."' AND owner='".mysql_real_escape_string($owner)."'";
+		$query = "SELECT * FROM collections WHERE collection_name='".mysql_real_escape_string($collection_name)."'";
 		
 		$result = $this->doQuery($query, $this->link);
 		if(mysql_num_rows($result) > 0) 
@@ -106,7 +106,7 @@ class Collections
 		}			
 	}
 	
-	function createCollection($collection_name, $submitter, $owner)
+	function createCollection($collection_name, $submitter)
 	{
 		$this->link = $this->connectDB();
 
@@ -117,13 +117,13 @@ class Collections
 			$collection_name = "new_collection";
 		}
 			
-		if(($collection_id = $this->checkCollection($collection_name, $submitter, $owner)) != false)
+		if(($collection_id = $this->checkCollection($collection_name, $submitter)) != false)
 		{
 		//	return array("-1", $collection_id);   // Collection exists.
 			return array("exists", $collection_id);   // Collection exists.
 		}
 		
-		$query = "INSERT INTO collections (collection_name, user_id, submitter, owner) VALUES ('".mysql_real_escape_string($collection_name)."', 0, '".$submitter."', '".$owner."')";
+		$query = "INSERT INTO collections (collection_name, user_id, submitter) VALUES ('".mysql_real_escape_string($collection_name)."', 0, '".$submitter."')";
 
 		$result = $this->doQuery($query, $this->link);
 		if(!$result) {
@@ -135,7 +135,7 @@ class Collections
 		}			
 	}	
 	
-	function insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner) // FAC PUBS TO-DO: Check if collection belongs to submitter before insertion?
+	function insert_member_of_collection($collection_id, $citation_ids, $submitter) // FAC PUBS TO-DO: Check if collection belongs to submitter before insertion?
 	{
 		$this->link = $this->connectDB();
 		
@@ -223,7 +223,7 @@ class Collections
 		}
 	}
 	
-	function mergeCollections($collection_id, $collection_ids, $submitter, $owner)
+	function mergeCollections($collection_id, $collection_ids, $submitter)
 	{
 		$this->link = $this->connectDB();
 		
@@ -231,7 +231,7 @@ class Collections
 		{
 			$new_name = $collection_id;
 			$collection_id = $collection_ids[0];
-			$collection_rename_result = $this->renameCollection($collection_id, $new_name, $submitter, $owner);
+			$collection_rename_result = $this->renameCollection($collection_id, $new_name, $submitter);
 		}
 		
 		$collection_ids_to_be_deleted = array();
@@ -318,7 +318,7 @@ class Collections
 		return $current_name;
 	}
 	
-	function renameCollection($collection_id, $collection_rename, $submitter, $owner)
+	function renameCollection($collection_id, $collection_rename, $submitter)
 	{
 		$this->link = $this->connectDB();
 		
@@ -331,12 +331,12 @@ class Collections
 		// Get unique name with collection_id as the exception.
 	//	$unique_name = $this->getUniqueCollectionName($collection_rename, $collection_id); 
 	
-		$return_val = $this->checkCollection($collection_rename, $submitter, $owner);
+		$return_val = $this->checkCollection($collection_rename, $submitter);
 		
 	//	echo 'collection_id: '.$collection_id;
 		if ($return_val == false)
 		{
-			$query = "UPDATE collections SET collection_name='".mysql_real_escape_string($collection_rename)."' WHERE collection_id='$collection_id' AND owner='$owner'";
+			$query = "UPDATE collections SET collection_name='".mysql_real_escape_string($collection_rename)."' WHERE collection_id='$collection_id' ";
 			$result = $this->doQuery($query, $this->link);
 			
 			if($result) return array($collection_id, $collection_rename);
@@ -419,7 +419,7 @@ class Collections
 		
 	}
 	
-	function getCollectionsGivenCitationID($citation_id, $submitter, $owner)
+	function getCollectionsGivenCitationID($citation_id, $submitter,$owner)
 	{
 		$this->link = $this->connectDB();
 					

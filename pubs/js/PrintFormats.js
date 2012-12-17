@@ -702,7 +702,20 @@ Page.printAPAStyleCitation = function(_citation)
 		html += title;
 		html += citation_req.school + ". ";
 	}
-	else if (pubtype == "proceedings" || pubtype == "inproceedings" || pubtype == "conference" || pubtype == "incollection"){
+  else if (pubtype == "inproceedings" || pubtype == "incollection") {
+		html += Page.printAPAStyleAuthors(_citation);
+		html += " (" + citation_req.year + "). ";
+		html += title;
+		html += Page.printEditorsAPAOrMLA(citation_req, 'apa');
+    if(_citation.booktitle) { html += ", <i>" + _citation.booktitle + "</i>. "; }
+		if((citation_req.organization == "") || (citation_req.organization == undefined)) {}
+		else { html += citation_req.organization + ". "; }
+		html += citation_req.pages + ". ";
+		html += citation_req.location + ": ";
+		html += citation_req.publisher + ".";		
+  
+  }
+	else if (pubtype == "proceedings" || pubtype == "conference"){
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html += title;

@@ -12,7 +12,7 @@ function echoJSONstr($result)
 	global $citations;
 	$jsonString = '{"error11111": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 //	$jsonString = '{"error": "'.$citations->error.'", "total_citations": "'.$result[0].'", "citations":'.json_encode($result[1]).'}';
-	echo $jsonString;  
+	echo $jsonString;
 } 
 
 function get_and_return_citations($current_get_type, $submitter, $owner, $page, $citations_per_page, $sort_order, $entryTime, $citation_id_page = 0)
@@ -41,7 +41,6 @@ function get_and_return_citations($current_get_type, $submitter, $owner, $page, 
 	
 	echo $jsonString;
 }
-
 if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 {
 	$jsonObj = json_decode($GLOBALS['HTTP_RAW_POST_DATA']);
@@ -137,7 +136,6 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	if(isset($jsonObj->{'request'}->{'returnType'})){
 		$returnType = $jsonObj->{'request'}->{'returnType'};
 	}
-	
 	$element_array = array("citation_id","user_id","pubtype","cit_key","abstract","keywords","doi","url","address","annote","author","booktitle","chapter","crossref","edition","editor","translator","howpublished","institution","journal","bibtex_key","month","note","number","organization","pages","publisher","location","school","series","title","type","volume","year","raw","verified","format","filename","submitter","owner","entryTime","date_retrieved");
 
 	$authors = array("author0id","author0ln","author0fn","author1id","author1ln","author1fn","author2id","author2ln","author2fn","author3id","author3ln","author3fn","author4id","author4ln","author4fn","author5id","author5ln","author5fn");
@@ -159,7 +157,6 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			}
 		}
 	}
-	
 	foreach ($authors as $key)
 	{
 		if(isset($citationObj->{$key}))
@@ -294,7 +291,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$collection_ids_array = array_merge($collection_ids_array1, $collection_ids_array2);
 			foreach ($collection_ids_array as $collection_id)
 			{
-				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']), $submitter, $owner);
+				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']), $submitter);
 			}
 			// to do maybe: return collections added to
 			
@@ -314,7 +311,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			require_once('../classes/Collections.class.php');
 			$collection = new Collections();
 			$citation_ids = array($result[0]['citation_id']);
-			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner);
+			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids, $submitter);
 			$collection_id = $insert_result[0];
 			$jsonString = '{"error66": "'.$citations->error.'", "citations":'.json_encode($result).'}';
 		}
@@ -336,7 +333,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			$collection_ids_array = array_merge($collection_ids_array1, $collection_ids_array2);
 			foreach ($collection_ids_array as $collection_id)
 			{
-				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']),$submitter, $owner);
+				$insert_result = $collection->insert_member_of_collection($collection_id, array($result[0]['citation_id']),$submitter);
 			}
 			// to do maybe: return collections added to
 			
@@ -355,7 +352,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 			require_once('../classes/Collections.class.php');
 			$collection = new Collections();
 			$citation_ids = array($result[0]['citation_id']);
-			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids,$submitter, $owner);
+			$insert_result = $collection->insert_member_of_collection($collection_id, $citation_ids,$submitter);
 			$collection_id = $insert_result[0];
 		}
 		echoJSONstr($result);

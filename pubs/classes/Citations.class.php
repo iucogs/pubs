@@ -1,6 +1,9 @@
 <?php 
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 // Read from the database and output it as an XML document.
 class Citations
 {
@@ -170,6 +173,12 @@ class Citations
 		{
 			if(is_string($str)) {
 				$str = trim($str);
+<<<<<<< HEAD
+			//Added by Abhinav
+				$str = str_replace(";","\n",$str);
+			}
+		}
+=======
 
 			//Added by Abhinav
 			//	$str = str_replace(";","\n",$str);
@@ -177,6 +186,7 @@ class Citations
 	    }
 
 		
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		// Unset reference since it is still exist.
 		unset($str);
 		
@@ -306,7 +316,11 @@ class Citations
 					$value_str .= "'".mysql_real_escape_string($value)."',";
 				}
 			}
+<<<<<<< HEAD
+				//echo($value_str);
+=======
 				echo($value_str);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			$args_str = substr($args_str, 0, -1);
 			$value_str = substr($value_str, 0, -1);
 			
@@ -343,7 +357,11 @@ class Citations
 			//$this->createAndUpdateCollectionsTable($coll_id, $args['submitter'], $args['owner']);
 			
 			// Update similarTo table using doFuzzyMatch function. 
+<<<<<<< HEAD
+			if($this->updateSimilarToWhenSaving($current_citation_id, $args['submitter']))
+=======
 			if($this->updateSimilarToWhenSaving($current_citation_id, $args['submitter'], $args['owner']))
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			{
 				return $current_citation_id;
 			}
@@ -364,19 +382,31 @@ class Citations
 	function createMiscCollectionForAllOwners()
 	{
 		$this->link = $this->connectDB();
+<<<<<<< HEAD
+		$query = "SELECT DISTINCT user_id FROM collections";
+=======
 		$query = "SELECT DISTINCT owner FROM collections";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		$result = $this->doQuery($query, $this->link);
 		$row = mysql_fetch_assoc($result);
 		
 		while ($row = mysql_fetch_assoc($result)) {
+<<<<<<< HEAD
+			$return_arr[] = $this->createMiscCollectionForOneOwner($row['user_id']);			
+=======
 			$return_arr[] = $this->createMiscCollectionForOneOwner($row['owner']);			
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		}
 		
 		return !array_search(false,$return_arr);
 	}
 	
 	// For every owner, create a MISC collection.
+<<<<<<< HEAD
+	function createMiscCollectionForOneOwner($user_id)
+=======
 	function createMiscCollectionForOneOwner($owner)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{
 		$this->link = $this->connectDB();
 		
@@ -385,12 +415,20 @@ class Citations
 		//$result = $this->doQuery($query, $this->link);
 		
 		// Create a misc collection.
+<<<<<<< HEAD
+		$query = "SELECT * FROM collections WHERE user_id = '".$user_id."' AND collection_name = 'misc'";
+=======
 		$query = "SELECT * FROM collections WHERE owner = '".$owner."' AND collection_name = 'misc'";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		$result = $this->doQuery($query, $this->link);
 		$misc_coll_id = "";
 		if (mysql_num_rows($result) == 0)  // Only insert when misc doesn't exist for the owner
 		{
+<<<<<<< HEAD
+			$query = "INSERT INTO collections (`collection_id` ,`collection_name` ,`user_id` ,`submitter` ) VALUES (NULL , 'misc', 'user_id', 'user_id');";
+=======
 			$query = "INSERT INTO collections (`collection_id` ,`collection_name` ,`user_id` ,`submitter` ,`owner`) VALUES (NULL , 'misc', '0', '".$owner."', '".$owner."');";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			$result = $this->doQuery($query, $this->link);
 			$misc_coll_id = mysql_insert_id();
 		}
@@ -441,11 +479,19 @@ class Citations
 	
 
 	
+<<<<<<< HEAD
+	function determineMultipleCollectionOwners($citation_id, $submitter)
+	{
+		$this->link = $this->connectDB();
+		
+		$query = "SELECT citation_id FROM collections c, member_of_collection moc WHERE moc.collection_id = c.collection_id AND c.citation_id = moc.citation_id";
+=======
 	function determineMultipleCollectionOwners($citation_id, $submitter, $owner)
 	{
 		$this->link = $this->connectDB();
 		
 		$query = "SELECT citation_id FROM collections c, member_of_collection moc WHERE moc.collection_id = c.collection_id AND c.citation_id = moc.citation_id AND c.owner != $owner";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		$result = $this->doQuery($query, $this->link);
 		$return_arr = array();
 		if(mysql_num_rows($result) > 0) { // Citation in collection with different owner
@@ -469,7 +515,11 @@ class Citations
 		
 		for($i = 0; $i < 6; $i++)
 		{
+<<<<<<< HEAD
+				if(empty($args_authors['author'.$i.'ln']) && empty($args_authors['author'.$i.'fn'])) // RUTH 080210
+=======
                 if(empty($args_authors['author'.$i.'ln']) && empty($args_authors['author'.$i.'fn'])) // RUTH 080210
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 				{
 					// Do nothing since the author is empty. To prevent empty author row with empty fn and ln to be verified authors.
 				}
@@ -478,6 +528,10 @@ class Citations
 					$query = "INSERT INTO author_of (author_id, citation_id, position_num) VALUES ('".mysql_real_escape_string($args_authors['author'.$i.'id'])."','".$current_citation_id."','".($i+1)."')";
 					$result = $this->doQuery($query, $this->link); 
 				}
+<<<<<<< HEAD
+
+=======
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		}
 		
 		//Commented by Abhinav on 06/27/2012
@@ -497,10 +551,17 @@ class Citations
 		return $current_citation_id;
 	}
 	
+<<<<<<< HEAD
+	function updateSimilarToWhenSaving($current_citation_id, $submitter)
+	{	
+		$return_value = true;
+		$citations_arr = $this->getCitation_byID($submitter,$current_citation_id);
+=======
 	function updateSimilarToWhenSaving($current_citation_id, $submitter, $owner)
 	{	
 		$return_value = true;
 		$citations_arr = $this->getCitation_byID($submitter, $owner, $current_citation_id);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		
 		$single_citation = $citations_arr[0];
 		
@@ -594,7 +655,11 @@ class Citations
 			}
 			else
 			{
+<<<<<<< HEAD
+				$result = $this->getCitation_byID($args['submitter'],$new_or_current_id);
+=======
 				$result = $this->getCitation_byID($args['submitter'],$args['owner'],$new_or_current_id);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 				return $result;
 			}
 		}
@@ -621,7 +686,11 @@ class Citations
 				if ($author_id == -1) // not in author table
 				{
 					// add to author table, set to unverified
+<<<<<<< HEAD
+					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'],0);
+=======
 					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'], $args['owner'],0);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 				}
 				else  // in author table
 				{
@@ -635,7 +704,11 @@ class Citations
 				if ($author_id == -1) // not in author table
 				{
 					// add to author table, set to verified
+<<<<<<< HEAD
+					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'],1);
+=======
 					$temp_author_id = $this->addNewAuthor($firstname, $lastname, $args['submitter'], $args['owner'],1);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 				}
 				else
 				{
@@ -657,7 +730,11 @@ class Citations
 		}
 		
 		$citation_id = $this->save($args, $args_authors, $coll_id);
+<<<<<<< HEAD
+		$result = $this->getCitation_byID($args['submitter'],$citation_id);
+=======
 		$result = $this->getCitation_byID($args['submitter'], $args['owner'],$citation_id);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		return $result;
 	}
 	
@@ -697,8 +774,12 @@ class Citations
 		return array($author_id, $author_verified, $suggestions);
 	}
 	
+<<<<<<< HEAD
+	function addNewAuthor($firstname, $lastname, $submitter,$verified)
+=======
     // pjc
 	function addNewAuthor($firstname, $lastname, $submitter, $owner,$verified)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{
 		$this->link = $this->connectDB();
 		
@@ -714,12 +795,22 @@ class Citations
 		}
 		else 
 		{
+<<<<<<< HEAD
+		//	if($flag == 0)
+		//	{
+				if($verified == 0)
+					$query = "INSERT INTO authors (lastname, firstname,verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',0)";
+				else
+					$query = "INSERT INTO authors (lastname, firstname,verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',1)";
+		//	}
+=======
 		    if($verified == 0){
 				$query = "INSERT INTO authors (lastname, firstname, verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',0)";
 			}
             else{
 				$query = "INSERT INTO authors (lastname, firstname, verified) VALUES ('".mysql_real_escape_string($lastname)."', '".mysql_real_escape_string($firstname)."',1)";
 	        }
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			
 			$result = $this->doQuery($query, $this->link);
 		
@@ -763,7 +854,11 @@ class Citations
 	}
 
 	
+<<<<<<< HEAD
+	function insert_into_deleted_citations_db($citation_id, $reason, $submitter)
+=======
 	function insert_into_deleted_citations_db($citation_id, $reason, $submitter, $owner)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{
 		$this->link = $this->connectDB();
 		
@@ -866,12 +961,40 @@ class Citations
 	
 	function delete($citation_id, $reason, $submitter, $owner)
 	{
+<<<<<<< HEAD
+		if($this->insert_into_deleted_citations_db($citation_id, $reason, $submitter))
+=======
 		if($this->insert_into_deleted_citations_db($citation_id, $reason, $submitter, $owner))
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		{
 			
 			$this->link = $this->connectDB();
 			$error_found = false;
 			
+<<<<<<< HEAD
+			$query = "DELETE FROM member_of_collection WHERE citation_id=$citation_id "; 
+			$result = $this->doQuery($query, $this->link);
+			if(!$result) $error_found = true;
+	
+			$query = "DELETE FROM author_of WHERE citation_id=$citation_id "; 
+			$result = $this->doQuery($query, $this->link);
+			if(!$result) $error_found = true;
+		
+			//Commented by Abhinav on 06/27/2012
+		/*	$query = "DELETE FROM authors_unverified WHERE citation_id=$citation_id "; 
+			$result = $this->doQuery($query, $this->link);
+			if(!$result) $error_found = true;  */
+			
+			$query = "DELETE FROM similar_to WHERE citation_id1=$citation_id OR citation_id2=$citation_id"; 
+			$result = $this->doQuery($query, $this->link);
+			if(!$result) $error_found = true;
+			
+			$query = "DELETE FROM represent_pubs_of WHERE citation_id=$citation_id"; 
+			$result = $this->doQuery($query, $this->link);
+			if(!$result) $error_found = true;
+			
+=======
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			$query = "DELETE FROM citations WHERE citation_id=$citation_id ";
 			$result = $this->doQuery($query, $this->link);
 			if(!$result) $error_found = true;
@@ -916,11 +1039,18 @@ class Citations
 	{ 
 		$this->limit = ""; // get all at first 
 		$this->link = $this->connectDB();
+<<<<<<< HEAD
+
+		if($keyword==""){
+		$query = $this->selectQueryFor_byFac_all($owner, $type, $keyword, $search,$sort_order);
+		$result_arr = $this->getJSON($query);
+=======
 // Ruth put code into this function to simplify
 		$query = $this->selectQueryFor_byFac_all($owner, $type, $keyword, $search,$sort_order);
 		
 		$result_arr = $this->getJSON($query);
 
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		if($sort_order != 'year_desc')
 		{
 			$citations = $this->sortCitations($result_arr, $sort_order);
@@ -929,8 +1059,45 @@ class Citations
 		{
 			$citations = $result_arr;
 		}
+<<<<<<< HEAD
+		$total_count = count($citations);
+		}
+	
+	else {
+		
+			list($name1,$name2) = explode (',',$keyword);
+				if($name2 == "")
+				$name2= $name1;
+			list($name3,$name4) = explode (' ',$keyword);
+				if($name4 == "")
+				$name4= $name3;
+			//echo('111111'.$name1.'22222222'.$name2.'33333333'.$name3.'44444444'.$name4);
+			
+			$query = "SELECT * FROM $this->table where citation_id in ( SELECT citation_id FROM author_of where author_id in ( SELECT author_id FROM authors where 
+		          lastname='".$name1."' or firstname='".$name1."' or lastname='".$name2."' or firstname='".$name2."' or lastname='".$name3."' or firstname='".$name3."' or			        lastname='".$name4."' or firstname='".$name4."')) ";
+				  
+				  		
+	//	$query = "SELECT * FROM $this->table where author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+				  
+			$result_arr = $this->getJSON($query);
+		//echo('1111111'.$result_arr);
+			if($sort_order != 'year_desc')
+			{
+				$citations = $this->sortCitations($result_arr, $sort_order);
+			}
+			else
+			{
+				$citations = $result_arr;
+			}
+		
+			$total_count = count($citations);
+	}
+		
+		
+=======
 		
 		$total_count = count($citations);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		if (count($citations) > $citations_per_page)
 		{
 			$total_count = count($citations);
@@ -939,7 +1106,11 @@ class Citations
 		}
 		
 		// Get similar citations
+<<<<<<< HEAD
+		$similar_citations_array = ""; //$this->getSimilarCitations($citations);
+=======
 		$similar_citations_array = $this->getSimilarCitations($citations);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		return array($total_count, $citations, $similar_citations_array, $page);
 		
 	}
@@ -960,7 +1131,23 @@ class Citations
 			}
 			if($type=='author')
 			{
+<<<<<<< HEAD
+				list($name1,$name2) = explode (',',$keyword);
+				if($name2 == " ")
+				$name2= $name1;
+				list($name3,$name4) = explode (' ',$keyword);
+				if($name4 == " ")
+				$name4= $name3;
+				
+				//echo('111111'.$name1.'22222222'.$name2.'33333333'.$name3.'44444444'.$name4);
+				
+		$query = "SELECT * FROM $this->table where citation_id in ( SELECT citation_id FROM author_of where author_id in ( SELECT author_id FROM authors where 
+		          lastname='".$name1."' or firstname='".$name1."' or lastname='".$name2."' or firstname='".$name2."' or lastname='".$name3."' or firstname='".$name3."' or lastname='".$name4."' or firstname='".$name4."')) ";
+		
+		// author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+=======
 		$query = "SELECT * FROM $this->table where author='".$keyword."' ORDER BY citation_id ASC $this->limit";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			}
 			if($type=='all')
 			{
@@ -1000,12 +1187,20 @@ class Citations
 		$query = "SELECT * FROM $this->table WHERE citation_id = '$citation_id' ORDER BY citation_id ASC $this->limit";
 		
 		$result_arr = $this->getJSON($query);
+<<<<<<< HEAD
+		$this->sortCitations($result_arr, '');
+=======
 	    $this->sortCitations($result_arr, '');
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		return $result_arr;
 	}
 	
 	
+<<<<<<< HEAD
+	function getCitation_byID($submitter,$citation_id)
+=======
 	function getCitation_byID($submitter, $owner, $citation_id)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{
 		$this->link = $this->connectDB();
 
@@ -1015,7 +1210,11 @@ class Citations
 		return $result_arr;
 	}
 
+<<<<<<< HEAD
+	function getCitations_byIDs($submitter, $owner, $citation_id_array)
+=======
 	function getCitations_byIDs($submitter, $owner, $citation_id_array, $sort_order)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{		
 		$this->link = $this->connectDB();
 				
@@ -1033,7 +1232,11 @@ class Citations
 			$query.= ")";
 						
 			$result_arr = $this->getJSON($query);
+<<<<<<< HEAD
+			$result_arr = $this->sortCitations($result_arr, '');
+=======
 			$result_arr = $this->sortCitations($result_arr, $sort_order);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		}
 		else
 		{
@@ -1045,9 +1248,13 @@ class Citations
 	function getJSON($query) {
 
 		$citations = array();
+<<<<<<< HEAD
+		$result = $this->doQuery($query, $this->link);
+=======
 	
 		$result = $this->doQuery($query, $this->link);
 	
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	//	print_r(mysql_num_rows($result));
 		while($row = mysql_fetch_assoc($result))
         {
@@ -1064,7 +1271,10 @@ class Citations
 						$citation['author'.$pos_num.'fn'] = "";
 						$citation['author'.$pos_num.'id'] = "";
 					}
+<<<<<<< HEAD
+=======
 					
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 					$query_author = "SELECT DISTINCT a.*, ao.position_num FROM authors a, author_of ao, citations c 
 										WHERE c.citation_id = '$citation_id' AND ao.citation_id = '$citation_id' AND a.author_id = ao.author_id ORDER BY ao.position_num";
 					
@@ -1088,8 +1298,13 @@ class Citations
 				}
             }
 			$citations[] = $citation;
+<<<<<<< HEAD
+			
+        }
+=======
         }
 		
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		mysql_free_result($result);
 		return $citations;
 	}
@@ -1369,6 +1584,14 @@ class Citations
 		return $search_query;
 	}
 	
+<<<<<<< HEAD
+	// getCitationsGivenCollectionID
+	
+	// Ruth 4/12
+	function getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner)
+	{
+		$citation_id_array = $this->getCitationIdsGivenCollectionId($collection_id);
+=======
 	
 	
 	// Ruth 4/12
@@ -1376,12 +1599,17 @@ class Citations
 	{
 		
         $citation_id_array = $this->getCitationIdsGivenCollectionId($collection_id);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		$total_count = count($citation_id_array);
 		if (count($citation_id_array) > 0)
 		{
 			require_once('../classes/Citations.class.php');
 			$citations = new Citations();
+<<<<<<< HEAD
+			$citations_array = $citations->getCitations_byIDs($submitter, $owner, $citation_id_array);
+=======
 			$citations_array = $citations->getCitations_byIDs($submitter, $owner, $citation_id_array, $sort_order);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 			//echo "size 1: ".count($citations_array);
 		}
 		else
@@ -1409,7 +1637,11 @@ class Citations
 				}
 			}
 		}
+<<<<<<< HEAD
+		
+=======
 		$citations_array = $this->sortCitations($citations_array, $sort_order);
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		return array($citations_array, $total_count, $similar_citations_array, 1);
 	}
 	
@@ -1425,8 +1657,12 @@ class Citations
         {				
 			$temp[] = $row['citation_id'];
 		}
+<<<<<<< HEAD
+		return $temp;
+=======
 		
         return $temp;
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	//	return $result_citation_ids;
 		
 	}
@@ -1486,7 +1722,11 @@ class Citations
 		}
 		
 		// This query should be copied to [Collections.class.php]->getDefaultCollectionNamesAndIds()
+<<<<<<< HEAD
+		$query_in = "citation_id IN (SELECT moc.citation_id FROM member_of_collection moc, collections col WHERE moc.collection_id = col.collection_id AND col.submitter = '".$owner."') ";
+=======
 		$query_in = "citation_id IN (SELECT moc.citation_id FROM member_of_collection moc, collections col WHERE moc.collection_id = col.collection_id AND col.owner = '".$owner."') ";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 
 		// Set 'owner' condition on "all" or "unverified". Do not set 'owner' when doing searches!
 		if(empty($search_query))
@@ -1508,15 +1748,25 @@ class Citations
 		
 
 		#Main query ORDER BY.
+<<<<<<< HEAD
+		if ($type == 'title' || $type == 'journal' || $type == 'author' || $type == 'all')
+=======
 	/*	if ($type == 'title' || $type == 'journal' || $type == 'author' || $type == 'all')
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		{
 			$query_ORDER = "ORDER BY relevance DESC";
 		}
 		else
+<<<<<<< HEAD
+		{
+			$query_ORDER = $this->write_query_order($sort_order);
+		}	
+=======
 		{*/
 			$query_ORDER = $this->write_query_order($sort_order);
             echo $sort_order;
 	//	}	
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		
 		#Main query SELECT.
 		$query_SELECT = "SELECT "; 
@@ -1528,6 +1778,11 @@ class Citations
 		
 		$query_SELECT .= "'' AS coll_name, '' AS coll_id, c.* "; // Select all citations columns.
 		
+<<<<<<< HEAD
+		//$query_SELECT .= " c.* "; // Select all citations columns.
+		
+=======
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		#Main Table query
 		$main_table_query_FROM = "FROM ( citations c ".$this->build_authors_table()." ) ";
 		$main_table = "(".$query_SELECT." ".$main_table_query_FROM.") AS mt"; // main_table
@@ -1654,11 +1909,15 @@ class Citations
 		
 		$query_ORDER = '';
 		
+<<<<<<< HEAD
+		if ($sort_order == 'year_asc')
+=======
 		if ($sort_order == 'citation_id')
         {
             $query_ORDER = "ORDER BY `citation_id` DESC";
         }
         else if ($sort_order == 'year_asc')
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		{
 			$query_ORDER = "ORDER BY year, ".$author_str.", title";
 		}
@@ -1670,9 +1929,13 @@ class Citations
 		{
 			$query_ORDER = "ORDER BY ".$author_str.", year, title";
 		}
+<<<<<<< HEAD
+		
+=======
 	    
 
 
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		return $query_ORDER;
 	}
 	
@@ -1710,6 +1973,16 @@ class Citations
 	function sortCitations($citations, $sort_order)
 	{	
 		//usort($citations, array($this, 'compare_fullname'));
+<<<<<<< HEAD
+		if ($sort_order == "author0ln")
+		{
+			usort($citations, array($this, 'compare_by_author0ln'));
+		}
+		else
+		{
+			usort($citations, array($this, 'compare_by_year'));
+		}
+=======
 		
         if ($sort_order == "citation_id"){
             usort($citations, array($this, 'compare_by_citation_id'));
@@ -1726,6 +1999,7 @@ class Citations
             usort($citations, array($this, 'compare_by_year_desc'));
         }
     
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		
 		return($citations);	
 	}
@@ -1749,7 +2023,11 @@ class Citations
 		return $retval;  // Will return here if all elements match.
 	} 
 	
+<<<<<<< HEAD
+	function compare_by_year($a, $b)
+=======
 	function compare_by_year_asc($a, $b)
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	{
 		$map = array('year','author0ln','author0fn','author1ln','author1fn','author2ln','author2fn','author3ln','author3fn','author4ln','author4fn','author5ln','author5fn','title');		
 		foreach($map as $key)
@@ -1766,6 +2044,9 @@ class Citations
 		}
 		return $retval;  // Will return here if all elements match.
 	} 
+<<<<<<< HEAD
+	
+=======
 
 
 
@@ -1787,6 +2068,7 @@ class Citations
 		return $retval;  // Will return here if all elements match.
 	} 
 
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 	/*
 	function compare_fullname($a, $b) { 
 		$retval = strnatcmp($a['author0ln'], $b['author0ln']); 
@@ -1846,7 +2128,11 @@ class Citations
 						$similar_citation_ids[]	= $row['citation_id1'];
 					}
 				}
+<<<<<<< HEAD
+				$similar_citations = $this->getCitations_byIDs('', '', $similar_citation_ids);
+=======
 				$similar_citations = $this->getCitations_byIDs('', '', $similar_citation_ids, '');
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 				return $similar_citations;
 			}
 			else
@@ -2024,7 +2310,11 @@ class Citations
 		$this->link = $this->connectDB();
 		$return_value = true;
 		
+<<<<<<< HEAD
+		$query = "SELECT citation_id FROM citations ORDER BY citation_ID ASC";
+=======
 		$query = "SELECT citation_id FROM citations ORDER BY citation_id ASC";
+>>>>>>> 9c6fb636d61a049e460ecbfb4201419cf8af9f0d
 		$result = $this->doQuery($query, $this->link);  
 		$citation_ids = array(); 
 	
