@@ -250,7 +250,7 @@ class Parse
 			
 			$entry['year'] = $parseDate['year'];  			// Save year
 			$splitStr = $this->splitYear($entry['year'], $line); 			// Split string by first date parsed.
-			
+
 			// Check for format.
 			if(parseFormat($line, $entry['year']) == "MLA")
 			{
@@ -291,7 +291,6 @@ class Parse
 			{
 				$entry['format'] = "APA";
 				$entry['author'] = parseAuthorAPA($splitStr[0]); 	// Parse author: Assuming author located before the publication year.
-				
 				if(!empty($splitStr[1])){
 					$typeInfo = parseTypeAPA($line, $splitStr[1], $splitStr[0]);		// Decide entry type. $splitStr[1] is string after first year found.
 				}
