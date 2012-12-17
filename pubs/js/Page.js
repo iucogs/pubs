@@ -1,7 +1,20 @@
-var Page = new Object();
+/* Indiana University Cognitive Science Program Pubs Application
+ * Page.js
+ * Page.js is javascript used to draw most of the citations panes and a good
+ * portion of the side, all of which is styled by the Yahoo! API. 
+ * Most of the function names are pretty self-explanitory and if you're looking
+ * to change the content of the panes or the functions of the buttons, you'll
+ * find what you're looking for in this file. However, this file is utterly
+ * gargantuan and trying to find things just by scrolling through it is ill-advised,
+ * especially if you don't know exactly what you're looking for.
+ *
+ * Search is your friend. 
+ */
 
-// Page object variables
-//Page.entry = 0;
+
+var Page = new Object();
+// ***PAGE.JS VARIABLES BEGIN HERE***
+
 Page.state = 1; // For now: 3=Paging through all, unverified or a collection; 2=Paging through newly added citations; 1=Everything else
 Page.movingTab = false;
 Page.current_citation_num = 0; 
@@ -13,9 +26,6 @@ Page._current_citation2 = "";
 
 Page.pre_merge_id1 = "";  
 Page.pre_merge_id2 = "";
-//Page.similar_citation1 = "";
-//Page.similar_citation2 = "";
-//Page.mergedCitation = ""; 
 
 Page.collections;
 Page.default_collections; // all and unverified
@@ -82,8 +92,7 @@ Page.show_URLs_flag = 1;
 Page.similar_citations_array = new Array();
 Page.selected_citations = [];
 
-//Page.oContextMenu = "";
-//Page.oContextMenu2 = "";
+
 Page.newly_added_citations = [];
 Page.newly_added_similar_citations_array = [];
 Page.current_newly_added_num = 0;
@@ -123,6 +132,7 @@ Page.user_back_button_state = 'user'; // or 'admin'
 
 Page.feedback_list = '';
 
+// Initializes the citations pane.
 Page.initializePanel = function() 
 {
 	var html;
@@ -262,7 +272,7 @@ Page.swapPanels2And3 = function()
 		document.getElementById('panel3_div').style.display = 'none'; 		// Hide
 	}
 }
-
+// Loads a citation into the panel.
 Page.oneCitationInPanel = function(citationInPanel, fieldFlag, newFlag) {
 	Page.panel_open = 1;
 
@@ -661,7 +671,7 @@ Page.showCheckAuthorPanel = function(responseObj)
 	else
 	{
 			html += '<input type="button" title="Unchecked authors will be saved as unverified."  value="Verify Checked Authors" onclick="Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />&nbsp;&nbsp;';
-		//html += '<input type="button" value="Do Not Add Authors" onclick="Page.uncheckAllAuthorCheckboxesInPanel();Page.checkInputAndSave1(\'create_authors\',\''+ merge +'\',0,0);" />';
+
 	}
 	
 	Page.panel1.setBody(html);
@@ -1095,9 +1105,10 @@ Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
 Page.printBackTD = function(pointer_style)
 {
 	var html = '';
+  var back = '';
 	if (((Page.state == 2) && (Page.current_newly_added_num > 0)) || ((Page.state == 3) && (Page.current_row_num > 0))) {
 		
-		html += '<tr><td id="goToBack" title="Previous citation in list" align="left" width="10%" ' + pointer_style + ' onclick="Page.goToBackCitation();"><font size="+2">Back</font></td>';
+		html += '<tr><td id="goToBack" title="Previous citation in collection" align="left" width="10%" ' + pointer_style + ' onclick="Page.goToBackCitation();"><font size="+2">Back</font></td>';
 	}
 	else {
 		html += '<tr><td id="goToBack" align="left" width="10%"></td>';	
@@ -1108,6 +1119,7 @@ Page.printBackTD = function(pointer_style)
 Page.printNextTD = function(pointer_style)
 {
 	var html = '';
+
 	if (((Page.state == 2) && (Page.current_newly_added_num < Page.newly_added_citations.length-1)) || ((Page.state == 3) && (Page.current_row_num < Page._citations.length-1))) {
 		html += '<td id="goToNext" title="Next citation in list" align="right" width="10%" ' + pointer_style + ' onclick="Page.goToNextCitation();"><font size="+2">Next</font></td>';
 	}
