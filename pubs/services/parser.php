@@ -107,7 +107,7 @@ function parseIntoCollection($filename, $collection_name, $action, $entryTime, $
 	if($action == "new") // Create collection
 	{
 		$collection_name = trim($collection_name);
-		$collection_id = $collection->checkCollection($collection_name, $submitter);
+		$collection_id = $collection->checkCollection($collection_name, $submitter, $owner);
 		$is_TI = is_file_TI($filename); 		// Check if entries are TI: type
 		$collection_status = "exists";
 		$continue_to_parse = false;
@@ -178,7 +178,7 @@ function parseIntoCollection($filename, $collection_name, $action, $entryTime, $
 	}
 	else if($action == "insert")  // Insert into current collection
 	{
-		if(($collection_id = $collection->checkCollection($collection_name, $submitter)) != false) // Collection id exist.
+		if(($collection_id = $collection->checkCollection($collection_name, $submitter, $owner)) != false) // Collection id exist.
 		{
 			// Check for Bibtext or EndNote format.
 			$format = get_entry_format($filename);
@@ -307,7 +307,7 @@ function parse_ti($parse_result, $submitter, $owner, $entryTime)
 			}
 			else $error .= 5;
 
-			$coll_result = $collection->createAndAddCollection($c_name, $citation_ids, $submitter,true);  // Optional FORCE_CREATE collection_name
+			$coll_result = $collection->createAndAddCollection($c_name, $citation_ids, $submitter, $owner, true);  // Optional FORCE_CREATE collection_name
 			
 			// Create or update collections table entries
 			// Ruth 6/27/12
@@ -332,7 +332,7 @@ function action_new_add_collections($collection_name, $citation_ids, $entryTime,
 	global $collection;
 	global $citations;
 	
-	$result_arr = $collection->createAndAddCollection($collection_name, $citation_ids, $submitter);
+	$result_arr = $collection->createAndAddCollection($collection_name, $citation_ids, $submitter, $owner);
 
 	if($result_arr != false) // Either collection doesnt exist(1) or collection exist (-1)
 	{
