@@ -14,8 +14,8 @@ class Citations
 	function Citations()
 	{
 		require_once('Logger.class.php');			// Class for logging
-		require_once('../lib/mysql_connect.php');
-		require_once('../lib/fuzzymatch.php');
+		require_once('/home/patrick/Sites/pubs/lib/mysql_connect.php');
+		require_once('/home/patrick/Sites/pubs/lib/fuzzymatch.php');
 		$this->table = "citations";
 		$this->limit = '';
 		$this->page = 1;

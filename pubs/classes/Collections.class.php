@@ -11,7 +11,7 @@ class Collections
 
 	function Collections()
 	{
-		require_once('../lib/mysql_connect.php');
+		require_once('/home/patrick/Sites/pubs/lib/mysql_connect.php');
 		$this->doc = new DOMDocument();
 		$this->formatOutput = true;
 		$this->root = array();
