@@ -47,7 +47,8 @@ class Parse
 							   'db_name' => '', 
 							   'db_user' => '', 
 							   'db_password' => '', 
-							   'db_host' => ''	// Local, if remote add :3306
+							   'db_host' => '', // Local, if remote add :3306            
+                               'return_array' => false
 							   );
 	}
 	
@@ -88,6 +89,12 @@ class Parse
 		{
 			if(is_string($options['db_host'])) $this->options['db_host'] = $options['db_host'];
 		}
+
+        // Return array
+        if(array_key_exists('return_array', $options))
+        {
+            if(is_bool($options['return_array'])) $this->options['return_array'] = $options['return_array'];
+        }
 	}
 	
 	function printOptions()
@@ -169,7 +176,7 @@ class Parse
 			
 			/*if(in_array($count, $processing_arr))	{ echo $count; }
 			else
-			{
+	t		{
 				//$count++;
 				//continue;
 			}*/
@@ -346,7 +353,9 @@ class Parse
 			$entry = $this->remove_unknown_from_entry($entry);
 			
 			$duplicate_toggle = false; // Toggle for printHTML
-						
+					
+            if($this->options['return_array']) 
+                return $entry;
 			if($this->options['db'])
 			{
 				if(($entry_to_db_result = parseEntryToDB($entry)) != false)

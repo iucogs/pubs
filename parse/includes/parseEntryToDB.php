@@ -8,34 +8,18 @@
 		else
 		{	
 			$citation_id = insertOneCitation($entry);
-			
-			//==============================================
-			// Prep array for fuzzy match argument.
-			//----------------------------------------------
-			
-			// Split / Prep first author lastname
-			
-			/******* MOVED TO PUBS (parser.php) *******
-			$first_auth_name = nameSplitter($entry['author'][0]);
-			$lastname = $first_auth_name['lastname'];
-			
-			$fuzzy_args = array("lastname" => $lastname, "year" => $entry['year'][0], "title" => $entry['title']);
-			
-			doFuzzyMatch($fuzzy_args, $citation_id);  // Does fuzzy match and updates similarTo table
-			/******************************************/
 		}
 		return $citation_id;
 	}
 	
 	function compareEntryAndHandleDuplicateRaw($entry)
 	{
-			// Query entries with same raw.
+	    // Query entries with same raw.
 		$duplicate_raw_query = "SELECT c.citation_id, c.raw FROM citations c WHERE raw='".mysql_real_escape_string($entry['raw'])."'";
 		$duplicate_raw_result = mysql_query($duplicate_raw_query);
 		query_result($duplicate_raw_result, $duplicate_raw_query);
 		
-		if(mysql_num_rows($duplicate_raw_result) > 0)  // Duplicate raw exists
-		{
+		if(mysql_num_rows($duplicate_raw_result) > 0) { // Duplicate raw exists
 			// Change the existing timestamp			
 			$row = mysql_fetch_assoc($duplicate_raw_result);  // Get first row			
 			if(changeTimestamp($row['citation_id'],$entry['entryTime']))
@@ -43,10 +27,8 @@
 				// Then return citation id.
 				return $row['citation_id'];
 			}
-		}
-		else
-		{
-			return false;	
+		} else {
+		  return false;	
 		}
 	}
 	
