@@ -1,0 +1,122 @@
+This File is a list of the functions found in Page.js to aid in 
+commenting and better organizing the code in the future.
+
+Page.js
+-------
+
+Page.initializePanel(void)
+> Line: ~128
+> Description:
+  Sets up initial content for each panel in index.php
+
+Page.swapPanels2And3(void)
+> Line: ~255
+> Description:
+  Shows/Hides panel3_div and panel1_div
+* Question: should this be named swapPanels1And3() ?
+
+Page.oneCitationInPanel(citationInPanel, fieldFlag, newFlag)
+> Line: ~270
+> Description:
+  Displays a single citation for a specified edit. Called 
+  by editOneCitation().
+> params: 
+  citationInPanel - citation object to show
+  fieldFlag - String ("text" or something else) 
+  newFlag - String (either "new" or "merge")
+
+Page.editOneCitation(i)
+> Line: ~346
+> Description:
+  Calls oneCitationInPanel() to edit a citation in a
+  given format
+> params:
+  i = int (i < 0; determines type of edit to be done)
+
+Page.setSubmitter(user, document_root, owner, currentCollection)
+> Line: ~378
+> Description:
+  Sets up the owner of a collection. Called by index.php
+> params:
+  user - login username
+  document_root - current filepath
+  owner - cas login name 
+  currentCollection - the collection being submitted
+
+Page.rewritePage(responseObj)
+> Line: ~404
+> Description:
+  Updates certain page values according to an Ajax response object. Called 
+  by Page.onResponse()
+> params:
+  responseObj - object collected from an ajax request
+
+Page.onResponse(void)
+> Line: ~419
+> Description:
+  Calls Page.rewritePage() if it receives an Ajax response.
+* Question: What are input_method 's 1, 2, and 3?
+
+Page.onResponseCheckAuthors(void)
+> Line: ~450
+> Description:
+  Checks if an Ajax response returns a citation id. If so it calls
+  showFeedbackAfterSave(). Otherwise, It just shows a default panel
+
+Page.showFeedbackAfterSave(responseObj)
+> Line: ~471
+> Description:
+  Verifies that the given citation in the responseObj was saved correctly
+> Params:
+  responseObj - object containing a citation
+
+Pafe.updateCitationsArraysAndTabs_after_save(void)
+> Line: ~539
+> Description:
+  Updates all saved arrays to include updated/new citations
+
+Page.updateOneCitationsArray_after_save(arr)
+> Line: ~556
+> Description:
+  Updates the saved array's citations with the current versions of the citations
+  (use after a change has been made)
+> Params:
+  arr - given array to update citations in
+
+Page.updateCitationsArraysAndTabs_after_delete(void)
+> Line: ~568
+> Description:
+  Updates all saved arrays to remove a deleted citations
+
+Page.updateOneCitationsArray_after_delete(arr)
+> Line: ~595
+> Description:
+  Updates the given array by removing deleted citation(s)
+> Params:
+  arr - array to remove deleted citation(s) from
+
+Page.updateTabView(tabView, arr)
+> Line: ~607
+> Description:
+  Updates the citation content of a tab.
+> Params:
+  tabView - a tabView object
+  arr - array with the citation information to display/update
+
+Page.showCheckAuthorPanel(responseObj)
+> Line: ~620
+> Description:
+  Display a list of unverified authors.
+> Params:
+  responseObj - object containing citations with unverified authors
+
+Page.checkInputAndSave1(type, merge, timestamp, verified)
+> Line: ~679
+> Description:
+  
+> Params:
+  type - string indicating the type of input/save (update/create)
+  merge - string indicating whether or not the ids need to be merged (valid
+  input is "merge") 
+  timestamp - timestamp of save
+  verified -
