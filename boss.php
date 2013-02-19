@@ -21,10 +21,10 @@ $debug;
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $method = "POST ".$_POST['method'];
+  $method = "POST ".$_POST['method']." ";
   $citations = explode("\n", $_POST['citations']);
   foreach ($citations as $citation) {
-    array_push($resultAccumulator, exec($cmd.$method.$ID));  
+    array_push($resultAccumulator, exec($cmd.$method.'"'.$citation.'"'));  
    } 
   } else {
   if (strpos($_SERVER['REQUEST_URI'], "citation") != false)

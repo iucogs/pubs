@@ -51,7 +51,7 @@ function parse_POST($raw) {
   global $timestamp;
   $json;
 
-  $json = $parse->execute($raw, "", "", $timestamp);
+  $json = stripslashes(json_encode($parse->execute($raw, "", "", $timestamp)));
   echo $json;
 }
 
