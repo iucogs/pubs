@@ -321,3 +321,164 @@ Page.bestViewedWith(void)
 > Description:
   Returns an HTML div containing a link to firefox's download and telling the
   user that firefox is best for this application.
+
+Page.copyCitationsForFormat(citations)
+> Line: ~1485
+> Description:
+  Takes a list of citations and returns a list of JSON objects of those
+  citations.
+> Params:
+  citations - list of citation objects
+
+Page.mapMissingFields(cit_copy, currentFormat)
+> Line: ~1492
+> Description:
+  Checks all the fields of a citation and fills any publication types that are
+  undefined with 'misc'. Otherwise, it calls fillEmptyFields to see if the
+  citation has missing fields. It returns a list of the missing fields.
+> Params:
+  cit_copy - citation
+  currentFormat - format that citation is saved/being desplayed in
+
+Page.filEmptyFields(_citation, pubtype, format)
+> Line: ~1521
+> Description:
+  identifies any missing fields in a citation and fills them with a placeholder.
+> Params:
+  _citation - citation object
+  pubtype - the type of publication the citation is for 
+  format - the format the citation is saved/displayed in
+
+Page.listCitations(void)
+> Line: ~1573
+> Description:
+  Returns HTML code displaying a list of citations in a format specified by a
+  Page variable. It can also highlight missing fields in citation if a certain
+  value is set.
+
+Page.writeListCitationsRightTable(verticalOrHorizontal i, cit_copy,
+pointer_style)
+> Line: ~1847
+> Description:
+  Returns HTML code that could display similar citations and other citations in a
+  collection.
+> Params:
+  verticalOrHorizontal - string specifying whether or not to display the list
+    vertically or horizonally
+  i - row number
+  cit_copy - copy of citation object
+  pointer_style - type of pointer to use 
+
+Page.showSimilarCitations(row, citation_id)
+> Line: ~1907
+> Description:
+  Displays a list of similar citations in a left panel from the selected
+  citation
+> Params:
+  row - table row of citation to show similar ones of
+  citation_id - id of citation to show similar ones of
+
+Page.printPagingAndFormatTable(void)
+> Line: ~1915
+> Description:
+  Returns HTML code containing a table of different formatting options for the
+  user
+
+Page.printPageViews(void)
+> Line: ~2005
+> Description:
+  Returns HTML code displaying how many citations are on a page, which ones, and
+  how many total there are.
+
+Page.printPageViews_paging_forwards(void)
+> Line: ~2083
+> Description:
+  Move to the next page of citations to view
+
+Page.printPageViews_paging_backwards(void)
+> Line: ~2088
+> Description:
+  Move to the previous page of citations to view
+
+Page.inArray(val, arr)
+> Line: ~2100
+> Description:
+  Checks if the given value is in the given array. Returns true if is is and
+  false if it isn't
+> Params:
+  val - value to check for
+  arr - array to check in
+
+Page.getCitations(page, type, citation_id)
+> Line: ~2114
+> Description:
+  Sends an Ajax request to fetch a cirtain page of citations
+> Params:
+  page - page to move to
+  type - type of citations to fetch
+  citation_id - ??? Apparently this is also a page, but it is of a citation_id 
+
+Page.searchCitations_response(void)
+> Line: ~2147
+> Description:
+  Rewrites the current page with what it recieved from anAjax request
+**NOTE: This seems fairly generic, it might be able to be combined with other
+        _response functions
+
+Page.listCollections(void)
+> Line: ~2157
+> Description:
+  
+Page.printBackToCitationsButton(void)
+> Line: ~2207
+> Description:
+  returns HTML with a button that will call 'backToCitations()'
+
+Page.backToCitations(void)
+> Line: ~2214
+> Description:
+  Resets the page to only show all citations
+
+Page.printFormatMenu(void)
+> Line: ~2228
+> Description:
+  Returns HTML code with a menu to select the different citation formats (apa,
+  mla, bibtex)
+
+Page.printSortOrderMenu(void)
+> Line: ~2257
+> Description:
+  Returns HTML code with a menu to select what parameter to sort the citations
+  being viewed by.
+
+Page.sortCitations_request(void)
+> Line: ~2297
+> Description:
+  sorts citations in the selected type on the page and starts the viewing on the
+  first page
+
+Page.highlightMissingInfoCB(void)
+> Line: ~2303
+> Description:
+  Returns HTML code for a checkbox that highlights missing fields of citations
+  when it is checked.
+
+Page.showCitationID(void)
+> Line: ~2317
+> Description:
+  Returns HTML code for a checkbox on whether or not to show a citation's id or
+  not.
+
+Page.setCompactView(void)
+> Line: ~2330
+> Description:
+  
+Page.showCollections(void)
+> Line: ~2344
+> Description:
+
+Page.showNotes(void)
+> Line: ~2357
+
+Page.showAbstracts(void)
+> Line: ~2370
