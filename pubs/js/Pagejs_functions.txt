@@ -113,10 +113,211 @@ Page.showCheckAuthorPanel(responseObj)
 Page.checkInputAndSave1(type, merge, timestamp, verified)
 > Line: ~679
 > Description:
-  
+  Saves a citation in a specified way depending on parameters and updates
+  whether or not the citation has been verified.
 > Params:
   type - string indicating the type of input/save (update/create)
   merge - string indicating whether or not the ids need to be merged (valid
   input is "merge") 
   timestamp - timestamp of save
-  verified -
+  verified - verification status of the citation
+
+Page.uncheckAllAuthorCheckboxesInPanel(void)
+> Line: ~746
+> Description:
+  Sets all the check boxes for any author to be unchecked.
+
+Page.createVerifiedAuthor_request(obj)
+> Line: ~757
+> Description:
+  Loops through author checkboxes and checks if they are checked.
+* NOTE: This function doesn't do anything either way though, whether the
+  boxes are checked or not.
+> Params:
+  obj - object containing the list of html elements
+
+Page.SendXML(callbackmethod, xmlStr)
+> Line: ~776
+> Description:
+  Sends the xml string through an Ajax call
+> Params:
+  callbackmethod - method to call if Ajax call fails.
+  xmlStr - String containing xml code
+
+Page.inputMethod(input_method)
+> Line: ~786
+> Description:
+  This function is called from index.php. It will check fro the input from the
+  menu in index.php. (Everything starts here)
+> Params:
+  input_method - integer value saying what the user is doing.
+
+Page.searchCitations_request(search_type)
+> Line: ~886
+> Description:
+  Submits a search query of the given type for collections
+> Params:
+  search_type - 
+
+Page.editFacultyInfoForm(response)
+> Line: ~897
+> Description:
+  Builds a html table of faculty members and where each member has a row and
+  their table row has these columns: title1, title2, title3, phone, office,
+  email, link1, link1_title, education, professional experience, and research
+  interests. 
+> Params:
+  response - response object containing the list of faculty members and their
+  information
+
+Page.saveFacultyInfo(user)
+> Line: ~973
+> Description:
+  Sends xml via Ajax to save faculty information changed/added by the given user.
+> Params:
+  user - username of person saving the file.
+
+Page.newVerifiedAuthor(i)
+> Line: ~998
+> Description:
+  Adds an html submit button to the page when an author has been verified and
+  needs to be saved.
+> Params:
+  i - number of new author
+
+Page.submitNewVerifiedAuthor(void)
+> Line: ~1021
+> Description:
+  Submits the information for a newly verified author (used after
+  Page.newVerifiedAuthor())
+
+Page.newVerifiedAuthor_response(void)
+> Line: ~1035
+> Description:
+  Adds a new verified author to the checklist upon receiving an Ajax response.
+
+Page.printCitationSaveButton(_citation, fieldFlag, newFlag)
+> Line: ~1049
+> Description:
+  Prints out the edit/save button for a citation for the appropriate field type
+  and whether it is a new or existing citation.
+* NOTE: if fieldFlag != "text" there is a string of if-else statements that set
+* a variable tempType, but after the last else, it just sets tempType to
+* "check_authors". Why bother with the if-elses then?
+> Params:
+  _citation - citation object
+  fieldFlag - what type of field the citation is being saved from/in
+  newFlag - whether the citation is new or edited.
+
+Page.printBackTD(pointer_style)
+> Line: ~1100
+> Description:
+  Adds a 'goToBack' cell in a table row and sets it to display the previous
+  citation in a list if possible.
+> Params:
+  pointer_style - ??? added in as an attribute in the td tag
+
+Page.printNextTD(pointer_style)
+> Line: ~1113
+> Description:
+  Adds a 'goToNext' cell in a table row and sets it to display the next citation
+  in a list if possible.
+> Params:
+  pointer_style - ???
+
+Page.checkForCitationChanges(void)
+> Line: ~1125
+> Description:
+  does some checks, but will ALWAYS return true
+* NOTE: this will return true regardless of any of the checks that are true or
+* false, so I don't feel like this will really see if changes have been made. Or
+* this is just a trivial function that has no purpose.
+
+Page.goToNextCitation(void)
+> Line: ~1175
+> Description:
+  Checks if there are any more existing new citations and sets the currently
+  desplayed one as the next available one in the Page.newly_added_citations
+  array.
+
+Page.goToBackCitation(void)
+> Line: ~1208
+> Description:
+  Checks if the current new citation being desplayed isn't the first and
+  displays previous one if it exists.
+
+Page.printCitationEditButton(_current_citation, size)
+> Line: ~1241
+> Description:
+  Prints a button that calls Page.oneCitationInPanel() on _current_citation with
+  the given font size.
+> Params:
+  _current_citation - a citation object
+  size - font size of text for button
+
+Page.printUploadDialog(_citation, citation_suffix)
+> Line: ~1250
+> Description:
+  Saves an uploaded citation and adds a suffix to the file if necessary
+> Params:
+  _citation - citation object
+  citation_suffix - suffix of the filename
+
+Page.clearAttachedFile(citation_suffix)
+> Line: ~1294
+> Description:
+  Clears the field of file to upload
+> Params:
+  citation_suffix - specific file suffix to clear
+
+Page.printFileUplaodDiv(citation_id, citation_suffix, status)
+> Line: ~1308
+> Description:
+  Return an HTML div containing a form to upload files.
+> Params:
+  citation_id - citation object that will be uploaded
+  citation_suffix - file suffix (used in naming divs)
+  status - status of the file???
+
+Page.updateUploadGlobals(citation_suffix)
+> Line: ~1354
+> Description:
+  Sets the global citation_suffix variables to the given one
+> Params:
+  citation_suffix - file suffix
+
+Page.blankInputFields(_citation, returntype)
+> Line: ~1362
+> Description:
+  
+* NOTE: This function has a few TO-DOs on it and looks unfinished. Neither
+* variables are not used either.
+> Params:
+  _citation - 
+  returntype - 
+
+print_r(theObj)
+> Line: ~1379
+> Description:
+  Writes an unordered HTML list with the contents of theObj
+> Params:
+  theObj - an object containing arrays or other objects
+
+print_r2(theObj)
+> Line: ~1398
+> Description:
+  Returns an array of theObj's contents in text form.
+> Params:
+  theObj -an object containing arrays or other objects
+
+Page.writeOptionsForListCitations(void)
+> Line: ~1419
+> Description:
+  Returns HTML containing a table of collection and formats the view depending
+  on the internet browser being used.
+
+Page.bestViewedWith(void)
+> Line: ~1475
+> Description:
+  Returns an HTML div containing a link to firefox's download and telling the
+  user that firefox is best for this application.
