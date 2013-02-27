@@ -472,13 +472,121 @@ Page.showCitationID(void)
 Page.setCompactView(void)
 > Line: ~2330
 > Description:
-  
+  Returns HTML code for a checkbox on whether to call 'Page.setCompactViewCB()'
+
 Page.showCollections(void)
 > Line: ~2344
 > Description:
+  Returns HTML code for a checkbox to show all collections or not. It calls the
+  function 'Page.setShowCollectionsCB()'.
 
 Page.showNotes(void)
 > Line: ~2357
+> Description:
+  Returns HTML code for a checkbox to show notes. Clicking the checkbox will
+  call 'Page.setShowNotesCB()'.
 
 Page.showAbstracts(void)
 > Line: ~2370
+> Description:
+  Returns HTML code for a checkbox to show the abstracts of citations. Clicking
+  the checkbox will call 'Page.setShowAbstractsCB()'.
+
+Page.showURLs(void)
+> Line: ~2383
+> Description:
+  Returns HTML code for a checkbox to show the urls of citations. Clicking the
+  checkbox will call 'Page.setShowURLsCB()'.
+
+Page.setMissingInfoCB(void)
+> Line: ~2396
+> Description:
+  Checks if the checkbox to highlight missing information is set and sets the
+  highlight_citations_with_missing_info_flag to 1 if it is, 0 otherwise. Then is
+  calls 'Page.listCitations()'.
+
+Page.setShowCitationIdCB(void)
+> Line: ~2409
+> Description:
+  Checks if the checkbox to show citation ids is set and sets the
+  show_citation_id_flag to 1 if it is, 0 otherwise. Then it calls
+  'Page.listCitations()'.
+
+Page.setCompactViewCB(void)
+> Line: ~2422
+> Description:
+  Checks if the checkbox to use the compact view is set and sets the
+  set_compact_view_flag to 1 if it is, 0 otherwise. Then it calls
+  'Page.listCitations()'.
+
+Page.setShowCollectionsCB(void)
+> Line: ~2435
+> Description:
+  Checks if the checkbox to show all collections is check and sets the
+  show_collections_flag to 1 if it is, 0 otherwise. Then it calls
+  'Page.listCitations()'.
+  
+Page.setShowNotesCB(void)
+> Line: ~2448
+> Description:
+  Checks if the checkbox to show notes is set and sets the show_notes_flag to 1
+  if it is, 0 otherwise. Then it calls 'Page.listCitations()'.
+
+Page.setShowAbstractsCB(void)
+> Line: ~2461
+> Description:
+  Checks if the checkbox to show notes is set and set the show_abstracts_flag to
+  1 if it is, 0 otherwise. Then it calls 'Page.list Citations()'.
+
+Page.highlightMissingInfoCB(void)
+> Line: ~2476
+> Description:
+  Returns HTML code for a checkbox that will highlight the missing fields of
+  citations that are displayed.
+
+Page.setShowURLsCB(void)
+> Line: ~2494
+> Description:
+  Checks if the checkbox to show URLs is set and set the show_URLs_flag to 1 if
+  it is, 0 otherwise. Then it calls 'Page.listCitations()'.
+
+Page.printExportMenu(void)
+> Line: ~2507
+> Description:
+  Returns HTML code that contains an option menu of different formats (apa, mla,
+  bibtex, endnote, and apa as html list) to export a citation in. Also, whenever 
+  a different option is selected it calls 'Page.exportCitations()'.
+
+Page.printSelectCitationsOrCollectionsMenu(citationsOrCollections)
+> Line: ~2550
+> Description:
+  Returns HTML code that sets either an option to show all of the citations or
+  collections, whichever was specified, or none of them
+> Params:
+  citationsOrCollections - input to be passed to 'Page.updateCheckboxes()'. 
+
+Page.exportCitations(void)
+> Line: ~2576
+> Description:
+  Checks the currentExportFormat of the page and calls the appropriate function
+  to print the citation in the correct format in HTML and return it.
+
+Page.updateCheckboxes(citationsOrCollections)
+> Line: ~2617
+> Description:
+  Checks all the checkboxes for either citations or collections depending on the
+  input.
+> Params:
+  citationsOrCollections - can either being 'citations' or 'collections' and
+  specifies which group should have there checkboxes updated.
+
+Page.deleteCitation_request(citation_id)
+> Line: ~2650
+> Description:
+  Sets the HTML on the page to a div asking the user whether or not they want to
+  delete the citation with the given id from the current collection
+> Params:
+  citation_id - the id of a citation in the database
+
+Page.deleteCitationHelper_request(citation_id)
+> Line: ~2673
