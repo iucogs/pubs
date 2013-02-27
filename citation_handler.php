@@ -6,7 +6,7 @@
  Maintained by: pjcraig@indiana.edu
  Created/refactored: Feb 27, 2013
  Notes: This worker is supposed to handle everything that comes in from the
- controller. The arguments work like this:
+ controller wrt citations. The arguments work like this:
  argv[1]: function to be called
  argv[2]: ID/raw citation string
  
@@ -19,7 +19,6 @@
 
 // Includes
 require_once('/home/patrick/Sites/pubs/classes/Citations.class.php');
-require_once('/home/patrick/Sites/pubs/classes/Collections.class.php');
 require_once('/home/patrick/Sites/parse/NewParse.class.php');
 
 // Variables
@@ -93,7 +92,7 @@ if (strpos($function, 'POST') != false) {
 
 switch ($function) {
   case "citation_POST":
-    citation_post($input);
+    citation_POST($input);
     break;
 
   case "parse_POST":
