@@ -8,7 +8,7 @@
  Notes: This worker should handle everything that comes in from the controller
  wrt collections. Args work like this:
  argv[1]: (string) function to be called
- argv[2]: (int) collection ID for GET or for posting citations to a collection
+ argv[2]: (int) collection ID for GET or for PUTing citations to a collection
  OR (string) the collection name
  argv[3]: (int) citation ID to be posted to collection ID from argv2 OR (string)
  the submitter of the collection (by default, APIUser)
@@ -54,4 +54,27 @@ function newCollection_POST($collection_name, $submitter, $owner) {
  $response_json = json_encode($collections->createCollection($collection_name, $submitter, $owner));
 }
 
+// We're posting/putting/getting; set up variables accordingly
+if (strpos($function, 'POST')) {
+  $collection_name = $argv[2];
+  if ($argv[3] != 0)
+    $submitter = $argv[3];
+  else
+    $submitter = "API User";
+  $owner = $argv[4];
+} else {
+  $collection_ID = $argv[2];
+  $citation_ID = $argv[3];
+} 
+
+switch ($function) {
+  case "collection_GET":
+    collection_get($collection_ID); 
+    break;
+
+  case "newCollection_POST":
+    newCollection_POST($collection_name, $submitter, $owner);
+    break;
+
+}
 ?>

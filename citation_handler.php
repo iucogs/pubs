@@ -80,7 +80,7 @@ function citation_GET($ID) {
 // If we're posting, set the parser up, otherwise set up citations object for
 // GET.
 
-if (strpos($function, 'POST') != false) {
+if (strpos($function, 'POST')) {
   $timestamp = time();                                         
   $parse = new NewParse();
   $parse->parse();
@@ -89,7 +89,7 @@ if (strpos($function, 'POST') != false) {
   $citations = new Citations();
 }
 
-
+// Function calls here
 switch ($function) {
   case "citation_POST":
     citation_POST($input);
