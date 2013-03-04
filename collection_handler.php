@@ -27,7 +27,7 @@ require_once('/home/patrick/Sites/pubs/classes/Collections.class.php');
 
 // Variables
 $collections = new Collections;
-$input = $argv[1];
+$function = $argv[1];
 
 /*************************
  GET /collection?IDs={collection IDs}
