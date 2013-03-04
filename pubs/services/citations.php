@@ -208,7 +208,7 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	
 	// Ruth 4/12
 		//$result = $citations->get_citations_JSON_collections_table($page, $submitter, $owner, $citations_per_page, $sort_order, $collection_id);
-		$result = $citations->getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner);
+		$result = $citations->getCitationsGivenCollectionID($collection_id, $page, $citations_per_page, $submitter, $owner, $sort_order);
 		$jsonString = '{"error22": "'.$citations->error.'", "page": "'.$result[3].'", "total_count": "'.$result[1].'", "citations":'.json_encode($result[0]).', "similar_citations_array": '.json_encode($result[2]).'}'; 		
 		echo $jsonString;
 	}
