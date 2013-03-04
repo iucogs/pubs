@@ -67,13 +67,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
         $cmd .= 'collection_GET ';
 
     $IDs = explode(",", $_GET['IDs']);
-    foreach ($IDs as $ID) { 
-      array_push($resultAccumulator, exec($cmd.'"'.$ID.'"'));
+    foreach ($IDs as $ID) {
+      if($debug){ echo $cmd.' '.$ID; } 
+      array_push($resultAccumulator, exec($cmd.' '.$ID));
     }
     break;
 }
-var_dump($IDs);
-echo $cmd;
-var_dump($resultAccumulator);
 echo stripslashes(json_encode($resultAccumulator));
 ?>
