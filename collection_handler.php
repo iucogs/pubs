@@ -18,7 +18,9 @@
  2.4.2013 / pjcraig : Testing the new parser.
  2.11.2013 / pjcraig: New parser's working well, though  not getting get or 
  requests. Need to hand that over to the bossman script.
- 2.27.2012 / pjcraig: Split handler into citation_handler and collection_handler
+ 2.27.2013 / pjcraig: Split handler into citation_handler and collection_handler
+ 3.5.2013 / pjcraig: Added/tested collection_POST and newCollection_POST. Need
+ better names.
  ************************/
 
 
@@ -42,9 +44,12 @@ function collection_GET($ID) {
 }
 
 /*************************
- POST /collection/
- input: (string) Name of new collection, (string) submitter (by default,
- "API User"), (string) owner
+ POST /collection?collectionNames={collection names}&submitters={submitters}&owners={owners}
+ **ALL DELIMITED BY \n**
+ input: 
+ (string) Name of new collection
+ (string) submitter (by default, "API User"), 
+ (string) owner
  output: JSON: if collection exists, it returns "exists" and the collection ID.
  If not, it returns an array with 1 at [0] and the new collection ID at [1].
  *************************/
@@ -54,7 +59,18 @@ function newCollection_POST($collectionName, $submitter, $owner) {
  echo $response_json = json_encode($collections->createCollection($collection_name, $submitter, $owner));
 }
 
-function collection_POST($collectionID, $citationID, $submitter, $owner){
+/*************************
+ PUT /collection?collectionID={collection ID}&citationIDs={citation IDs}&submitter={submitter}&owner={owner of collection}
+ citationIDs delimited by commas
+ input: 
+ (int) ID of collection to be added to
+ (int) ID of citation to add
+ (string) Submitter, by default "API USER")
+ (string) Collection owner
+ output: JSON: collection added to, citations added, duplicates in collection
+ *************************/
+
+function addCitationToCollection_PUT($collectionID, $citationID, $submitter, $owner){
   global $collections;
   $citationIDs[0] = $citationID;
   echo $response_json = stripslashes(json_encode($collections->insert_member_of_collection($collectionID, $citationIDs, $submitter, $owner)));
@@ -73,7 +89,7 @@ switch ($function) {
     newCollection_POST($collectionName, $submitter, $owner);
     break;
 
-  case "collection_POST":
+  case "addCitationToCollection_PUT":
     $collectionID = $argv[2];
     $citationID = $argv[3];
     if (strlen($argv[4]))
