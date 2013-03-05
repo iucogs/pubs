@@ -9,13 +9,27 @@
 
  ****************************/
 
-// Variables
+// General variables
 $cmd = "php ";              
-$debug;                      // Debug flag
+$debug =1;                      // Debug flag
 $handler;                    // Tells us which handler to use
 $function;                   // Function to call in the respective handler
 $resultAccumulator = Array();          
 
+// POST variables
+$citations = Array();
+$collectionNames = Array();
+$submitters = Array();
+$owners = Array();
+
+// PUT variables
+$putVars = Array();
+$collectionID;
+$citationIDs;
+
+// GET variables
+$IDs = Array();
+$ID;
 
 // Detects citations request vs collections request
 if (strpos($_SERVER['REQUEST_URI'], 'citation'))

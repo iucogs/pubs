@@ -49,31 +49,39 @@ function collection_GET($ID) {
  If not, it returns an array with 1 at [0] and the new collection ID at [1].
  *************************/
 
-function newCollection_POST($collection_name, $submitter, $owner) {
+function newCollection_POST($collectionName, $submitter, $owner) {
  global $collections;
- $response_json = json_encode($collections->createCollection($collection_name, $submitter, $owner));
+ echo $response_json = json_encode($collections->createCollection($collection_name, $submitter, $owner));
 }
 
-// We're posting/putting/getting; set up variables accordingly
-if (strpos($function, 'POST')) {
-  $collection_name = $argv[2];
-  if ($argv[3] != 0)
-    $submitter = $argv[3];
-  else
-    $submitter = "API User";
-  $owner = $argv[4];
-} else {
-  $collection_ID = $argv[2];
-  $citation_ID = $argv[3];
-} 
+function collection_POST($collectionID, $citationID, $submitter, $owner){
+  global $collections;
+  $citationIDs[0] = $citationID;
+  echo $response_json = stripslashes(json_encode($collections->insert_member_of_collection($collectionID, $citationIDs, $submitter, $owner)));
+}
 
 switch ($function) {
   case "collection_GET":
-    collection_get($collection_ID); 
+    $collectionID = $argv[2];
+    collection_get($collectionID); 
     break;
 
   case "newCollection_POST":
-    newCollection_POST($collection_name, $submitter, $owner);
+    $collectionName = $argv[2];
+    $submitter = $argv[3];
+    $owner = $argv[4];
+    newCollection_POST($collectionName, $submitter, $owner);
+    break;
+
+  case "collection_POST":
+    $collectionID = $argv[2];
+    $citationID = $argv[3];
+    if (strlen($argv[4]))
+      $submitter = $argv[4];
+    else
+      $submitter = "API user";
+    $owner = $argv[4];
+    collection_POST($collectionID, $citationID, $submitter, $owner);
     break;
 
 }
