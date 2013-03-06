@@ -11,7 +11,7 @@
 
 // General variables
 $cmd = "php ";              
-$debug =1;                      // Debug flag
+$debug;                      // Debug flag
 $handler;                    // Tells us which handler to use
 $function;                   // Function to call in the respective handler
 $resultAccumulator = Array();          
