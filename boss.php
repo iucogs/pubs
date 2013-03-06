@@ -40,8 +40,13 @@ else
 // Build exec command, execute, populate resultAccumulator
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST': 
-    $cmd .= $_POST['function']." ";
-    
+    if (strpos($cmd, 'citation'))
+      $cmd .= 'citation_POST ';
+    else
+      $cmd .= 'newCollection_POST ';
+
+
+    if($debug){var_dump($_POST);} 
     // We either are posting citations or collections
     if (strlen($_POST['citations'] > 0)) {
       $citations = explode("\n", $_POST['citations']);
@@ -54,7 +59,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $submitters = explode("\n", $_POST['submitters']);
       $owners = explode("\n", $_POST['owners']);
       
-      for ($i = 0; $i < sizeof($collectionNames); $i++) { 
+      for ($i = 0; $i < sizeof($collectionNames); $i++) {
+        if($debug){echo $cmd."\n";
         array_push($resultAccumulator, exec($cmd.'"'.$collectionNames[$i].'" "'.$submitters[$i].'" "'.$owners[$i].'"'));
       }  
     }

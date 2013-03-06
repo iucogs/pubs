@@ -56,7 +56,7 @@ function collection_GET($ID) {
 
 function newCollection_POST($collectionName, $submitter, $owner) {
  global $collections;
- echo $response_json = json_encode($collections->createCollection($collection_name, $submitter, $owner));
+ echo $response_json = json_encode($collections->createCollection($collectionName, $submitter, $owner));
 }
 
 /*************************
