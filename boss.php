@@ -63,13 +63,27 @@ switch ($_SERVER['REQUEST_METHOD']) {
 
   // for now we're just adding citations to collection
   case 'PUT':
-    $putVars = parse_str(file_get_contents("php://input"),$putVars);
-    $cmd .= $putVars['function']." ";
+    // Parsing PUT data... seems like get_file_contents wasn't working, possibly
+    // due to enctype.
+    $putData = '';
+    $fp = fopen('php://input', 'r');
+    while (!feof($fp)) {
+      $s = fread($fp, 64);
+      $putData .= $s;
+    }
+    fclose($fp);
+    parse_str($putData, $putVars);
+    
+    
+    $cmd .= 'addCitationToCollection_PUT ';
     $collectionID =  $putVars['collectionID'];
     $citationIDs = explode(',', $putVars['citationIDs']);
+    $submitter = $putVars['submitter'];
+    $owner = $putVars['owner'];
 
     for ($i = 0; $i < sizeof($citationIDs); $i++) {
-      array_push($resultAccumulator, exec($cmd.'"'.$collectionID.'" "'.$citationIDs[$i].'"'));  
+      if($debug){ echo $cmd; }
+      array_push($resultAccumulator, exec($cmd.' '.$collectionID.' '.$citationIDs[$i].' '.$owner.' '.$submitter));  
     }
     
     break;

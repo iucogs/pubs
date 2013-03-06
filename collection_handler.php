@@ -28,7 +28,7 @@
 require_once('/home/patrick/Sites/pubs/classes/Collections.class.php');
 
 // Variables
-$collections = new Collections;
+$collections = new Collections();
 $function = $argv[1];
 
 /*************************
@@ -97,7 +97,7 @@ switch ($function) {
     else
       $submitter = "API user";
     $owner = $argv[4];
-    collection_POST($collectionID, $citationID, $submitter, $owner);
+    addCitationToCollection_PUT($collectionID, $citationID, $submitter, $owner);
     break;
 
 }
