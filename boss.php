@@ -60,7 +60,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $owners = explode("\n", $_POST['owners']);
       
       for ($i = 0; $i < sizeof($collectionNames); $i++) {
-        if($debug){echo $cmd."\n";
+        if($debug){echo $cmd."\n"};
         array_push($resultAccumulator, exec($cmd.'"'.$collectionNames[$i].'" "'.$submitters[$i].'" "'.$owners[$i].'"'));
       }  
     }
