@@ -18,8 +18,8 @@
  *****************************/
 
 // Includes
-require_once('/home/patrick/Sites/pubs/classes/Citations.class.php');
-require_once('/home/patrick/Sites/parse/NewParse.class.php');
+require_once('/home/ruth/Sites/pubs/classes/Citations.class.php');
+require_once('/home/ruth/Sites/parse/NewParse.class.php');
 
 // Variables
 $citations;             // For storing citations class wrt GET
@@ -110,5 +110,3 @@ switch ($function) {
 
 
 ?>
-
-
