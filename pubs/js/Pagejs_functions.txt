@@ -590,3 +590,251 @@ Page.deleteCitation_request(citation_id)
 
 Page.deleteCitationHelper_request(citation_id)
 > Line: ~2673
+> Description:
+  Sends a JSON string through Ajax to delete citation with the given id in the
+  current type of publication group
+> Params:
+  citations_id - id of citation to delete
+
+Page.deleteCitation_response(void)
+> Line: ~2705
+> Description:
+  When an Ajax request is received it prints whether or not the citation was
+  deleted.
+
+Page.setCitationHighlight(row)
+> Line: ~2734
+> Description:
+  sets the background color of the specified row to #C0C0C0.
+* NOTE: this function may no longer be in use  
+> Params:
+  row - row to highlight
+
+Page.updateCitationInList(_citation)
+> Line: ~2739
+> Description:
+  Checks if the given citation is verified and makes the citation red if it
+  isn't. 
+> Params: 
+  _citation - a citation object
+
+Page.alertInputEntry(err_elements, element_array, data_key, data_value)
+> Line: ~2758
+> Description:
+  Does an alerm message with a list of the fields that have errors
+* NOTE: only uses err_elements input
+> Params:
+  err_elements - array of elements with errors
+  element_array - ???
+  data_key - ???
+  data_value - ???
+
+Page.validateInputEntry(element_array, data_key, data_value
+> Line: ~2769
+> Description:
+  Returns a list of fields that contain errors
+> Params:
+  element_array - array of elements
+  data_key - array of keys to each elements
+  data_value - the value key to be put into the data_key array
+* NOTE: The three inputs for this function seem like they could be implemented
+* in a much better way with a dictionary or something like that.
+
+Page.clearInputEntry(void)
+> Line: ~2823
+> Description:
+  Clears all the input fields of the entry form.
+
+Page.pubtypeMenu(pubtype, fieldFlag, citation_suffix)
+> Line: ~2734
+> Description:
+  Returns HTML code containing a list of option selects for the different
+  publication types.
+> Params:
+  pubtype - currently selected publication type 
+  fieldFlag - flag identifying whether the field is a text field 
+  citation_suffix - 
+
+Page.changePubtypeOneCitation(citation_suffix, pubtype)
+> Line: ~2920
+> Description:
+  Calls Page.enterChangingByPubtypeInfo() to set up the fields of the given
+  publication type for the current citation. Ultimately changes the publication
+  type of the current citation.
+> Params:
+  citation_suffix - suffix of current citation
+  pubtype - publication type to change the citation to
+
+Page.getInbookRelatedBooks_request(void)
+> Line: ~2937
+> Description:
+  Sends an Ajax request searching for books with a similar title to the current
+  book
+
+Page.getInbookRelatedBooks_response(void)
+> Line: ~2943
+> Description:
+  When it recieves an Ajax response, it sets the inbook_search_button_div to an
+  option list of the citation that were similar to the current one.
+
+Page.changePubtypeTabs(void)
+> Line: ~2962
+> Description:
+  ...
+**NOTE: There is literally nothing in this function.
+
+Page.printCheckBox(group, value, checked, disabled)
+> Line: ~2967
+> Description:
+  Returns HTML code containing a checkbox for the given group with the given
+  value.
+> Params:
+  group - id name for the checkbox
+  value - value for the checkbox
+  checked - string that tells whether the checkbox should be checked
+  disabled - string that tells whether the checkbox should be disabled
+
+Page.getCheckedValue(radioObj)
+> Line: ~2976
+> Description:
+  Used by saveEntry(), nextInputEntry(). Finds the radio button and check the
+  value
+> Params:
+  radioObj - radio button object
+
+Page.setCheckedValue(radioObj, newValue)
+> Line: ~3015
+> Description:
+  Sets the given radio button object to the given value
+**NOTE: The file says this function is currently not in use
+> Params:
+  radioObj - radio button
+  newValue - value to check 
+
+Page.checkAuthorFirstnameForInitials(void)
+> Line: ~3032
+> Description:
+  Returns an array containing strings in the form 'authorifn' where i is a
+  number. That string is the id of the firstname field.
+
+Page.alertOnSavingFirstnameAsInitials(void)
+> Line: ~3048
+> Description:
+  Returns a string saying that the current author's firstname contains initials
+  and asks if the user still wants to save. It will return an empty string if
+  the author's first name doesn't contain initials and false if the
+  Page.checkAuthorFirstnameForInitials() returns a string with length <= 0
+
+Page.checkInputAndSave(type, merge, timestamp)
+> Line: ~3070
+> Description:
+  Checks the type of change/added content and saves it with the given timestamp.
+  Then it merges the pre_merge_ids if specified. At the end it sends an Ajax
+  request to services/citations.php to Page.onResponseCheckAuthors.
+> Params:
+  type - type of change or new information added
+  merge - whether or not an id merge needs to take place
+  timestamp - timestamp of event
+
+Page.create_page_dot_sentData(timestamp)
+> Line: ~3132
+> Description:
+  Creates a new array of data_keys for the page.
+> Params:
+  timestamp - timestamp string of the event
+
+Page.validate_varified_entry(void)
+> Line: ~3182
+> Description:
+  Goes through each author checkbox on the page and checks if it is checked. If
+  they all are, it returns 1, otherwise it returns 0;
+
+Page.update_page_dot_sentData(timestamp)
+> Line: ~3204
+> Description:
+  Calls Page.alertOnSavingFirstnameAsInitials() and saves the response into a
+  variable info. If info exists and is confirmed, it updates the Page's sentData
+  of each verified author's to -1; unverified authors' sentData is set to -2.
+  Then, regardless, it saves whether the each author's first name and last name
+  are. 
+**NOTE: timestamp is not used
+> Params:
+  timestamp - timestamp of event
+
+Page.showHome(void)
+> Line: ~3233
+> Description:
+  Used by homePage(). Shows elements that have the id 'welcome' or 'home' and
+  hides 'top', 'options', 'insert', 'citations', and 'secondary'.
+
+Page.buildXMLText(data_key, datavalue)
+> Line: ~3247
+> Description:
+  Returns XML text that contains a citation object in XML format
+> Param:
+  data_key - 
+  datavalue - 
+
+Page.CompareSentDataWithReceivedData(void)
+> Line: ~3258
+> Description:
+  Calls Page.compareTwoCitations() on the page's current citation and the
+  citation in the page's sentData.
+
+Page.compareTwoCitations(cit1, cit2)
+> Line: ~3266
+> Description:
+  Checks for differences between the given citations and returns a string
+  containing an HTML table of all the differences. Otherwise, it returns the
+  empty string.
+
+Page.right_column_display(current_view)
+> Line: ~ 3315
+> Description:
+  Shows and hides various elements in the right column, based on the
+  current view passed to the function. If it doesn't recognize the view, it sets
+  the display to a default setting.
+> Params:
+  current_view - string that could be: 'all', 'none', 'export_citations'.
+
+Page.print_ViewOptions_rm_div(void)
+> Line: ~3357
+> Description:
+  Returns HTML code containing a div with the id 'view_options_rm'. This calls
+  Page.printFormatMenu(), Page.printSortOrderMenu(), Page.showURLs(),
+  Page.showNotes(), Page.showAbstracts(), Page.highlightMissingInfoCB(),
+  Page.showCitationID(), and Page.setCompactView() to fill a table of options.
+
+Page.print_ExportCitations_rm_div(void)
+> Line: ~3378
+> Description:
+  Returns HTML code containing a div with the id 'export_citations_rm'. It
+  contains a table with the contents returned by Page.printExportMenu().
+
+Page.print_Collections_rm_div(void)
+> Line: ~3390
+> Description:
+  Returns HTML code containing a div with the id 'collections_rm'. It contains a
+  table with the contents returned by
+  Page.printCollectionNamesMenuForManagingCitations().
+
+Page.print_CompareMergeCitations_rm_div(void)
+> Line: ~3406
+> Description:
+  Returns HTML code containing a div with the id 'compare_merge_citations_rm'.
+  It contains a table with a button to call Page.compareCitations().
+  
+
+Page.panel1_alert_message(msg, panel1_open)
+> Line: ~3417
+> Description:
+  Returns HTML code containing a div with the given alert message. 
+> Params:
+  msg - message to display in div
+  panel1_open - whether or not to open panel1.
+
+Page.createToolTips(void)
+> Line: ~3426
+> Description:
+  Sets the page's tt (tooltip) variable to a new YAHOO.widget.Tooltip telling
+  the user how to verify a citation. 
