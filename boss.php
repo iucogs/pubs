@@ -40,8 +40,13 @@ else
 // Build exec command, execute, populate resultAccumulator
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST': 
-    if (strpos($cmd, 'citation'))
-      $cmd .= 'citation_POST ';
+    if (strpos($cmd, 'citation'))    
+      if($_SERVER['REQUEST_URI'], 'match')
+        $cmd .= 'match_POST';
+      elseif($SERVER['REQUEST_URI'], 'parse')
+        $cmd .= 'parse_POST';
+      else
+        $cmd .= 'citation_POST ';
     else
       $cmd .= 'newCollection_POST ';
 
