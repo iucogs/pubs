@@ -123,6 +123,9 @@ Page.user_back_button_state = 'user'; // or 'admin'
 
 Page.feedback_list = '';
 
+/*
+ * Sets up initial content for each panel in index.php
+*/
 Page.initializePanel = function() 
 {
 	var html;
@@ -248,6 +251,10 @@ Page.initializePanel = function()
 	initializeContextMenu("panel2"); // for panel2
 }
 
+/*
+ * Shows/Hides panel3_div and panel1_div
+ * Question: should this be named swapPanels1And3() ?
+*/
 Page.swapPanels2And3 = function()
 {
 	if (document.getElementById('panel3_div').style.display == 'none')			
@@ -263,6 +270,14 @@ Page.swapPanels2And3 = function()
 	}
 }
 
+/*
+ * Displays a single citation for a specified edit. Called 
+ * by editOneCitation().
+ * params: 
+ *   citationInPanel - citation object to show
+ *   fieldFlag - String ("text" or something else) 
+ *   newFlag - String (either "new" or "merge")
+*/
 Page.oneCitationInPanel = function(citationInPanel, fieldFlag, newFlag) {
 	Page.panel_open = 1;
 
@@ -338,6 +353,12 @@ Page.oneCitationInPanel = function(citationInPanel, fieldFlag, newFlag) {
 	//document.getElementById('changingByPubtype_fields').innerHTML += Page.pubtypes_json[citationInPanel.pubtype]['apa_required_fields'];
 }
 
+/*
+ * Calls oneCitationInPanel() to edit a citation in a
+ * given format
+ * params:
+ *   i = int (i < 0; determines type of edit to be done)
+*/
 Page.editOneCitation = function(i)
 {
 	if (i == -1) // merged citation
@@ -367,9 +388,15 @@ Page.editOneCitation = function(i)
 	document.getElementById('panel1_div').style.display = '';
 }
 
-
-// setSubmitter	- Called by index.php
-//				- set Page.submitter from php
+/*
+ * Sets up the owner of a collection by setting Page.submitter from php. Called 
+ * by index.php
+ * Params:
+ *   user - login username
+ *   document_root - current filepath
+ *   owner - cas login name 
+ *   currentCollection - the collection being submitted
+*/
 Page.setSubmitter = function(user, document_root, owner, currentCollection)
 {
 	Page.user = user; //user;
@@ -396,6 +423,12 @@ Page.setSubmitter = function(user, document_root, owner, currentCollection)
 	Page.setHasProxy();
 }
 
+/*
+ * Updates certain page values according to an Ajax response object. Called 
+ * by Page.onResponse()
+ * params:
+ *   responseObj - object collected from an ajax request
+*/
 Page.rewritePage = function(responseObj)
 {
 	if (Page.panel_open == 0) {
@@ -409,8 +442,12 @@ Page.rewritePage = function(responseObj)
 	}
 }
 
-// onResponse 	- Default callback method of an Ajax request
-// 				- Check for XML response tag and handle case appropriately
+/*
+ * Calls Page.rewritePage() if it receives an Ajax response. It's the default
+ * callback method of an Ajax request. It checks for XML response tag and
+ * handles the case appropriately.
+ * Question: What are input_method 's 1, 2, and 3?
+*/
 Page.onResponse = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -441,7 +478,10 @@ Page.onResponse = function()
 	}
 }
 
-
+/*
+ * Checks if an Ajax response returns a citation id. If so it calls
+ * showFeedbackAfterSave(). Otherwise, It just shows a default panel
+*/
 Page.onResponseCheckAuthors = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -463,6 +503,11 @@ Page.onResponseCheckAuthors = function()
 	}
 }
 
+/*
+ * Verifies that the given citation in the responseObj was saved correctly
+ * Params:
+ *   responseObj - object containing a citation
+*/
 Page.showFeedbackAfterSave = function(responseObj)
 { 
 	var sentCitation = Page._current_citation;
@@ -531,6 +576,9 @@ Page.showFeedbackAfterSave = function(responseObj)
 	}
 }
 
+/*
+ * Updates all saved arrays to include updated/new citations
+*/
 Page.updateCitationsArraysAndTabs_after_save = function()
 {
 	Page.updateOneCitationsArray_after_save(Page._citations);
@@ -548,6 +596,12 @@ Page.updateCitationsArraysAndTabs_after_save = function()
 	Page.updateTabView(tabView_b, Page.citations_array_b);
 }
 
+/*
+ * Updates the saved array's citations with the current versions of the citations
+ * (use after a change has been made)
+ * Params:
+ *   arr - given array to update citations in
+*/
 Page.updateOneCitationsArray_after_save = function(arr)
 {
 	for (var i=0; i<arr.length; i++)
@@ -560,6 +614,9 @@ Page.updateOneCitationsArray_after_save = function(arr)
 	}
 }
 
+/*
+ * Updates all saved arrays to remove a deleted citations
+*/
 Page.updateCitationsArraysAndTabs_after_delete = function()
 {
 	Page.updateOneCitationsArray_after_delete(Page._citations);
@@ -587,6 +644,11 @@ Page.updateCitationsArraysAndTabs_after_delete = function()
 	
 }
 
+/*
+ * Updates the given array by removing deleted citation(s)
+ * Params:
+ *   arr - array to remove deleted citation(s) from
+*/
 Page.updateOneCitationsArray_after_delete = function(arr)
 {
 	for (var i=0; i<arr.length; i++)
@@ -599,6 +661,12 @@ Page.updateOneCitationsArray_after_delete = function(arr)
 	}
 }
 
+/*
+ * Updates the citation content of a tab.
+ * Params:
+ *   tabView - a tabView object
+ *   arr - array with the citation information to display/update
+*/
 Page.updateTabView = function(tabView, arr)
 {
 	for (var i=0; i<arr.length; i++)
@@ -612,6 +680,11 @@ Page.updateTabView = function(tabView, arr)
 	}
 }
 
+/*
+ * Display a list of unverified authors.
+ * Params:
+ *   responseObj - object containing citations with unverified authors
+*/
 Page.showCheckAuthorPanel = function(responseObj)
 {
 	var all_authors_empty = false;
@@ -670,7 +743,16 @@ Page.showCheckAuthorPanel = function(responseObj)
 
 //abhinav
 
-
+/*
+ * Saves a citation in a specified way depending on parameters and updates
+ * whether or not the citation has been verified.
+ * Params:
+ *   type - string indicating the type of input/save (update/create)
+ *   merge - string indicating whether or not the ids need to be merged (valid
+ *   input is "merge") 
+ *   timestamp - timestamp of save
+ *   verified - verification status of the citation
+*/
 Page.checkInputAndSave1 = function(type, merge, timestamp,verified)
 {	
 	var response;
@@ -732,12 +814,9 @@ Page.checkInputAndSave1 = function(type, merge, timestamp,verified)
 	Ajax.SendJSON('services/citations.php', Page.onResponseCheckAuthors, jsonStr);		
 }
 
-
-
-
-
-
-
+/*
+ * Sets all the check boxes for any author to be unchecked.
+*/
 Page.uncheckAllAuthorCheckboxesInPanel = function()
 {
 	for(var i = 0; i < 6; i++)
@@ -749,6 +828,13 @@ Page.uncheckAllAuthorCheckboxesInPanel = function()
 	}
 }
 
+/*
+ * Loops through author checkboxes and checks if they are checked.
+ **NOTE: This function doesn't do anything either way though, whether the
+ *       boxes are checked or not.
+ * Params:
+ *   obj - object containing the list of html elements
+*/
 Page.createVerifiedAuthor_request = function(obj)
 {
 	
@@ -766,18 +852,24 @@ Page.createVerifiedAuthor_request = function(obj)
 	Ajax.SendJSON('services/parser.php', callbackmethod, jsonStr);
 }*/
 
-// SendXML 		- Call Ajax.SendXML
-//				- Ajax.SendXML send data to php using XML (POST method) instead of URL (GET method)
+/*
+ * Sends the xml string through an Ajax call. Calls Ajax.sendXML. Ajax.SendXML
+ * send data to php using XML (POST method) instead of URL (GET method)
+ * Params:
+ *   callbackmethod - method to call if Ajax call fails.
+ *   xmlStr - String containing xml code
+ */
 Page.SendXML = function(callbackmethod, xmlStr)
 {
 		Ajax.SendXML('services/xml.php', callbackmethod, xmlStr);
 }
 
-
-
-// inputMethod	- This function is called from index.php
-//				- It will check for the input from the menu in index.php
-//				- Everything starts here
+/* inputMethod
+ * This function is called from index.php. It will check fro the input from the
+ * menu in index.php. (Everything starts here)
+ * Params:
+ *   input_method - integer value saying what the user is doing.
+*/
 Page.inputMethod = function(input_method)
 {
 	var html = "";
@@ -878,6 +970,11 @@ Page.inputMethod = function(input_method)
 
 // *********************************************************************
 
+/*
+ * Submits a search query of the given type for collections
+ * Params:
+ *   search_type - 
+*/
 Page.searchCitations_request = function(search_type)
 {	
 	Page.keywords = document.getElementById('search_keywords').value;
@@ -888,7 +985,15 @@ Page.searchCitations_request = function(search_type)
 	Page.getCitations(Page.current_page, search_type);
 }
 
-// editFacultyInfoForm - Used by inputMethod(11)
+/*
+ * Used by inputMethod(11). Builds a html table of faculty members and where 
+ * each member has a row and their table row has these columns: title1, title2, 
+ * title3, phone, office, email, link1, link1_title, education, professional 
+ * experience, and research interests. 
+ * Params:
+ *   response - response object containing the list of faculty members and their
+ *              information
+*/
 Page.editFacultyInfoForm = function(response)
 {
 	var html = '<form name="editFacultyInfoForm">';
@@ -964,7 +1069,12 @@ Page.editFacultyInfoForm = function(response)
 	return html;
 }
 
-// saveFacultyInfo - Used by editFacultyInfoForm
+/*
+ * Sends xml via Ajax to save faculty information changed/added by the given user.
+ * Used by ediFacultyInfoForm.
+ * Params:
+ *   user - username of person saving the file.
+*/
 Page.saveFacultyInfo = function(user)
 {
 	var cdatastart = "<![CDATA[";
@@ -990,6 +1100,12 @@ Page.saveFacultyInfo = function(user)
 	Ajax.SendXML('services/faculty.php', Page.onResponse, xmlStr);
 }
 
+/*
+ * Adds an html submit button to the page when an author has been verified and
+ * needs to be saved.
+ * Params:
+ *   i - number of new author
+*/
 Page.newVerifiedAuthor = function(i)
 {
 	var lastname, firstname;
@@ -1013,6 +1129,10 @@ Page.newVerifiedAuthor = function(i)
 	Page.panel1.show();
 }
 
+/*
+ * Submits the information for a newly verified author (used after
+ * Page.newVerifiedAuthor())
+*/
 Page.submitNewVerifiedAuthor = function()
 {
 	
@@ -1027,6 +1147,9 @@ if ((document.getElementById('new_auth_ln').value == "") || (document.getElement
 	}
 }
 
+/*
+ * Adds a new verified author to the checklist upon receiving an Ajax response.
+*/
 Page.newVerifiedAuthor_response = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -1041,6 +1164,17 @@ Page.newVerifiedAuthor_response = function()
 	}		
 }
 
+/*
+ * Prints out the edit/save button for a citation for the appropriate field type
+ * and whether it is a new or existing citation.
+ **NOTE: If fieldFlag != "text" there is a string of if-else statements that set
+ *       a variable tempType, but after the last else, it just sets tempType to
+ *       "check_authors". Why bother with the if-elses then?
+ * Params:
+ *   _citation - citation object
+ *   fieldFlag - what type of field the citation is being saved from/in
+ *   newFlag - whether the citation is new or edited.
+*/
 Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
 	var timestamp = _citation.entryTime;
 	var html = "";
@@ -1092,6 +1226,12 @@ Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
 	return html;
 }
 
+/*
+ * Adds a 'goToBack' cell in a table row and sets it to display the previous
+ * citation in a list if possible.
+ * Params:
+ *   pointer_style - ??? added in as an attribute in the td tag
+*/
 Page.printBackTD = function(pointer_style)
 {
 	var html = '';
@@ -1105,6 +1245,12 @@ Page.printBackTD = function(pointer_style)
 	return html;
 }
 
+/*
+ * Adds a 'goToNext' cell in a table row and sets it to display the next citation
+ * in a list if possible.
+ * Params:
+ *   pointer_style - ???
+*/
 Page.printNextTD = function(pointer_style)
 {
 	var html = '';
@@ -1117,6 +1263,12 @@ Page.printNextTD = function(pointer_style)
 	return html;
 }
 
+/*
+ * Does some checks, but will ALWAYS return true
+ * NOTE: This will return true regardless of any of the checks that are true or
+ *       false, so I don't feel like this will really see if changes have been made. Or
+ *       this is just a trivial function that has no purpose.
+*/
 Page.checkForCitationChanges = function()
 {
 
@@ -1167,6 +1319,11 @@ Page.checkForCitationChanges = function()
 //	}
 }
 
+/*
+ * Checks if there are any more existing new citations and sets the currently
+ * desplayed one as the next available one in the Page.newly_added_citations
+ * array.
+*/
 Page.goToNextCitation = function()  
 {
 	if (Page.checkForCitationChanges())
@@ -1200,6 +1357,10 @@ Page.goToNextCitation = function()
 	}
 }
 
+/*
+ * Checks if the current new citation being desplayed isn't the first and
+ * displays previous one if it exists.
+*/
 Page.goToBackCitation = function()
 {
 	if (Page.checkForCitationChanges())
@@ -1233,6 +1394,13 @@ Page.goToBackCitation = function()
 	}
 }
 
+/*
+ * Prints a button that calls Page.oneCitationInPanel() on _current_citation with
+ * the given font size.
+ * Params:
+ *   _current_citation - a citation object
+ *   size - font size of text for button
+*/
 Page.printCitationEditButton = function(_current_citation, size) {
 	
 	if(size == undefined) size = '+3';
@@ -1242,6 +1410,12 @@ Page.printCitationEditButton = function(_current_citation, size) {
 	return html;
 }
 
+/*
+ * Saves an uploaded citation and adds a suffix to the file if necessary
+ * Params:
+ * _citation - citation object
+ * citation_suffix - suffix of the filename
+*/
 Page.printUploadDialog = function(_citation, citation_suffix) {
 	var filename = _citation.filename;
 	var citation_id = _citation.citation_id;
@@ -1286,6 +1460,11 @@ Page.printUploadDialog = function(_citation, citation_suffix) {
 	return html;
 }
 
+/*
+ * Clears the field of file to upload
+ * Params:
+ *   citation_suffix - specific file suffix to clear
+*/
 Page.clearAttachedFile = function(citation_suffix)
 {
 	if(citation_suffix == '' || citation_suffix == undefined)
@@ -1300,6 +1479,13 @@ Page.clearAttachedFile = function(citation_suffix)
 	return true;
 }
 
+/*
+ * Return an HTML div containing a form to upload files.
+ * Params:
+ *   citation_id - citation object that will be uploaded
+ *   citation_suffix - file suffix (used in naming divs)
+ *   status - status of the file???
+*/
 Page.printFileUploadDiv = function(citation_id, citation_suffix, status)
 {
 	var upload_div = 'upload_div'+citation_suffix;
@@ -1346,14 +1532,25 @@ Page.printFileUploadDiv = function(citation_id, citation_suffix, status)
 	return html;
 }
 
+/*
+ * Sets the global citation_suffix variables to the given one
+ * Params:
+ *   citation_suffix - file suffix
+*/
 Page.updateUploadGlobals = function(citation_suffix)
 {
 	document.getElementById('upload_citation_suffix').value = citation_suffix;
 	Page.upload_citation_suffix = citation_suffix;
 }
 
-// inputFields	- Called by inputMethod() [#3 Enter information by hand]
-//				- Generate empty forms
+/*
+ * Called by inputMethod() and generates empty input fields and forms.
+ ** NOTE: This function has a few TO-DOs on it and looks unfinished. Neither
+ *        variables are not used either.
+ * Params:
+ *   _citation - 
+ *   returntype - 
+*/
 Page.blankInputFields = function(_citation, returntype)
 {
 	var html = "";
@@ -1369,8 +1566,11 @@ Page.blankInputFields = function(_citation, returntype)
 	initializeAutocompleteFields("");
 }
 
-// EditLayout.js
-
+/* EditLayout.js
+ * Writes an unordered HTML list with the contents of theObj
+ * Params:
+ *   theObj - an object containing arrays or other objects
+*/
 function print_r(theObj){
   if(theObj.constructor == Array ||
      theObj.constructor == Object){
@@ -1390,6 +1590,11 @@ document.write("<li>["+p+"] => "+theObj[p]+"</li>");
   }
 }
 
+/*
+ * Returns an array of theObj's contents in text form.
+ * Params:
+ *   theObj -an object containing arrays or other objects
+*/
 function print_r2(theObj){
   var text = "";
   if(theObj.constructor == Array ||
@@ -1411,6 +1616,10 @@ function print_r2(theObj){
   return text;
 }
 
+/*
+ * Returns HTML containing a table of collection and formats the view depending
+ * on the internet browser being used.
+*/
 Page.writeOptionsForListCitations = function()
 {
 	var html = '';
@@ -1464,9 +1673,12 @@ Page.writeOptionsForListCitations = function()
 	}
 	document.getElementById('right_col').innerHTML = html;
 	Page.right_column_display('all');
-	
 }
 
+/*
+ * Returns an HTML div containing a link to firefox's download and telling the
+ * user that firefox is best for this application.
+*/
 Page.bestViewedWith = function()
 {
 	var html = '';
@@ -1477,6 +1689,12 @@ Page.bestViewedWith = function()
 	return html;
 }
 
+/*
+ * Takes a list of citations and returns a list of JSON objects of those
+ * citations.
+ * Params:
+ *   citations - list of citation objects
+*/
 Page.copyCitationsForFormat = function(citations)
 {
 	var json_citations = YAHOO.lang.JSON.stringify(citations);
@@ -1484,6 +1702,14 @@ Page.copyCitationsForFormat = function(citations)
 	return citations_copy;	
 }
 
+/*
+ * Checks all the fields of a citation and fills any publication types that are
+ * undefined with 'misc'. Otherwise, it calls fillEmptyFields to see if the
+ * citation has missing fields. It returns a list of the missing fields.
+ * Params:
+ *   cit_copy - citation
+ *   currentFormat - format that citation is saved/being desplayed in
+*/
 Page.mapMissingFields = function(cit_copy, currentFormat)
 {
 	var missing_fields = new Array();
@@ -1513,6 +1739,13 @@ Page.mapMissingFields = function(cit_copy, currentFormat)
 	return missing_fields;
 }
 
+/*
+ * Identifies any missing fields in a citation and fills them with a placeholder.
+ * Params:
+ *   _citation - citation object
+ *   pubtype - the type of publication the citation is for 
+ *   format - the format the citation is saved/displayed in
+*/
 Page.fillEmptyFields = function(_citation, pubtype, format)
 {
 	var missing = false;	
@@ -1564,7 +1797,11 @@ Page.fillEmptyFields = function(_citation, pubtype, format)
 	return missing;
 }
 
-// List Citations
+/* List Citations
+ * Returns HTML code displaying a list of citations in a format specified by a
+ * Page variable. It can also highlight missing fields in citation if a certain
+ * value is set.
+*/
 Page.listCitations = function()
 {	
 	Page.state = 1;
@@ -1839,6 +2076,16 @@ Page.listCitations = function()
 	//alert("Page.listCitations : Viewport "+ cur_id + " " + inViewPort(document.getElementById('a_'+cur_id)));
 }
 
+/*
+ * Returns HTML code that could display similar citations and other citations in a
+ * collection.
+ * Params:
+ *   verticalOrHorizontal - string specifying whether or not to display the list
+ *                          vertically or horizonally
+ *   i - row number
+ *   cit_copy - copy of citation object
+ *   pointer_style - type of pointer to use 
+*/ 
 Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, pointer_style)
 {
 	var html = '';
@@ -1899,6 +2146,13 @@ Page.writeListCitationsRightTable = function(verticalOrHorizontal, i, cit_copy, 
 	return html;
 }
 
+/*
+ * Displays a list of similar citations in a left panel from the selected
+ * citation
+ * Params:
+ *   row - table row of citation to show similar ones of
+ *   citation_id - id of citation to show similar ones of
+*/
 Page.showSimilarCitations = function(row, citation_id)
 {
 	Page._current_citation = Page._citations[row];
@@ -1907,6 +2161,9 @@ Page.showSimilarCitations = function(row, citation_id)
 	Page.editTwoCitations(Page.similar_citations_array[Page._current_citation.citation_id], current_citation_array);
 }
 
+/*
+ * Returns HTML code containing a table of different formatting options for the user
+*/
 Page.printPagingAndFormatTable = function()
 {
 	var html = '';
@@ -1997,6 +2254,10 @@ Page.printPagingAndFormatTable = function()
 //	return html;
 //}
 
+/*
+ * Returns HTML code displaying how many citations are on a page, which ones, and
+ * how many total there are.
+*/
 Page.printPageViews = function()
 {
 	var html = '';	
@@ -2073,6 +2334,9 @@ Page.printPageViews = function()
 	return html;
 }
 
+/*
+ * Move to the next page of citations to view
+*/
 Page.printPageViews_paging_forwards = function()
 {
 	Page.current_page=Page.current_viewable_pages[Page.current_viewable_pages.length-1]+1; 
@@ -2080,6 +2344,9 @@ Page.printPageViews_paging_forwards = function()
 	Page.getCitations(Page.current_page,Page.current_get_type);
 }
 
+/*
+ * Move to the previous page of citations to view
+*/
 Page.printPageViews_paging_backwards = function()
 {
 	Page.current_page=Page.current_viewable_pages[0]-1; 
@@ -2092,6 +2359,13 @@ Page.printPageViews_paging_backwards = function()
 	Page.getCitations(Page.current_page,Page.current_get_type);
 }
 
+/*
+ * Checks if the given value is in the given array. Returns true if is is and
+ * false if it isn't
+ * Params:
+ *   val - value to check for
+ *   arr - array to check in
+*/
 Page.inArray = function(val, arr)
 {
 	var valInArray = false;
@@ -2106,6 +2380,13 @@ Page.inArray = function(val, arr)
 	return valInArray;
 }
 
+/*
+ *  Sends an Ajax request to fetch a cirtain page of citations
+ * Params:
+ *   page - page to move to
+ *   type - type of citations to fetch
+ *   citation_id - ??? Apparently this is also a page, but it is of a citation_id 
+*/
 Page.getCitations = function(page, type, citation_id)
 { 
 	Page.current_get_type = type;
@@ -2139,6 +2420,11 @@ Page.getCitations = function(page, type, citation_id)
 	}
 }
 
+/*
+ * Rewrites the current page with what it recieved from anAjax request
+ * *NOTE: This seems fairly generic, it might be able to be combined with other
+ *   _response functions
+*/
 Page.searchCitations_response = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -2148,7 +2434,10 @@ Page.searchCitations_response = function()
 	}
 }
 
-
+/*
+ * Sets the HTML in the element with the id 'secondary' to a table that lists
+ * the collections in the current page.
+*/
 Page.listCollections = function()
 {	
 	var html = '';
@@ -2199,6 +2488,9 @@ Page.listCollections = function()
 	document.getElementById('secondary').style.display = '';	//show
 }
 
+/*
+ * Returns HTML with a button that will call 'backToCitations()'
+*/
 Page.printBackToCitationsButton = function()
 {
 	var html = '';
@@ -2206,6 +2498,9 @@ Page.printBackToCitationsButton = function()
 	return html;
 }
 
+/*
+ * Resets the page to only show all citations
+*/
 Page.backToCitations = function()
 {
 	document.getElementById('citations').style.display = '';		//show
@@ -2218,8 +2513,10 @@ Page.backToCitations = function()
 	document.getElementById('exportformattype').selectedIndex = "";
 }
 
-
-
+/*
+ * Returns HTML code with a menu to select the different citation formats (apa,
+ * mla, bibtex)
+*/
 Page.printFormatMenu = function() 
 {
 	var html = '';
@@ -2249,6 +2546,10 @@ Page.printFormatMenu = function()
 	return html;
 }
 
+/*
+ * Returns HTML code with a menu to select what parameter to sort the citations
+ * being viewed by.
+*/
 Page.printSortOrderMenu = function() 
 {
 	var html = '';
@@ -2289,12 +2590,20 @@ Page.printSortOrderMenu = function()
   return html;
 }
 
+/*
+ * Sorts citations in the selected type on the page and starts the viewing on the
+ * first page
+*/
 Page.sortCitations_request = function()
 {
 	Page.current_page = 1;
 	Page.getCitations(Page.current_page, Page.current_get_type);
 }
 
+/*
+ * Returns HTML code for a checkbox that highlights missing fields of citations
+ * when it is checked.
+*/
 Page.highlightMissingInfoCB = function() 
 {
 	var html = '';
@@ -2309,6 +2618,10 @@ Page.highlightMissingInfoCB = function()
 	return html;
 }
 
+/*
+ * Returns HTML code for a checkbox on whether or not to show a citation's id or
+ * not.
+*/
 Page.showCitationID = function() 
 {
 	var html = '';
@@ -2322,6 +2635,9 @@ Page.showCitationID = function()
 	return html;
 }
 
+/*
+ * Returns HTML code for a checkbox on whether to call 'Page.setCompactViewCB()'
+*/
 Page.setCompactView = function() 
 {
 	var html = '';
@@ -2335,7 +2651,10 @@ Page.setCompactView = function()
 	return html;
 }
 
-
+/*
+ * Returns HTML code for a checkbox to show all collections or not. It calls the
+ * function 'Page.setShowCollectionsCB()'.
+*/
 Page.showCollections = function() 
 {
 	var html = '';
@@ -2349,6 +2668,10 @@ Page.showCollections = function()
 	return html;
 }
 
+/*
+ * Returns HTML code for a checkbox to show notes. Clicking the checkbox will
+ * call 'Page.setShowNotesCB()'.
+*/
 Page.showNotes = function() 
 {
 	var html = '';
@@ -2362,6 +2685,10 @@ Page.showNotes = function()
 	return html;
 }
 
+/*
+ * Returns HTML code for a checkbox to show the abstracts of citations. Clicking
+ * the checkbox will call 'Page.setShowAbstractsCB()'.
+*/
 Page.showAbstracts = function() 
 {
 	var html = '';
@@ -2375,6 +2702,10 @@ Page.showAbstracts = function()
 	return html;
 }
 
+/*
+ * Returns HTML code for a checkbox to show the urls of citations. Clicking the
+ * checkbox will call 'Page.setShowURLsCB()'.
+*/
 Page.showURLs = function() 
 {
 	var html = '';
@@ -2388,6 +2719,11 @@ Page.showURLs = function()
 	return html;
 }
 
+/*
+ * Checks if the checkbox to highlight missing information is set and sets the
+ * highlight_citations_with_missing_info_flag to 1 if it is, 0 otherwise. Then is
+ * calls 'Page.listCitations()'.
+*/
 Page.setMissingInfoCB = function()
 {
 	if (document.getElementById("highlight_missing_info_cb").checked == true)
@@ -2401,6 +2737,11 @@ Page.setMissingInfoCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Checks if the checkbox to show citation ids is set and sets the
+ * show_citation_id_flag to 1 if it is, 0 otherwise. Then it calls
+ * 'Page.listCitations()'.
+*/
 Page.setShowCitationIdCB = function()
 {
 	if (document.getElementById("show_citation_id_cb").checked == true)
@@ -2414,6 +2755,11 @@ Page.setShowCitationIdCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Checks if the checkbox to use the compact view is set and sets the
+ * set_compact_view_flag to 1 if it is, 0 otherwise. Then it calls
+ * 'Page.listCitations()'.
+*/
 Page.setCompactViewCB = function()
 {
 	if (document.getElementById("set_compact_view_cb").checked == true)
@@ -2427,6 +2773,11 @@ Page.setCompactViewCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Checks if the checkbox to show all collections is check and sets the
+ * show_collections_flag to 1 if it is, 0 otherwise. Then it calls
+ * 'Page.listCitations()'.
+*/
 Page.setShowCollectionsCB = function()
 {
 	if (document.getElementById("show_collections_cb").checked == true)
@@ -2440,6 +2791,10 @@ Page.setShowCollectionsCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Checks if the checkbox to show notes is set and sets the show_notes_flag to 1
+ * if it is, 0 otherwise. Then it calls 'Page.listCitations()'.
+*/
 Page.setShowNotesCB = function()
 {
 	if (document.getElementById("show_notes_cb").checked == true)
@@ -2453,6 +2808,10 @@ Page.setShowNotesCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Checks if the checkbox to show notes is set and set the show_abstracts_flag to
+ * 1 if it is, 0 otherwise. Then it calls 'Page.list Citations()'.
+*/
 Page.setShowAbstractsCB = function()
 {
 	if (document.getElementById("show_abstracts_cb").checked == true)
@@ -2468,6 +2827,10 @@ Page.setShowAbstractsCB = function()
 
 //abhinav
 
+/*
+ * Returns HTML code for a checkbox that will highlight the missing fields of
+ * citations that are displayed.
+*/
 Page.highlightMissingInfoCB = function() 
 {
 	var html = '';
@@ -2482,10 +2845,10 @@ Page.highlightMissingInfoCB = function()
 	return html;
 }
 
-
-
-
-
+/*
+ * Checks if the checkbox to show URLs is set and set the show_URLs_flag to 1 if
+ * it is, 0 otherwise. Then it calls 'Page.listCitations()'.
+*/
 Page.setShowURLsCB = function()
 {
 	if (document.getElementById("show_URLs_cb").checked == true)
@@ -2499,6 +2862,11 @@ Page.setShowURLsCB = function()
 	Page.listCitations();
 }
 
+/*
+ * Returns HTML code that contains an option menu of different formats (apa, mla,
+ * bibtex, endnote, and apa as html list) to export a citation in. Also, whenever 
+ * a different option is selected it calls 'Page.exportCitations()'.
+*/
 Page.printExportMenu = function() 
 {
 	var html = '';
@@ -2542,6 +2910,12 @@ Page.printExportMenu = function()
 	return html;
 }
 
+/*
+ * Returns HTML code that sets either an option to show all of the citations or
+ * collections, whichever was specified, or none of them
+ * Params:
+ *   citationsOrCollections - input to be passed to 'Page.updateCheckboxes()'. 
+*/
 Page.printSelectCitationsOrCollectionsMenu = function(citationsOrCollections) 
 {
 	var html = '';
@@ -2568,6 +2942,10 @@ Page.printSelectCitationsOrCollectionsMenu = function(citationsOrCollections)
 	return html;
 }
 
+/*
+ * Checks the currentExportFormat of the page and calls the appropriate function
+ * to print the citation in the correct format in HTML and return it.
+*/
 Page.exportCitations = function()
 {
 	var html = '<p>' + Page.printBackToCitationsButton() + '</p>';
@@ -2609,6 +2987,13 @@ Page.exportCitations = function()
 	document.getElementById('secondary').style.display = '';	// Show
 	Page.right_column_display('export_citations');
 }
+
+/*
+ * Checks all the checkboxes for either citations or collections depending on the input.
+ * Params:
+ *   citationsOrCollections - can either being 'citations' or 'collections' and
+ *   specifies which group should have there checkboxes updated.
+*/
 Page.updateCheckboxes = function(citationsOrCollections)
 {
 	var checkboxPrefix;
@@ -2641,7 +3026,12 @@ Page.updateCheckboxes = function(citationsOrCollections)
 	}
 }
 
-
+/*
+ * Sets the HTML on the page to a div asking the user whether or not they want to
+ * delete the citation with the given id from the current collection
+ * Params:
+ *   citation_id - the id of a citation in the database
+*/
 Page.deleteCitation_request = function(citation_id)  
 {	
 	var style = 'style="width: 100px"';
@@ -2665,6 +3055,12 @@ Page.deleteCitation_request = function(citation_id)
 	Page.panel1.show();
 }
 
+/*
+ * Sends a JSON string through Ajax to delete citation with the given id in the
+ * current type of publication group
+ * Params:
+ *  citations_id - id of citation to delete
+*/
 Page.deleteCitationHelper_request = function(citation_id)
 {
 	Page.panel1.setBody('');  // Clear panel 1 since input button could still accept input.
@@ -2697,6 +3093,9 @@ Page.deleteCitationHelper_request = function(citation_id)
 //	Ajax.SendJSON('services/citations.php', callback_function, jsonStr);
 }
 
+/*
+ * When an Ajax request is received it prints whether or not the citation was deleted.
+*/
 Page.deleteCitation_response = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -2725,12 +3124,22 @@ Page.deleteCitation_response = function()
 	}
 }
 
-// Maybe no longer used.
+/*
+ * Sets the background color of the specified row to #C0C0C0.
+ **NOTE: this function may no longer be in use  
+ * Params:
+ *   row - row to highlight
+*/
 Page.setCitationHighlight = function(row)
 {
 	document.getElementById("row_" + row).style.backgroundColor = '#C0C0C0';
 }
 
+/*
+ *Checks if the given citation is verified and makes the citation red if it isn't. 
+ * Params: 
+ *   _citation - a citation object
+*/
 Page.updateCitationInList = function(_citation)
 {
 	if(_citation.verified == 1)
@@ -2749,7 +3158,15 @@ Page.updateCitationInList = function(_citation)
 	Page._citations[Page.current_row_num] = _citation;
 }
 
-// alertInputEntry		- Alert form error
+/*
+ * Does an alerm message with a list of the fields that have errors
+ **NOTE: only uses err_elements input
+ * Params:
+ *   err_elements - array of elements with errors
+ *   element_array - ???
+ *   data_key - ???
+ *   data_value - ???
+*/
 Page.alertInputEntry = function(err_elements, element_array, data_key, data_value)
 {
 	var msg = "Following field(s) have errors:\n";
@@ -2761,6 +3178,16 @@ Page.alertInputEntry = function(err_elements, element_array, data_key, data_valu
 }
 
 // validateInputEntry	- Validate form
+/*
+ * Returns a list of fields that contain errors
+ **NOTE: The three inputs for this function seem like they could be implemented
+ * in a much better way with a dictionary or something like that.
+ * Params:
+ *   element_array - array of elements
+ *   data_key - array of keys to each elements
+ *   data_value - the value key to be put into the data_key array
+ *
+*/
 Page.validateInputEntry = function(element_array, data_key, data_value)
 {
 	var error = true;				// There's no error by default
@@ -2814,7 +3241,9 @@ Page.validateInputEntry = function(element_array, data_key, data_value)
 	}
 }
 
-// clearInputEntry	- Clear entry form
+/*
+ * Clears all the input fields of the entry form.
+*/
 Page.clearInputEntry = function()
 {
 	var theForm = document.forms[0];
@@ -2825,7 +3254,14 @@ Page.clearInputEntry = function()
 	}
 }
 
-// Writing the pubtype menu
+/*
+ * Returns HTML code containing a list of option selects for the different
+ * publication types.
+ * Params:
+ *   pubtype - currently selected publication type 
+ *   fieldFlag - flag identifying whether the field is a text field 
+ *   citation_suffix - 
+*/
 Page.pubtypeMenu = function(pubtype, fieldFlag, citation_suffix) {
 	citation_suffix = (citation_suffix == undefined) ? "" : citation_suffix;
 	var html = "";
@@ -2912,6 +3348,14 @@ Page.pubtypeMenu = function(pubtype, fieldFlag, citation_suffix) {
 	return html;
 }
 
+/*
+ * Calls Page.enterChangingByPubtypeInfo() to set up the fields of the given
+ * publication type for the current citation. Ultimately changes the publication
+ * type of the current citation.
+ * Params:
+ *   citation_suffix - suffix of current citation
+ *   pubtype - publication type to change the citation to
+*/
 Page.changePubtypeOneCitation = function(citation_suffix, pubtype)
 {
 	document.getElementById('changingByPubtype_fields').innerHTML = Page.enterChangingByPubtypeInfo(Page._current_citation,pubtype,'','');
@@ -2929,12 +3373,20 @@ Page.changePubtypeOneCitation = function(citation_suffix, pubtype)
 	Page.highlightRequiredInputFields(pubtype); 
 }
 
+/*
+ * Sends an Ajax request searching for books with a similar title to the current
+ * book
+*/
 Page.getInbookRelatedBooks_request = function()
 {
 	var jsonStr = '{"request": {"type": "title",  "keyword": "' + document.getElementById('booktitle').value + '", "sort_order": "' + Page.sort_order + '", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "page": "1", "citations_per_page": "' + Page.citations_per_page + '"}}';
 	Ajax.SendJSON('services/search.php', Page.getInbookRelatedBooks_response, jsonStr);
 }
 
+/*
+ * When it recieves an Ajax response, it sets the inbook_search_button_div to an
+ * option list of the citation that were similar to the current one.
+*/
 Page.getInbookRelatedBooks_response = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request))  
@@ -2954,11 +3406,20 @@ Page.getInbookRelatedBooks_response = function()
 	}
 }
 
+//Does nothing... Really... :\
 Page.changePubtypeTabs = function()
 {
 }
 
-
+/*
+ * Returns HTML code containing a checkbox for the given group with the given
+ * value.
+ * Params:
+ *   group - id name for the checkbox
+ *   value - value for the checkbox
+ *   checked - string that tells whether the checkbox should be checked
+ *   disabled - string that tells whether the checkbox should be disabled
+*/
 Page.printCheckBox = function(group, value, checked, disabled)
 {
 	var html = '';
@@ -2966,8 +3427,12 @@ Page.printCheckBox = function(group, value, checked, disabled)
 	return html;
 }
 
-// getCheckedValue	- Used by saveEntry(), nextInputEntry()
-//					- Find the radiobutton and check the value
+/*
+ * Used by saveEntry(), nextInputEntry(). Finds the radio button and check the
+ * value
+ * Params:
+ *   radioObj - radio button object
+*/
 Page.getCheckedValue = function(radioObj) 
 {
 	if(!radioObj)
@@ -3005,8 +3470,13 @@ Page.getCheckedValue = function(radioObj)
 	}
 }
 
-// setCheckedValue	- Currently not in used
-//					- Useful to set radio button's value
+/*
+ * Sets the given radio button object to the given value
+ **NOTE: The file says this function is currently not in use
+ * Params:
+ * radioObj - radio button
+ * newValue - value to check 
+*/
 Page.setCheckedValue = function(radioObj, newValue) {
 	if(!radioObj)
 		return;
@@ -3023,7 +3493,10 @@ Page.setCheckedValue = function(radioObj, newValue) {
 	}
 }
 
-
+/*
+ * Returns an array containing strings in the form 'authorifn' where i is a
+ * number. That string is the id of the firstname field.
+*/
 Page.checkAuthorFirstnameForInitials = function()
 {
 	var result_arr = new Array();
@@ -3040,6 +3513,12 @@ Page.checkAuthorFirstnameForInitials = function()
 	return result_arr;
 }
 
+/*
+ * Returns a string saying that the current author's firstname contains initials
+ * and asks if the user still wants to save. It will return an empty string if
+ * the author's first name doesn't contain initials and false if the
+ * Page.checkAuthorFirstnameForInitials() returns a string with length <= 0
+*/
 Page.alertOnSavingFirstnameAsInitials = function()
 {
 
@@ -3062,6 +3541,15 @@ Page.alertOnSavingFirstnameAsInitials = function()
         else return false;
 }
 
+/*
+ * Checks the type of change/added content and saves it with the given timestamp.
+ * Then it merges the pre_merge_ids if specified. At the end it sends an Ajax
+ * request to services/citations.php to Page.onResponseCheckAuthors.
+ * Params:
+ *   type - type of change or new information added
+ *   merge - whether or not an id merge needs to take place
+ *   timestamp - timestamp of event
+*/
 Page.checkInputAndSave = function(type, merge, timestamp)
 {	
 	var response;
@@ -3124,6 +3612,11 @@ Page.checkInputAndSave = function(type, merge, timestamp)
 	Ajax.SendJSON('services/citations.php', Page.onResponseCheckAuthors, jsonStr);		
 }
 
+/*
+ * Creates a new array of data_keys for the page.
+ * Params:
+ *  timestamp - timestamp string of the event
+*/
 Page.create_page_dot_sentData = function(timestamp)
 {	
 	var element_array = new Array("citation_id","user_id","pubtype","cit_key","abstract","keywords","doi","url","address","annote","author","booktitle","chapter","crossref","edition","editor","translator","howpublished","institution","journal","bibtex_key","month","note","number","organization","pages","publisher","location","school","series","title","type","volume","year", "format", "filename", "date_retrieved", "author0id","author0ln","author0fn","author1id","author1ln","author1fn","author2id","author2ln","author2fn","author3id","author3ln","author3fn","author4id","author4ln","author4fn","author5id","author5ln","author5fn");  //,"raw"
@@ -3174,6 +3667,10 @@ Page.create_page_dot_sentData = function(timestamp)
 	Page.data_keys = Page.data_keys.concat(tempArray);
 }
 
+/*
+ * Goes through each author checkbox on the page and checks if it is checked. If
+ * they all are, it returns 1, otherwise it returns 0;
+*/
 Page.validate_verified_entry = function()
 {
 	var valid = 1;
@@ -3196,6 +3693,16 @@ Page.validate_verified_entry = function()
 	return valid;
 }
 
+/*
+ * Calls Page.alertOnSavingFirstnameAsInitials() and saves the response into a
+ * variable info. If info exists and is confirmed, it updates the Page's sentData
+ * of each verified author's to -1; unverified authors' sentData is set to -2.
+ * Then, regardless, it saves whether the each author's first name and last name
+ * are. 
+ * *NOTE: timestamp is not used
+ * Params:
+ *   timestamp - timestamp of event
+*/
 Page.update_page_dot_sentData = function(timestamp)
 {
 	var info = Page.alertOnSavingFirstnameAsInitials();
@@ -3222,9 +3729,10 @@ Page.update_page_dot_sentData = function(timestamp)
 	return true;
 }
 
-
-
-// showHome	- Used by homePage()
+/*
+ * Used by homePage(). Shows elements that have the id 'welcome' or 'home' and
+ * hides 'top', 'options', 'insert', 'citations', and 'secondary'.
+*/
 Page.showHome = function() {
 	clearAllRadios("input_method");
 	document.getElementById('welcome').style.display = '';				//show
@@ -3239,6 +3747,12 @@ Page.showHome = function() {
 	document.getElementById('secondary').style.display = 'none';		//hide
 }
 
+/*
+ * Returns XML text that contains a citation object in XML format
+ * Param:
+ *   data_key - 
+ *   datavalue - 
+*/
 Page.buildXMLText = function(data_key, data_value) {
 			
 			var xml_text = "<citation>";
@@ -3250,6 +3764,10 @@ Page.buildXMLText = function(data_key, data_value) {
 			return xml_text;
 }
 
+/*
+ * Calls Page.compareTwoCitations() on the page's current citation and the
+ * citation in the page's sentData.
+*/
 Page.CompareSentDataWithReceivedData = function() {
 	
 	var cit1 = Page._current_citation;
@@ -3258,6 +3776,11 @@ Page.CompareSentDataWithReceivedData = function() {
 	return Page.compareTwoCitations(cit1, cit2);
 }
 
+/*
+ * Checks for differences between the given citations and returns a string
+ * containing an HTML table of all the differences. Otherwise, it returns the
+ * empty string.
+*/
 Page.compareTwoCitations = function(cit1, cit2)
 {
 	var differences_found = 0;
@@ -3306,6 +3829,13 @@ Page.compareTwoCitations = function(cit1, cit2)
 	return differenceString;	
 }
 
+/*
+ * Shows and hides various elements in the right column, based on the
+ * current view passed to the function. If it doesn't recognize the view, it sets
+ * the display to a default setting.
+ * Params:
+ *   current_view - string that could be: 'all', 'none', 'export_citations'.
+*/
 // Hide or show right column options based on current_view
 Page.right_column_display = function(current_view)
 {
@@ -3349,6 +3879,12 @@ Page.right_column_display = function(current_view)
 	}
 }
 
+/*
+ * Returns HTML code containing a div with the id 'view_options_rm'. This calls
+ * Page.printFormatMenu(), Page.printSortOrderMenu(), Page.showURLs(),
+ * Page.showNotes(), Page.showAbstracts(), Page.highlightMissingInfoCB(),
+ * Page.showCitationID(), and Page.setCompactView() to fill a table of options.
+*/
 Page.print_ViewOptions_rm_div = function()
 {
 	var html = '<div id="view_options_rm">';
@@ -3370,6 +3906,10 @@ Page.print_ViewOptions_rm_div = function()
 	return html;
 }
 
+/*
+ * Returns HTML code containing a div with the id 'export_citations_rm'. It
+ * contains a table with the contents returned by Page.printExportMenu().
+*/
 Page.print_ExportCitations_rm_div = function()
 {
 	var html = '<div id="export_citations_rm">';
@@ -3382,6 +3922,10 @@ Page.print_ExportCitations_rm_div = function()
 	return html;
 }
 
+/*
+ * Returns HTML code containing a div with the id 'collections_rm'. It contains a
+ * table with the contents returned by Page.printCollectionNamesMenuForManagingCitations().
+*/
 Page.print_Collections_rm_div = function()
 {	
 	var html = '<div id="collections_rm">';
@@ -3398,6 +3942,10 @@ Page.print_Collections_rm_div = function()
 	return html;
 }
 
+/*
+ * Returns HTML code containing a div with the id 'compare_merge_citations_rm'.
+ * It contains a table with a button to call Page.compareCitations().
+*/
 Page.print_CompareMergeCitations_rm_div = function()
 {
 	var html = '<div id="compare_merge_citations_rm">';
@@ -3409,6 +3957,13 @@ Page.print_CompareMergeCitations_rm_div = function()
 	html += '</div>';
 	return html;
 }
+
+/*
+ * Returns HTML code containing a div with the given alert message. 
+ * Params:
+ *   msg - message to display in div
+ *   panel1_open - whether or not to open panel1.
+*/
 Page.panel1_alert_message = function(msg, panel1_open)
 {
 	var html = '<div class="panel1_message"><p>'+msg+'</p>';
@@ -3418,6 +3973,10 @@ Page.panel1_alert_message = function(msg, panel1_open)
 	Page.panel1.show();	
 }
 
+/*
+ * Sets the page's tt (tooltip) variable to a new YAHOO.widget.Tooltip telling the user 
+ * how to verify a citation. 
+*/
 Page.createToolTips = function()
 {
 	var tt_array = new Array();
