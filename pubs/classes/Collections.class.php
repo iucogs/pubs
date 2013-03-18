@@ -9,8 +9,7 @@ class Collections
 	var $limit;
 	var $error;
 
-	function Collections()
-	{
+	function Collections() {
 		require_once('/home/patrick/Sites/pubs/lib/mysql_connect.php');
 		$this->doc = new DOMDocument();
 		$this->formatOutput = true;
@@ -21,8 +20,7 @@ class Collections
 	}
 	
 	// Create connection to database.
-	function connectDB()
-	{
+	function connectDB() {
 		$link;
 		if (!$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD)) {
     		$this->error .= 1;
@@ -36,7 +34,6 @@ class Collections
 	
 	
 	function doQuery($query, $link) {  //added for json function
-	
 		if (!$result = mysql_query($query, $link)) {
 			$this->error .= 1;
 		}
@@ -44,82 +41,64 @@ class Collections
 	}
 	
 	// FORCE_CREATE = force unique collection name creation. (used by TI in parser.php)
-	function createAndAddCollection($collection_name, $citation_ids, $submitter, $owner, $FORCE_CREATE = false)  
-	{
+	function createAndAddCollection($collection_name, $citation_ids, $submitter, $owner, $FORCE_CREATE = false) {
 		$result_arr;
-		if(($result_arr=$this->createCollection($collection_name, $submitter, $owner)) != false)
-		{
+		if(($result_arr=$this->createCollection($collection_name, $submitter, $owner)) != false)  {
 			$collection_status = $result_arr[0];
 			$new_or_existing_collection_id = $result_arr[1];
 		
-			if($collection_status == "exists")// Collection exists.
-			{
-				if($FORCE_CREATE) 		// Force collection creation and add citations!
-				{
+			if($collection_status == "exists") { //collection exists
+				if($FORCE_CREATE) {		// Force collection creation and add citations!
 					// Get unique name.	
 					$unique_name = $this->getUniqueCollectionName($collection_name);
 
 					// Tail recursion using unique name.
 					return $this->createAndAddCollection($unique_name, $citation_ids, $submitter, $owner, $FORCE_CREATE);
-				}
-				else 					// Do not add citations!
-				{
+				} else { 					// Do not add citations!
 					return array("exists", $new_or_existing_collection_id, 0, 0);  
 				}
-			}
-			else {
+			} else {
 				$insert_result = $this->insert_member_of_collection($new_or_existing_collection_id, $citation_ids, $submitter, $owner);
 				if($insert_result[0]) {					
 					return array("new_inserted", $new_or_existing_collection_id, $insert_result[1], $insert_result[2]);  // Collection does not exists.
-				}
-				else {						
+				} else {						
 					$this->error .= 1;
 					return false;			// DB insert error
 				}	
 			}
-		}
-		else 
-		{
+		} else {
 			$this->error .= 1;
 			return false;  		// DB create error
 		}
 	}
 	
-	function checkCollection($collection_name, $submitter, $owner)
-	{
+	function checkCollection($collection_name, $submitter, $owner)	{
 		$this->link = $this->connectDB();
 		$collection_name = trim($collection_name);
 		$query = "SELECT * FROM collections WHERE collection_name='".mysql_real_escape_string($collection_name)."' AND owner='".mysql_real_escape_string($owner)."'";
 		
 		$result = $this->doQuery($query, $this->link);
-		if(mysql_num_rows($result) > 0) 
-		{
+		if(mysql_num_rows($result) > 0) {
 			$row = mysql_fetch_array($result, MYSQL_ASSOC);
 		//	print_r($row);
 			$collection_id = $row['collection_id'];
 
 			return $collection_id;   // Collection exists.
-		}	
-		else 
-		{
+		} else {
 			return false;
 		}			
 	}
 	
-	function createCollection($collection_name, $submitter, $owner)
-	{
+	function createCollection($collection_name, $submitter, $owner)	{
 		$this->link = $this->connectDB();
 
 		$collection_name = trim($collection_name);
 		
-		if(empty($collection_name))  // Check for empty collection name. Give default name
-		{
+		if(empty($collection_name)) { // Check for empty collection name. Give default name
 			$collection_name = "new_collection";
 		}
 			
-		if(($collection_id = $this->checkCollection($collection_name, $submitter, $owner)) != false)
-		{
-		//	return array("-1", $collection_id);   // Collection exists.
+		if(($collection_id = $this->checkCollection($collection_name, $submitter, $owner)) != false) {
 			return array("exists", $collection_id);   // Collection exists.
 		}
 		
@@ -128,41 +107,32 @@ class Collections
 		$result = $this->doQuery($query, $this->link);
 		if(!$result) {
 			return false;
-		}
-		else {
+		} else {
 			$new_collection_id = (int)mysql_insert_id();
 			return array("1", $new_collection_id);
 		}			
 	}	
 	
-	function insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner) // FAC PUBS TO-DO: Check if collection belongs to submitter before insertion?
-	{
+	function insert_member_of_collection($collection_id, $citation_ids, $submitter, $owner) { // FAC PUBS TO-DO: Check if collection belongs to submitter before insertion?
 		$this->link = $this->connectDB();
 		
 		$insert_count = 0;
 		$duplicates = 0;
 		$insert_error = false;
 		
-		foreach($citation_ids as $citation_id)
-		{
+		foreach($citation_ids as $citation_id) {
 			$query = "SELECT * FROM member_of_collection WHERE collection_id='$collection_id' AND citation_id='$citation_id'";
 			$result = $this->doQuery($query, $this->link);
-			if(mysql_num_rows($result) > 0) 
-			{	
+			if(mysql_num_rows($result) > 0) {	
 				// Duplicates
 				$duplicates++;
-			}
-			else
-			{
+			} else {
 				$query = "INSERT INTO member_of_collection (collection_id, citation_id) VALUES ($collection_id, $citation_id)";
 				$result = $this->doQuery($query, $this->link);
-				if(!$result)
-				{
+				if(!$result) {
 					$insert_error = true;
 					$this->error .= 2;
-				}
-				else
-				{
+				} else {
 					$insert_count++;
 				}
 			}
@@ -172,19 +142,16 @@ class Collections
 		else return array($collection_id, $insert_count, $duplicates);
 	}
 	
-	function setAccessToCollection($user_id, $coll_id)
-	{
+	function setAccessToCollection($user_id, $coll_id) {
 		$this->link = $this->connectDB();
 		$query = "INSERT INTO access_to (user_id, collection_id) VALUES ($user_id, $coll_id)";
 		$result = $this->doQuery($query, $this->link);
-		if(!$result)
-		{
+		if(!$result) {
 			$this->error .= 2;
 		}
 	}
 	
-	function deleteCollection($collection_id)
-	{
+	function deleteCollection($collection_id) {
 		$this->link = $this->connectDB();
 		
 		$query_collection = "DELETE FROM collections WHERE collection_id='$collection_id'";
@@ -198,37 +165,29 @@ class Collections
 		else return false;
 	}
 	
-	function deleteCollections($collection_ids)
-	{
+	function deleteCollections($collection_ids) {
 		$result = array();
 		
-		foreach($collection_ids as $collection_id)
-		{
-			if(($result_id = $this->deleteCollection($collection_id)) != false)
-			{
+		foreach($collection_ids as $collection_id) {
+			if(($result_id = $this->deleteCollection($collection_id)) != false) {
 				$result[] = array($collection_id => $result_id);
-			}
-			else
-			{
+			} else {
 				$result[] = array($collection_id => 'error');
 			}
 		}
 		// Look for delete 'error' key in $result
 		if(array_search('error', $result) === false) {
 			return true;
-		}
-		else {
+		} else {
 			$this->error .= 2;
 			return false;
 		}
 	}
 	
-	function mergeCollections($collection_id, $collection_ids, $submitter, $owner)
-	{
+	function mergeCollections($collection_id, $collection_ids, $submitter, $owner) {
 		$this->link = $this->connectDB();
 		
-		if (!is_numeric($collection_id))
-		{
+		if (!is_numeric($collection_id)) {
 			$new_name = $collection_id;
 			$collection_id = $collection_ids[0];
 			$collection_rename_result = $this->renameCollection($collection_id, $new_name, $submitter, $owner);
@@ -240,11 +199,9 @@ class Collections
 		$select_ids = "SELECT DISTINCT ".mysql_real_escape_string($collection_id)." AS collection_id, moc.citation_id FROM member_of_collection moc WHERE ";
 		// Where the citation_id does not exists in selected collection.
 		$select_ids .= "NOT EXISTS (SELECT * FROM member_of_collection WHERE collection_id='".mysql_real_escape_string($collection_id)."' AND moc.citation_id = citation_id) AND ";
-		foreach($collection_ids as $coll_id) // Loop through the collections to be merged
-		{
+		foreach($collection_ids as $coll_id) { // Loop through the collections to be merged
 			// Select all citation_ids except the one we're inserting into.
-			if($coll_id != $collection_id) 
-			{ 	
+			if($coll_id != $collection_id) { 	
 				$select_ids .= "collection_id='".mysql_real_escape_string($coll_id)."' OR "; 
 				$collection_ids_to_be_deleted[] = $coll_id; 
 			}
@@ -255,8 +212,7 @@ class Collections
 		$query = "INSERT INTO member_of_collection ".$select_ids." ";
 
 		$result = $this->doQuery($query, $this->link);
-		if($result)
-		{
+		if($result) {
 			// Delete old merged collections
 			$delete_result = $this->deleteCollections($collection_ids_to_be_deleted);  // return [true|false]
 			if($delete_result != false)			
@@ -264,17 +220,14 @@ class Collections
 			else
 				$this->error .= 2;
 				return -1;
-		}
-		else
-		{
+		} else {
 			$this->error .= 2;
 			return -1; // Insert error.
 		}
 	}
 	
 	// Get a unique name for an existing collection_id. 
-	function getUniqueCollectionName($collection_rename, $EXCEPTION_ID = 0) // $collection_id,  
-	{
+	function getUniqueCollectionName($collection_rename, $EXCEPTION_ID = 0) { // $collection_id, 
 		$this->link = $this->connectDB();
 		
 		// Trim spaces that can cause problems
@@ -284,33 +237,24 @@ class Collections
 		$end_loop = false;
 		$copy_extension = "";
 		
-		for($i = 1; $end_loop == false; $i++)
-		{
+		for($i = 1; $end_loop == false; $i++) {
 			$query = "SELECT * FROM collections WHERE collection_name='".mysql_real_escape_string($current_name)."'";
 			$result = $this->doQuery($query, $this->link);
 
-			if(mysql_num_rows($result) > 0)
-			{
+			if(mysql_num_rows($result) > 0) {
 				$row = mysql_fetch_assoc($result);
-				if($EXCEPTION_ID == 0)					// No collection_id for exception
-				{
+				if($EXCEPTION_ID == 0) { // No collection_id for exception
 					$copy_extension = "-".$i."";
 					$current_name = $collection_rename.$copy_extension;
-				}
-				else {									// Have collection_id for exception
-					if($row['collection_id'] != $EXCEPTION_ID)
-					{
+				} else {									// Have collection_id for exception
+					if($row['collection_id'] != $EXCEPTION_ID) {
 						$copy_extension = "-".$i."";
 						$current_name = $collection_rename.$copy_extension;
-					}
-					else // Changing collection_name to the same current collection_name.
-					{
+					} else { // Changing collection_name to the same current collection_name.
 						$end_loop = true;	
 					} 
 				}
-			}
-			else
-			{
+			} else {
 				$end_loop = true;			
 			}
 		}
@@ -318,8 +262,7 @@ class Collections
 		return $current_name;
 	}
 	
-	function renameCollection($collection_id, $collection_rename, $submitter, $owner)
-	{
+	function renameCollection($collection_id, $collection_rename, $submitter, $owner) {
 		$this->link = $this->connectDB();
 		
 		// Check for empty input.
@@ -334,22 +277,18 @@ class Collections
 		$return_val = $this->checkCollection($collection_rename, $submitter, $owner);
 		
 	//	echo 'collection_id: '.$collection_id;
-		if ($return_val == false)
-		{
+		if ($return_val == false) {
 			$query = "UPDATE collections SET collection_name='".mysql_real_escape_string($collection_rename)."' WHERE collection_id='$collection_id' AND owner='$owner'";
 			$result = $this->doQuery($query, $this->link);
 			
 			if($result) return array($collection_id, $collection_rename);
 			else return false;
-		}
-		else
-		{
+		} else {
 			return array(-1, $collection_rename);
 		}
 	}
 	
-	function getDefaultCollectionNamesAndIds($submitter, $owner)
-	{
+	function getDefaultCollectionNamesAndIds($submitter, $owner) {
 		$this->link = $this->connectDB();
 		
 		// This query should be the same query from [Citations.class.php]->get_citations_JSON_query()
@@ -364,25 +303,20 @@ class Collections
 
 		$result = $this->doQuery($query, $this->link);
 
-		if(mysql_num_rows($result) > 0)
-		{
+		if(mysql_num_rows($result) > 0) {
 			$result_arr = array();
 			while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
 			return $result_arr;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
 	
-	function getCollectionNamesAndIds($submitter, $owner)
-	{
+	function getCollectionNamesAndIds($submitter, $owner) {
 		$this->link = $this->connectDB();
 		
 		$WHERE_clause = "";
-		if ($owner != "")
-		{
+		if ($owner != "") {
 			$WHERE_clause = "WHERE owner='".$owner."'";
 		}
 			
@@ -390,37 +324,29 @@ class Collections
 		
 		$result = $this->doQuery($query, $this->link);
 
-		if(mysql_num_rows($result) > 0)
-		{
+		if(mysql_num_rows($result) > 0) {
 			$result_arr = array();
 			while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
 			return $result_arr;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
 	
-	function getCollectionByID($collection_id)
-	{
+	function getCollectionByID($collection_id) {
 		$this->link = $this->connectDB();
 		$query = "SELECT c.*, cl.citation_id FROM collections c, member_of_collection cl WHERE c.collection_id='$collection_id'";
 		$result = $this->doQuery($query, $this->link);
 		
-		if(mysql_num_rows($result) > 0)
-		{
+		if(mysql_num_rows($result) > 0) {
 			return mysql_fetch_array($result);
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 		
 	}
 	
-	function getCollectionsGivenCitationID($citation_id, $submitter, $owner)
-	{
+	function getCollectionsGivenCitationID($citation_id, $submitter, $owner) {
 		$this->link = $this->connectDB();
 					
 		$query = "SELECT moc.citation_id, col.collection_name, col.collection_id FROM member_of_collection moc, collections col WHERE moc.collection_id = col.collection_id AND col.owner = '$owner' AND moc.citation_id = $citation_id ORDER BY col.collection_name";		
@@ -429,57 +355,46 @@ class Collections
 		
 		$result_arr = array();
 		
-		while($row = mysql_fetch_assoc($result))
-        {
+		while($row = mysql_fetch_assoc($result)) {
 			$result_arr[] = array($row['collection_id'],$row['collection_name']);
 		}
 		
 		return $result_arr;	
 	}
 	
-	function getCollectionsByCitationID($citation_id)
-	{
+	function getCollectionsByCitationID($citation_id) {
 		$this->link = $this->connectDB();
 		$temp = array();
 		$query = "SELECT moc.collection_id FROM member_of_collection moc WHERE moc.citation_id='$citation_id'";
 		$result_collection_ids = $this->doQuery($query, $this->link);
-		while($row = mysql_fetch_assoc($result_collection_ids))
-        {				
+		while($row = mysql_fetch_assoc($result_collection_ids)) {				
 			$temp[] = $row['collection_id'];
 		}
 		return $temp;		
 	}
 	
-	function deleteCitationByCollectionId($citation_id, $collection_id)
-	{
+	function deleteCitationByCollectionId($citation_id, $collection_id) {
 		$this->link = $this->connectDB();
 		
 		$query = "DELETE FROM member_of_collection WHERE collection_id='$collection_id' AND citation_id='$citation_id'";
 		$result = $this->doQuery($query, $this->link);
-		if(!$result)
-		{
+		if(!$result) {
 			$this->error .= 2;
 			return false;
-		}
-		else 
-		{
+		} else {
 			return true;
 		}
 	}
 	
 	// Functions for collections_table
-	function deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id)
-	{
+	function deleteCitationByCollectionId_collecitons_table($citation_id, $collection_id) {
 		$query = "DELETE FROM collections_table WHERE coll_id='$collection_id' AND citation_id='$citation_id'";
 		
 		$result = $this->doQuery($query, $this->link);
-		if(!$result)
-		{
+		if(!$result) {
 			$this->error .= 2;
 			return false;
-		}
-		else 
-		{
+		} else {
 			return true;
 		}
 	}
