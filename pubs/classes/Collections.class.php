@@ -312,40 +312,53 @@ class Collections
 		}
 	}
 	
-	function getCollectionNamesAndIds($submitter, $owner) {
-		$this->link = $this->connectDB();
+  function getCollectionNamesAndIds($submitter, $owner) {
+    $this->link = $this->connectDB();
 		
-		$WHERE_clause = "";
-		if ($owner != "") {
-			$WHERE_clause = "WHERE owner='".$owner."'";
-		}
+	$WHERE_clause = "";
+      if ($owner != "") {
+	    $WHERE_clause = "WHERE owner='".$owner."'";
+      }
 			
-		$query = "SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c ".$WHERE_clause." ORDER BY LTRIM(c.collection_name)";
+    $query = "SELECT c.collection_id, c.collection_name, (SELECT Count( * ) FROM member_of_collection moc WHERE moc.collection_id = c.collection_id) as count FROM collections c ".$WHERE_clause." ORDER BY LTRIM(c.collection_name)";
 		
-		$result = $this->doQuery($query, $this->link);
+	$result = $this->doQuery($query, $this->link);
 
-		if(mysql_num_rows($result) > 0) {
-			$result_arr = array();
-			while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
-			return $result_arr;
-		} else {
-			return false;
-		}
-	}
+	if(mysql_num_rows($result) > 0) {
+	  $result_arr = array();
+	  while(($result_arr[] = mysql_fetch_assoc($result)) || array_pop($result_arr));  // Copy result into an array
+	  return $result_arr;
+	} else {
+	  return false;
+    }
+  }
 	
-	function getCollectionByID($collection_id) {
-		$this->link = $this->connectDB();
-		$query = "SELECT c.*, cl.citation_id FROM collections c, member_of_collection cl WHERE c.collection_id='$collection_id'";
-		$result = $this->doQuery($query, $this->link);
-		
-		if(mysql_num_rows($result) > 0) {
-			return mysql_fetch_array($result);
-		} else {
-			return false;
-		}
-		
+  function getCollectionByID($collection_id) {
+    $this->link = $this->connectDB();
+	$query = "SELECT c.*, cl.citation_id FROM collections c, member_of_collection cl WHERE c.collection_id='$collection_id'";
+    $result = $this->doQuery($query, $this->link);
+	    	
+	if(mysql_num_rows($result) > 0) {
+	  return mysql_fetch_assoc($result);
+	} else {
+	  return false;
 	}
-	
+		
+  }
+
+  function getCollectionCitations($collection_id) {
+    $citations_string = '';
+    $this->link = $this->connectDB();
+    $query = "SELECT cl.citation_id FROM member_of_collection cl WHERE cl.collection_id='$collection_id'";
+    $result = $this->doQuery($query, $this->link);
+   
+    while ($row = mysql_fetch_assoc($result)) {
+      $citations_string.= $row['citation_id'].",";
+    }
+    // substr removes trailing comma
+    return substr($citations_string, 0, strlen($citations_string) - 1);
+  }
+
 	function getCollectionsGivenCitationID($citation_id, $submitter, $owner) {
 		$this->link = $this->connectDB();
 					

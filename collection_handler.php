@@ -39,8 +39,10 @@ $function = $argv[1];
  *************************/
 function collection_GET($ID) {
   global $collections;
-  $collection_json = json_encode($collections->getCollectionByID($ID));
-  echo $collection_json;
+  $collection_data = $collections->getCollectionByID($ID);
+  unset($collection_data['citation_id']);
+  $collection_data = array_merge($collection_data, array("citation_ids" => ($collections->getCollectionCitations($ID))));
+  echo json_encode($collection_data);
 }
 
 /*************************
