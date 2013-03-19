@@ -1,5 +1,7 @@
 var cogs_value;
 
+// Makes an Ajax.SendJSON request for the feedback list (unsorted) and sets the cogs_value variable to the given
+// value
 Page.get_feedback_request = function(cogs)
 {
 	cogs_value=cogs;
@@ -9,6 +11,8 @@ Page.get_feedback_request = function(cogs)
 
 //Abhinav 
 
+// Makes an Ajax.SendJSON request for a sorted feedback list. It also sets the
+// global cogs_value to the given value.
 Page.get_sortedfeedback_request = function(cogs)
 {
 	cogs_value=cogs;
@@ -16,7 +20,8 @@ Page.get_sortedfeedback_request = function(cogs)
 	Ajax.SendJSON('services/feedback.php', Page.get_feedback_response, jsonStr);
 }
 
-
+// Sets the feedback_div's HTML to a text area with a submit button to submit
+// feedback. Then it calls Page.write_feedback_table('list').
 Page.get_feedback_response = function()
 {						
 	html = '';
@@ -43,6 +48,10 @@ Page.get_feedback_response = function()
 	Page.write_feedback_table('list');
 }
 
+// Sets the HTML content of the feedback_table_div to a table containing the
+// different ids and the feedback associated with them along with comment, edit,
+// and delete buttons. The given list_or_editID parameter determines some
+// display aspects of the data.
 Page.write_feedback_table = function(list_or_editID)
 {
 	var html = '';
@@ -119,12 +128,16 @@ Page.write_feedback_table = function(list_or_editID)
 	document.getElementById('feedback_table_div').innerHTML = html;
 }
 
+// calls write_feedback_table on the fourth item in the id list (after it is
+// split).
 Page.edit_feedback = function(id)
 {
 	var temp_array = id.split('_');
 	Page.write_feedback_table(temp_array[3]);	
 }
 
+// Makes an Ajax.SendJSON request seding a JSON string containing updated
+// feedback for the object with the given id..
 Page.update_feedback_request = function(id)
 {
 	var temp_array = id.split('_');
@@ -139,6 +152,7 @@ Page.update_feedback_request = function(id)
 	Ajax.SendJSON('services/feedback.php', Page.get_feedback_response, jsonStr);	
 }
 
+// Make an Ajax.SendJSON request sending a JSON string containing feedback.
 Page.add_feedback_request = function()
 {
 	var jsonStr = '{"request": {"type": "add_feedback", "submitter": "' + Page.submitter + '", "feedback": ' + YAHOO.lang.JSON.stringify(document.getElementById('add_feedback').value) + '}}';
@@ -152,6 +166,9 @@ Page.add_feedback_request = function()
 	Ajax.SendJSON('services/feedback.php', Page.get_feedback_response, jsonStr);
 }*/
 
+// Make an Ajax.SendJSON request to services/feedback.php with
+// Page.get_feedback_response as the callback method and sending a JSON string
+// specifying the feedback of the object of the given id to be deleted.
 Page.delete_feedback_request = function(id)
 {
 	if (confirm('Are you sure?'))
