@@ -1,5 +1,8 @@
 Page.oneTimeToggle = true;
 
+// If oneTimeToggle is set to true (meaning it hasn't displayed an alert
+// yet) launch an alert displaying the given object then set oneTimeToggle
+// to false.
 Page.alertOnce = function(obj)
 {
 	if(Page.oneTimeToggle == true)
@@ -11,6 +14,7 @@ Page.alertOnce = function(obj)
 
 //document.onkeydown = KeyCheck;  // For backspace (key 8) use onekeydown.
 //document.onkeyup = KeyCheck;
+// Launches an alert window displaying which key was pressed.
 function KeyCheck(e) {
 	var KeyID = (window.event) ? event.keyCode : e.keyCode;
 
