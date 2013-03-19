@@ -3,6 +3,8 @@ var Ajax = new Object();
 // Debug purposes 
 //var time_object = new timestamp_class(0, 0, 0, 0);	//create new time object and initialize it
 
+// Sends the given url through an Ajax.request with the given callbackMethod to
+// the given url.
 Ajax.Request = function(url, callbackMethod)
 {
 	Ajax.request = Ajax.createRequestObject();
@@ -11,6 +13,8 @@ Ajax.Request = function(url, callbackMethod)
 	Ajax.request.send(url);
 }
 
+// Sends the given JSONString on an Ajax.request with the given callbackMethod
+// to the given url.
 Ajax.SendJSON = function(url, callbackMethod, JSONString)
 {
 	// Custom properties for debugging
@@ -30,6 +34,8 @@ Ajax.SendJSON = function(url, callbackMethod, JSONString)
 	Ajax.request.send(JSONString);
 }
 
+// Sends the given xmlString on an Ajax.request with the given callbackMethod
+// to the given url.
 Ajax.SendXML = function(url, callbackMethod, xmlString)
 {
 	Ajax.request = Ajax.createRequestObject();
@@ -39,6 +45,8 @@ Ajax.SendXML = function(url, callbackMethod, xmlString)
 	Ajax.request.send(xmlString);
 }
 
+// Returns either a new XMLHTTPRequest object or a new ActiveXObject object
+// depending on what type the window is.
 Ajax.createRequestObject = function()
 {
 	var obj;
@@ -53,6 +61,8 @@ Ajax.createRequestObject = function()
 	return obj;
 }
 
+// Returns true if the obj.status is 200. Otherwise it launches an alert window
+// that displays the HTTP error code.
 Ajax.CheckReadyState = function(obj)
 {
 	if(Page.panel4) Page.panel4.show(); // Show loading panel
@@ -117,6 +127,7 @@ Ajax.CheckReadyStateNoLoading = function(obj)
 }
 
 // Debug
+// Launches an alert window that displays the ajax call information.
 function alertAjaxCalls(ajax_obj, func_list, options_arr)
 {
 	var msg = '[Ajax.js]\n';
@@ -176,6 +187,8 @@ function alertAjaxCalls(ajax_obj, func_list, options_arr)
 	return false;
 }
 
+// Launches an alert windown that displays all the properties of the given
+// object.
 function alertObjectProperties(obj)
 {
 	/**** Display Object Properties ****/
@@ -190,6 +203,8 @@ function alertObjectProperties(obj)
 	/************************************/
 }
 
+// Returns the first property in obj that is equal to caller. If caller is not a
+// property, then it returns "not found"
 function objectCaller(caller, obj)
 {
 	for(var prop in obj)
@@ -204,6 +219,7 @@ function objectCaller(caller, obj)
 	return "not found!";
 }
 
+// Creates a popup window containing the given 'SayWhat' parameter.
 function PopUp(SayWhat) {
 	WinPop = this.WinPop; 																// Set WinPop to global.
 	if(this.window.onunload != "") this.window.onunload = function() {WinPop.close()};  // Debug window on refresh.
