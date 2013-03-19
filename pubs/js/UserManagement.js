@@ -617,6 +617,7 @@ Page.setOwnerDiv = function()
 	Page.viewOwners_request();
 }
 
+// COMMENTFLAG //
 // homePage		- Called by index.php
 //				- Called by onClick event of "Home" button
 Page.homePage = function(faculty)
@@ -639,6 +640,7 @@ Page.homePage = function(faculty)
 	Page.hideCitations();
 }
 
+// Rewrites the proxy select menu if user logged in and calls Page.getCitations.
 Page.getFacultyRepresentativePublications = function(faculty_username)  // essentially same as getCitationsGivenCollectionID, but don't set owner
 {
 	var citation_id = 0;
@@ -653,6 +655,8 @@ Page.getFacultyRepresentativePublications = function(faculty_username)  // essen
 
 }
 
+// Hides the right column, the citations element, and the
+// collectionNamesMenuForViewing element.
 Page.hideCitations = function()
 {
 	Page.right_column_display('none');
@@ -664,12 +668,16 @@ Page.hideCitations = function()
 	}
 }
 
+// Calls Page.hideCitations() so it shows how to register on pubs
 Page.register = function()
 {
 	document.getElementById('secondary').innerHTML = 'Here is how to register.';
 	Page.hideCitations();
 }
 
+// Sets the element with the id 'secondary' to contain HTML displaying a page
+// that will allow individual users to view and set their own proxies when
+// appropriate.
 Page.myAccount = function()
 {
 	Page.user_back_button_state = 'user';
@@ -693,11 +701,9 @@ Page.myAccount = function()
 	Page.hideCitations();
 }
 
-
-
+// Returns HTML code containing a form to create a new proxy 
 Page.createproxy_html = function(selected_username, print_back_button,cogs)  //abhinav
 {
-	
 	var html = '';
 	if(print_back_button) html += Page.print_user_back_button(); 
 	html += '<center>Create Proxy</center>';
@@ -755,7 +761,7 @@ Page.createproxy_html = function(selected_username, print_back_button,cogs)  //a
 	return html;
 }
 
-
+// Returns HTML code containing a form to create a new user.
 Page.createuser_html = function(selected_username)
 {
 	var html = '';
@@ -789,6 +795,8 @@ Page.createuser_html = function(selected_username)
 	return html;
 }
 
+// Returns HTML containing a list of the different proxies being used and the
+// result of Page.createproxy_html.
 Page.manageproxy_html = function(selected_username, proxies) // Submitter is currently the user being viewed.
 {
 	var html = '';
@@ -830,12 +838,15 @@ Page.manageproxy_html = function(selected_username, proxies) // Submitter is cur
 	return html;
 }
 
+// Makes an Ajax.SendJSON request to manage the given selected_username.
 Page.manageproxy_request = function(selected_username, submitter)
 {
 	var jsonStr = '{"request": {"type": "manage", "submitter": "' + selected_username + '"}}';
 	Ajax.SendJSON('services/proxy.php', Page.manageproxy_response, jsonStr);
 }
 
+// Sets the HTML in the element with the id 'secondary' to the result of
+// Page.manageproxy_html.
 Page.manageproxy_response = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -852,6 +863,7 @@ Page.manageproxy_response = function()
 	}
 }
 
+// Sets the user_div's HTML to display the admin page.
 Page.adminPage = function(flag,cogs)  //Abhinav
 {
 	Page.hideCitations();
@@ -864,7 +876,7 @@ Page.adminPage = function(flag,cogs)  //Abhinav
 	
 	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
 	html += '<tr><td align="center"><b>Collections Table</b></td></tr>';
-    html += '<tr><td>';
+  html += '<tr><td>';
 	html += '<div id="populate_div">'
 	html += '<input type="button" onclick="Page.populateCollectionsTable_request();" value="Populate" name="populate_button"/>';
 	html += '&nbsp;&nbsp;';
@@ -877,7 +889,7 @@ Page.adminPage = function(flag,cogs)  //Abhinav
 	
 	html += '<br><br><table align="center" style="border: 2px solid #7D110C;">';
 	html += '<tr><td align="center"><b>Feedback</b></td></tr>';
-    html += '<tr><td>';
+  html += '<tr><td>';
 	html += '<div id="feedback_div"></div>';
 	html += '</td></tr>';
 	html += '</table>';
@@ -886,12 +898,12 @@ Page.adminPage = function(flag,cogs)  //Abhinav
 	html = '';
 	html += '<table align="center" style="border: 2px solid #7D110C;">';
 	html += '<tr><td width="10">&nbsp;</td><td><b>User management</b></td></tr>';
-    html += '<tr><td></td><td>';
+  html += '<tr><td></td><td>';
  	html += '<table border="0">';
-    html += '<tr id="user_create"><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod_createproxy(6,\''+ cogs +'\')" value="6" name="inputMethod_createproxy"/></td><td align="left">Create Proxy</td></tr>';  //abhinav
-    html += '<tr id="user_view"><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
-    html += '<tr><td><input type="radio" onclick="Page.inputMethod(7)" value="7" name="input_method"/></td><td align="left">View / Manage Current Proxies</td>';
+  html += '<tr id="user_create"><td><input type="radio" onclick="Page.inputMethod(16)" value="16" name="input_method"/></td><td align="left">Create User</td></tr>';
+  html += '<tr><td><input type="radio" onclick="Page.inputMethod_createproxy(6,\''+ cogs +'\')" value="6" name="inputMethod_createproxy"/></td><td align="left">Create Proxy</td></tr>';  //abhinav
+  html += '<tr id="user_view"><td><input type="radio" onclick="Page.inputMethod(8)" value="8" name="input_method"/></td><td align="left">View / Manage All Users</td></tr>';
+  html += '<tr><td><input type="radio" onclick="Page.inputMethod(7)" value="7" name="input_method"/></td><td align="left">View / Manage Current Proxies</td>';
 	html += '</table>';
 	html += '</td></tr>';
 	html += '<tr><td></td><td>';
@@ -905,24 +917,24 @@ Page.adminPage = function(flag,cogs)  //Abhinav
 	}
 	//Abhinav 
 	if(flag==1)
-	Page.get_sortedfeedback_request(cogs);
-    else
-	Page.get_feedback_request(cogs);
-	
+	  Page.get_sortedfeedback_request(cogs);
+  else
+	  Page.get_feedback_request(cogs);
 }
+
 //abhinav
 
+// Sets the HTML code in the element with the id 'secondary' to the result of
+// calling Page.createproxy_html.
 Page.inputMethod_createproxy = function(input_method,cogs)
 {
 	var html = "";
 
-
-	 if(input_method == 6)
+	if(input_method == 6)
 	{
 		html += Page.createproxy_html(Page.submitter, true,cogs);
 	}
-	
-	
+		
 	if ((input_method == 6) ) 
 	{
 		document.getElementById('citations').style.display = 'none';
@@ -930,5 +942,4 @@ Page.inputMethod_createproxy = function(input_method,cogs)
 		document.getElementById('secondary').innerHTML = html;
 		document.getElementById('secondary').style.display = '';
 	}
-	
 }
