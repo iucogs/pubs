@@ -517,19 +517,16 @@ Page.showFeedbackAfterSave = function(responseObj)
 	//send back either a success message or an error message.
 	document.getElementById("panel1_div").style.display = 'none';	//hide
 	document.getElementById("panel2_div").style.display = '';	//show
-	if (differenceString == "") {
-		for (var i=0; i<6; i++)
-		{
-			if (((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != sentCitation['author'+i+'ln']))	|| ((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'fn'] != "") && (Page._current_citation['author'+i+'fn'] != sentCitation['author'+i+'fn'])))
-			{
-				var personObj=new Object();
-				personObj.orig_ln = sentCitation['author'+i+'ln'];
-				personObj.orig_fn = sentCitation['author'+i+'fn'];;
-				personObj.new_ln = Page._current_citation['author'+i+'ln'];
-				personObj.new_fn = Page._current_citation['author'+i+'fn'];
-				Page.authorNameSubstitutions.push(personObj);
-			}
+  for (var i=0; i<6; i++)	{
+	  if (((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != sentCitation['author'+i+'ln']))	|| ((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'fn'] != "") && (Page._current_citation['author'+i+'fn'] != sentCitation['author'+i+'fn'])))	{
+	  	var personObj=new Object();
+			personObj.orig_ln = sentCitation['author'+i+'ln'];
+			personObj.orig_fn = sentCitation['author'+i+'fn'];;
+			personObj.new_ln = Page._current_citation['author'+i+'ln'];
+			personObj.new_fn = Page._current_citation['author'+i+'fn'];
+			Page.authorNameSubstitutions.push(personObj);
 		}
+	}
 		
 		var html = '';
 		Page.oneCitationInPanel(Page._current_citation, "text", ""); 
@@ -569,11 +566,7 @@ Page.showFeedbackAfterSave = function(responseObj)
 		Page.selected_citations = [];
 		// update
 		
-		Page.updateCitationsArraysAndTabs_after_save();
-	}
-	else {
-		document.getElementById('panel2_div').innerHTML = differenceString;
-	}
+		Page.updateCitationsArraysAndTabs_after_save();	
 }
 
 /*
@@ -1178,47 +1171,33 @@ Page.newVerifiedAuthor_response = function()
 Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
 	var timestamp = _citation.entryTime;
 	var html = "";
-	//var pointer_style = 'onmouseover="this.style.cursor=\'pointer\';" onmouseout="this.style.cursor=\'default\'"';
 	var pointer_style = 'class="pointerhand"';
 	var merge = (newFlag == "merge") ? newFlag : "";
 	
 	html += '<table width="100%" border="0">';
 	
-	if(fieldFlag == "text")
-	{
+	if(fieldFlag == "text") {
 		html += Page.printBackTD(pointer_style);
-		
 		html += '<td><center>';
 		html += Page.printCitationEditButton(Page._current_citation, '+3');
-		
-		html += Page.printNextTD(pointer_style);
-
+  	html += Page.printNextTD(pointer_style);
 		html += '</tr>';	
-	}
-	else
-	{
+	} else {
 		var tempType;
 		if (Page.input_method == 1) {
 			tempType = "save_byTimestamp_unverified";
-		}
-		else if (Page.input_method == 2) {
+		} else if (Page.input_method == 2) {
 			tempType = "save_byTimestamp_unverified";
-		}
-		else if (Page.input_method == 4) {
+		}	else if (Page.input_method == 4) {
 			tempType = "save_byFac_unverified";
-		}
-		else if ((Page.input_method == 12) || (Page.input_method == 9)) {
+		}	else if ((Page.input_method == 12) || (Page.input_method == 9)) {
 			tempType = "save_byFac_one";
 		}
-		tempType = "check_authors";
-		
-		html += Page.printBackTD(pointer_style);
-		
+    tempType = "check_authors";
+		html += Page.printBackTD(pointer_style, _citation);
 		html += '<td><center>' + Page.printTableRowCheckBox(_citation, 'Verified', 'verified') + '<br />';
 		html += '<span class="link pointerhand" onclick="Page.checkInputAndSave(\'' + tempType + '\', \'' + merge + '\', \'' + timestamp + '\');return false;"><font size="+3">Save</font></span></center></td>';
-		
-		html += Page.printNextTD(pointer_style);
-		
+		html += Page.printNextTD(pointer_style, _citation);
 		html += '</tr>';
 	}
 	
@@ -1232,14 +1211,15 @@ Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
  * Params:
  *   pointer_style - ??? added in as an attribute in the td tag
 */
-Page.printBackTD = function(pointer_style)
-{
+Page.printBackTD = function(pointer_style, _citation) {
 	var html = '';
-	if (((Page.state == 2) && (Page.current_newly_added_num > 0)) || ((Page.state == 3) && (Page.current_row_num > 0))) {
-		
-		html += '<tr><td id="goToBack" title="Previous citation in list" align="left" width="10%" ' + pointer_style + ' onclick="Page.goToBackCitation();"><font size="+2">Back</font></td>';
-	}
-	else {
+  var tempType = "check_authors";
+  var merge = "";
+  var timestamp = _citation.entryTime;
+	
+  if (((Page.state == 2) && (Page.current_newly_added_num > 0)) || ((Page.state == 3) && (Page.current_row_num > 0))) {
+    html += '<tr><td id="goToBack" title="Previous citation in list" align="left" width="10%" ' + pointer_style + ' onclick="Page.checkInputAndSave(\'' + tempType + '\', \'' + merge + '\', \'' + timestamp + '\');return false;Page.goToBackCitation();"><font size="+2">Back</font></td>';
+	} else {
 		html += '<tr><td id="goToBack" align="left" width="10%"></td>';	
 	}
 	return html;
@@ -1251,13 +1231,15 @@ Page.printBackTD = function(pointer_style)
  * Params:
  *   pointer_style - ???
 */
-Page.printNextTD = function(pointer_style)
-{
+Page.printNextTD = function(pointer_style, _citation) {
 	var html = '';
+  var tempType = "check_authors";
+  var merge = "";
+  var timestamp = _citation.entryTime;
+
 	if (((Page.state == 2) && (Page.current_newly_added_num < Page.newly_added_citations.length-1)) || ((Page.state == 3) && (Page.current_row_num < Page._citations.length-1))) {
-		html += '<td id="goToNext" title="Next citation in list" align="right" width="10%" ' + pointer_style + ' onclick="Page.goToNextCitation();"><font size="+2">Next</font></td>';
-	}
-	else {
+		html += '<td id="goToNext" title="Next citation in list" align="right" width="10%" ' + pointer_style + ' onclick="Page.checkInputAndSave(\'' + tempType + '\', \'' + merge + '\', \'' + timestamp + '\');return false;Page.goToNextCitation();"><font size="+2">Next</font></td>';
+	} else {
 		html += '<td id="goToNext" align="right" width="10%" ></td>';	
 	}
 	return html;
