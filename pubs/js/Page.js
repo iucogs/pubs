@@ -1321,7 +1321,7 @@ Page.checkForCitationChanges = function()
 
 /*
  * Checks if there are any more existing new citations and sets the currently
- * desplayed one as the next available one in the Page.newly_added_citations
+ * displayed one as the next available one in the Page.newly_added_citations
  * array.
 */
 Page.goToNextCitation = function()  
@@ -1362,7 +1362,7 @@ Page.goToNextCitation = function()
  * displays previous one if it exists.
 */
 Page.goToBackCitation = function()
-{
+{ 
 	if (Page.checkForCitationChanges())
 	{
 		if (Page.state == 2)
@@ -1391,7 +1391,7 @@ Page.goToBackCitation = function()
 				Page.oneCitationInPanel(Page._citations[Page.current_row_num], "", "");
 			}
 		}
-	}
+	} 
 }
 
 /*
