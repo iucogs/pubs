@@ -486,6 +486,7 @@ Page.onResponseCheckAuthors = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	
+	
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 	
 		if (responseObj.citations[0].citation_id) // citation id is returned; therefore, returning a citation
@@ -495,6 +496,7 @@ Page.onResponseCheckAuthors = function()
 			
 			Page.savingCitationEnteredByHandIntoCollection = false;  //irrelevant if not saving a citation entered by hand
 			Page.showFeedbackAfterSave(responseObj);
+
 		}
 		else // no citation id; therefore returning authors array
 		{
@@ -517,6 +519,7 @@ Page.showFeedbackAfterSave = function(responseObj)
 	//send back either a success message or an error message.
 	document.getElementById("panel1_div").style.display = 'none';	//hide
 	document.getElementById("panel2_div").style.display = '';	//show
+	if (differenceString == "") {
   for (var i=0; i<6; i++)	{
 	  if (((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'ln'] != sentCitation['author'+i+'ln']))	|| ((sentCitation['author'+i+'ln'] != "") && (Page._current_citation['author'+i+'fn'] != "") && (Page._current_citation['author'+i+'fn'] != sentCitation['author'+i+'fn'])))	{
 	  	var personObj=new Object();
@@ -567,6 +570,10 @@ Page.showFeedbackAfterSave = function(responseObj)
 		// update
 		
 		Page.updateCitationsArraysAndTabs_after_save();	
+		}
+	else {
+		document.getElementById('panel2_div').innerHTML = differenceString;
+	}
 }
 
 /*
@@ -1177,10 +1184,10 @@ Page.printCitationSaveButton = function(_citation, fieldFlag, newFlag) {
 	html += '<table width="100%" border="0">';
 	
 	if(fieldFlag == "text") {
-		html += Page.printBackTD(pointer_style);
+		html += Page.printBackTD(pointer_style, _citation);
 		html += '<td><center>';
 		html += Page.printCitationEditButton(Page._current_citation, '+3');
-  	html += Page.printNextTD(pointer_style);
+  	html += Page.printNextTD(pointer_style, _citation);
 		html += '</tr>';	
 	} else {
 		var tempType;
