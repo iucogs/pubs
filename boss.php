@@ -41,9 +41,9 @@ else
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'POST': 
     if (strpos($cmd, 'citation'))    
-      if($_SERVER['REQUEST_URI'], 'match')
+      if(strpos($_SERVER['REQUEST_URI'], 'match'))
         $cmd .= 'match_POST';
-      elseif($SERVER['REQUEST_URI'], 'parse')
+      elseif(strpos($SERVER['REQUEST_URI'], 'parse'))
         $cmd .= 'parse_POST';
       else
         $cmd .= 'citation_POST ';
@@ -65,7 +65,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $owners = explode("\n", $_POST['owners']);
       
       for ($i = 0; $i < sizeof($collectionNames); $i++) {
-        if($debug){echo $cmd."\n"};
+        if($debug){echo $cmd."\n";}
         array_push($resultAccumulator, exec($cmd.'"'.$collectionNames[$i].'" "'.$submitters[$i].'" "'.$owners[$i].'"'));
       }  
     }
