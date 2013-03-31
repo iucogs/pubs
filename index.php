@@ -7,7 +7,7 @@ require_once($document_root.'lib/adLDAP.php');
 ?> 
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
 <title>Publications currently <?php if(DB_NAME != "pubs") echo " [".DB_NAME."]";?></title>
@@ -86,6 +86,8 @@ function LoggedIn($user_info, $document_root)
 {
 ?>
 
+<link href="<?php echo $document_root;?>css/bootstrap/css/bootstrap.css"
+rel="stylesheet" media="screen" />
 
 <link href="<?php echo $document_root;?>css/layout.css" rel="stylesheet" type="text/css" />
 <!-- CSS for Menu-->
@@ -112,6 +114,8 @@ function LoggedIn($user_info, $document_root)
 }
 </style>
 
+<!-- JQuery js files -->
+<script src="http://code.jquery.com/jquery-latest.js"></script>
 
 <script type="text/javascript" src="<?php echo $document_root;?>js/validate.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/Ajax.js"></script>
@@ -196,12 +200,13 @@ else
     <input type='button' id="homeButton" value='Home' onclick='Page.homePage()'/>
 	</td>-->
     
+    <!-- Search field with separate buttons for separate searches. 
     <td>
 	<form name="searchForm">		
-	<table><tr>
+    <table><tr>
     <td>Search:&nbsp;</td>
     <td>
-	<input text="text" size="30" id="search_keywords" name="search_keywords">
+	<input type="text" size="30" id="search_keywords" name="search_keywords">
 	<input type="submit" value="All" onclick="Page.searchCitations_request('all');return false;">
 	</td>
     <td>
@@ -215,18 +220,19 @@ else
 	</td>
     <td>
 	<input type="submit" value="Citation Id" onclick="Page.searchCitations_request('citation_id'); return false;">
-	</td></tr>
-	</table>		
+	</td>
+    <td>
+    </td></tr>
+    </table>		
 	</form>
     </td>
-    
-   
+    -->
+
      
      <td><div id="owner_div"></div></td>
      
       <td align="right">
-    
-    
+     
     <?php
 	echo "<table><tr>";
 	echo "<td class='pointerhand' onclick='Page.get_faculty_request();'>Home</td>";
@@ -259,11 +265,28 @@ else
 	echo "</tr></table>";
 	?>
      
-     </td>
+    </td>
      
-     </tr></table>
+    </tr></table>
      
-     
+    <!-- select style at line 1199 in bootstrap.css -->
+    <form>
+        <div class="input-prepend input-append">
+        <select id="search_filter">
+            <option value="all">All</option>
+            <option value="author">Author</option>
+            <option value="title">Title</option>
+            <option value="journal">Journal</option>
+            <option value="citation_id">Citation ID</option>
+        </select>
+	    <input type="text" size="30" id="search_keywords" name="search_keywords">
+        <button type="submit" class="btn"
+        onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
+            <i class="icon-search"></i> Search
+        </button>
+        </div>
+    </form>
+       
 
     </div>
     
