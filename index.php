@@ -190,7 +190,9 @@ else
 
 </head>
 
-<body class="yui-skin-sam" onLoad="Page.initializePanel(); Page.inputMethod(9);">
+<!-- 40px padding on body is to offset on account of a navbar-fixed-top div -->
+<body class="yui-skin-sam" onLoad="Page.initializePanel(); Page.inputMethod(9);"
+style="padding: 40px">
 <div id="welcome"></div>
 <div id="layout">
 	<div id="top" style="display:none; text-align:left">
@@ -200,7 +202,9 @@ else
     <input type='button' id="homeButton" value='Home' onclick='Page.homePage()'/>
 	</td>-->
     
-    <!-- Search field with separate buttons for separate searches. 
+    <!-- Search field with separate buttons for separate searches. This was
+         commented out and replaced by bootstrap div form which is lower in
+         file. 
     <td>
 	<form name="searchForm">		
     <table><tr>
@@ -228,7 +232,10 @@ else
     </td>
     -->
 
-     
+    <!-- This part of the page navigation has been replaced by a bootstrap
+         navbar at the top of the page. The owner_div has been moved to sit
+         parallel with the search interface below the navbar.
+
      <td><div id="owner_div"></div></td>
      
       <td align="right">
@@ -268,25 +275,72 @@ else
     </td>
      
     </tr></table>
-     
-    <!-- select style at line 1199 in bootstrap.css -->
-    <form>
-        <div class="input-prepend input-append">
-        <select id="search_filter">
-            <option value="all">All</option>
-            <option value="author">Author</option>
-            <option value="title">Title</option>
-            <option value="journal">Journal</option>
-            <option value="citation_id">Citation ID</option>
-        </select>
-	    <input type="text" size="30" id="search_keywords" name="search_keywords">
-        <button type="submit" class="btn"
-        onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
-            <i class="icon-search"></i> Search
-        </button>
-        </div>
-    </form>
-       
+-->
+
+    <!-- Homepage html created at UserManagement.js:624 -->
+
+    <div class="navbar navbar-fixed-top navbar-inverse">
+        <div class="navbar-inner">
+            <ul class="nav pull-right">
+            <?php
+            echo "<li class='pointerhand'
+            onclick='Page.get_faculty_request();'><p class='navbar-text'>Home</p></li>";
+            echo '<li class="divider-vertical"></li>';
+            
+            if ($user_info == "") 
+            {
+                echo "<li class='pointerhand'
+                onclick='Page.register();'><p class='navbar-text'>Register</p></li>";
+                echo '<li class="divider-vertical"></li>';
+                echo "<li> <form class='navbar-form' action='cas.php'><input
+                type='hidden' id='owner' name='owner' value='' /><input
+                type='hidden' id='currentCollection' name='currentCollection'
+                value=''><button class='btn btn-inverse' type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
+            }
+            else
+            {
+                
+                if ($user_info['admin'] == 1)
+                {
+                    echo "<td class='pointerhand' onclick='Page.adminPage(0,0);'>Admin</td>"; //Abhinav
+                    echo '<td>::</td>';
+                }
+                if ($user_info['cogs'] == 1 && !($user_info['cogs'] == 1 && $user_info['admin'] == 1) )
+                {
+                    echo "<td class='pointerhand' onclick='Page.adminPage(0,1);'>Admin</td>"; //Abhinav 
+                    echo '<td>::</td>';
+                }
+                echo "<td class='pointerhand' onclick='Page.myAccount();'>My Account</td>";
+                echo '<td>::</td>';
+                echo '<td><a href="'.$document_root.'logout.php" >Logout</a></td>';
+            }
+            ?>
+            </ul>            
+        </div> <!-- navbar-inner -->
+    </div> <!-- navbar -->
+
+    <div class="row">
+        <form>
+            <div class="span6">
+                    <div class="input-prepend input-append">
+                    <select id="search_filter">
+                        <option value="all">All</option>
+                        <option value="author">Author</option>
+                        <option value="title">Title</option>
+                        <option value="journal">Journal</option>
+                        <option value="citation_id">Citation ID</option>
+                    </select>
+                    <input type="text" size="30" id="search_keywords" name="search_keywords">
+                    <button type="submit" class="btn"
+                    onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
+                        <i class="icon-search"></i> Search
+                    </button>
+                    </div>
+            </div>
+
+            <div class="owner_div offset6"></div>
+        </form>
+    </div> <!-- row -->
 
     </div>
     

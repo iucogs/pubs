@@ -618,8 +618,7 @@ Page.setOwnerDiv = function()
 }
 
 // COMMENTFLAG //
-// homePage		- Called by index.php
-//				- Called by onClick event of "Home" button
+// Displays the homepage. Called when page first loads and by onClick event of "home" button.  
 Page.homePage = function(faculty)
 {	
 	// Reset owner then rewrite proxy select menu
