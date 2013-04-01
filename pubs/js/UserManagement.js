@@ -628,17 +628,19 @@ Page.homePage = function(faculty)
 	}
 	
 	var html = '<div class="text-center"><h1>Welcome to Publications</h1><p class="small">sponsored by the Indiana University Cognitive Science Program.</p></div>';
-  html += '<ul class="nav nav-list"><li class="divider"></li></ul>';	
-  
+  //html += '<ul class="nav nav-list"><li class="divider"></li></ul>';	
+ 
+  html += '<button class="btn btn-large btn-block btn-inverse disabled">Get started with a search or by selecting a faculty member below!</button>';
+
   html += '<ul class="inline unstyled" align="center">';
 	for (var i=0; i<faculty.length; i++)
 	{
-	  if (i%(faculty.length/4) == 0) {
+	  if (i%Math.ceil(faculty.length/8) == 0) {
       html += '<li><ul class="unstyled">';
     }
 		html += '<li class="pointerhand" onclick="Page.owner=\'' + faculty[i].username + '\';Page.owner_fullname=\'' + faculty[i].firstname + ' ' +faculty[i].lastname + '\';Page.setHasProxy();Page.currentCollection=\'' + faculty[i].collection_id + '\'; Page.getFacultyRepresentativePublications(\'' + faculty[i].username + '\');">' + faculty[i].lastname + ', ' + faculty[i].firstname + '</li>';
 	
-    if ((i+1)%(faculty.length/4) == 0 || i+1==faculty.length) {
+    if ((i + 1)%Math.ceil(faculty.length/8) == 0 || (i + 1)==faculty.length) {
       html += '</ul></li>';
     }
   }
@@ -652,7 +654,7 @@ Page.homePage = function(faculty)
 		html += '<tr><td class="pointerhand" onclick="Page.owner=\'' + faculty[i].username + '\';Page.owner_fullname=\'' + faculty[i].firstname + ' ' +faculty[i].lastname + '\';Page.setHasProxy();Page.currentCollection=\'' + faculty[i].collection_id + '\'; Page.getFacultyRepresentativePublications(\'' + faculty[i].username + '\');">' + faculty[i].lastname + ', ' + faculty[i].firstname + '</td></tr>';
 	}
 	html += '</table>';
-  */
+ */ 
 	document.getElementById('secondary').innerHTML = html;
 	Page.hideCitations();
 }

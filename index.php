@@ -302,17 +302,17 @@ style="padding: 40px">
                 
                 if ($user_info['admin'] == 1)
                 {
-                    echo "<td class='pointerhand' onclick='Page.adminPage(0,0);'>Admin</td>"; //Abhinav
-                    echo '<td>::</td>';
+                    echo "<li class='pointerhand'onclick='Page.adminPage(0,0);'>Admin</li>"; //Abhinav
+                    echo '<li class="divider-vertical"></li>';
                 }
                 if ($user_info['cogs'] == 1 && !($user_info['cogs'] == 1 && $user_info['admin'] == 1) )
                 {
-                    echo "<td class='pointerhand' onclick='Page.adminPage(0,1);'>Admin</td>"; //Abhinav 
-                    echo '<td>::</td>';
+                    echo "<li class='pointerhand' onclick='Page.adminPage(0,1);'>Admin</li>"; //Abhinav 
+                    echo '<li class="divider-vertical"></li>';
                 }
-                echo "<td class='pointerhand' onclick='Page.myAccount();'>My Account</td>";
-                echo '<td>::</td>';
-                echo '<td><a href="'.$document_root.'logout.php" >Logout</a></td>';
+                echo "<li class='pointerhand navbar-text' onclick='Page.myAccount();'>My Account</li>";
+                echo '<li class="divider-vertical"></li>';
+                echo '<li><a href="'.$document_root.'logout.php" >Logout</a></li>';
             }
             ?>
             </ul>            
