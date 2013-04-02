@@ -112,6 +112,40 @@ rel="stylesheet" media="screen" />
     border-style: solid;
     background-color: #EEEEEE;
 }
+
+/* set up Essays1743 font for header... if i can figure out how to do it... (Alex)*/
+@font-face {
+    font-family: "Essays1743";
+    src: url("pubs/css/fonts/essays1743/Essays1743.sfd"),
+         url("pubs/css/fonts/essays1743/Essays1743.otf") format("opentype");
+
+}
+
+@font-face {
+    font-family: "Essays1743";
+    src: url("pubs/css/fonts/essays1743/Essays1743-Bold.sfd"),
+         url("pubs/css/fonts/essays1743/Essays1743-Bold.otf") format("opentype");
+         font-weight: bold;
+} 
+
+@font-face {
+    font-family: "Essays1743";
+    src: url("pubs/css/fonts/essays1743/Essays1743-Italic.sfd"),
+         url("pubs/css/fonts/essays1743/Essays1743-Italic.otf") format("opentype");
+         font-style: italic;
+}
+
+@font-face {
+    font-family: "Essays1743";
+    src: url("pubs/css/fonts/essays1743/Essays1743-BoldItalic.sfd"),
+         url("pubs/css/fonts/essays1743/Essays1743-BoldItalic.otf") format("opentype");
+         font-weight: bold;
+         font-style: italic;
+}
+
+.essays {
+    font-family: "Essays1743";
+}
 </style>
 
 <!-- JQuery and Bootstrap js files -->
@@ -303,7 +337,7 @@ style="padding: 50px">
                 </form>
             </div>
             
-            <div class="owner_div offset6"></div>
+            <div id="owner_div" class="span3 navbar-text" style="padding-top:5px;"></div>
 
             <ul class="nav pull-right span3">
             <?php
