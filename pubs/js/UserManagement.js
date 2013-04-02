@@ -631,20 +631,13 @@ Page.homePage = function(faculty)
   //html += '<ul class="nav nav-list"><li class="divider"></li></ul>';	
  
   html += '<button class="btn btn-large btn-block btn-inverse disabled">Get started with a search or by selecting a faculty member below!</button>';
-
-  html += '<ul class="inline unstyled" align="center">';
+  
+  html += '<div class="row-fluid"><ul class="inline unstyled">';
 	for (var i=0; i<faculty.length; i++)
 	{
-	  if (i%Math.ceil(faculty.length/8) == 0) {
-      html += '<li><ul class="unstyled">';
-    }
-		html += '<li class="pointerhand" onclick="Page.owner=\'' + faculty[i].username + '\';Page.owner_fullname=\'' + faculty[i].firstname + ' ' +faculty[i].lastname + '\';Page.setHasProxy();Page.currentCollection=\'' + faculty[i].collection_id + '\'; Page.getFacultyRepresentativePublications(\'' + faculty[i].username + '\');">' + faculty[i].lastname + ', ' + faculty[i].firstname + '</li>';
-	
-    if ((i + 1)%Math.ceil(faculty.length/8) == 0 || (i + 1)==faculty.length) {
-      html += '</ul></li>';
-    }
+		html += '<li class="pointerhand" style="width:18%;" onclick="Page.owner=\'' + faculty[i].username + '\';Page.owner_fullname=\'' + faculty[i].firstname + ' ' +faculty[i].lastname + '\';Page.setHasProxy();Page.currentCollection=\'' + faculty[i].collection_id + '\'; Page.getFacultyRepresentativePublications(\'' + faculty[i].username + '\');">' + faculty[i].lastname + ', ' + faculty[i].firstname + '</li>';
   }
-	html += '</ul>';
+	html += '</ul></div>';
 
   /*
   // old way of displaying faculty

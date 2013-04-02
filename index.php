@@ -114,8 +114,9 @@ rel="stylesheet" media="screen" />
 }
 </style>
 
-<!-- JQuery js files -->
+<!-- JQuery and Bootstrap js files -->
 <script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="pubs/css/bootstrap/js/bootstrap.min.js"></script>
 
 <script type="text/javascript" src="<?php echo $document_root;?>js/validate.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/Ajax.js"></script>
@@ -192,7 +193,7 @@ else
 
 <!-- 40px padding on body is to offset on account of a navbar-fixed-top div -->
 <body class="yui-skin-sam" onLoad="Page.initializePanel(); Page.inputMethod(9);"
-style="padding: 40px">
+style="padding: 50px">
 <div id="welcome"></div>
 <div id="layout">
 	<div id="top" style="display:none; text-align:left">
@@ -280,8 +281,31 @@ style="padding: 40px">
     <!-- Homepage html created at UserManagement.js:624 -->
 
     <div class="navbar navbar-fixed-top navbar-inverse">
-        <div class="navbar-inner">
-            <ul class="nav pull-right">
+        <div class="navbar-inner"> <!-- max-height set to 40px in bootstrap.css:4368 -->
+            
+            <div class="span6" id="search_ui" style="padding-top:5px;">  
+                <select class="pull-left" id="search_filter">
+                    <option value="all">All</option>
+                    <option value="author">Author</option>
+                    <option value="title">Title</option>
+                    <option value="journal">Journal</option>
+                    <option value="citation_id">Citation ID</option>
+                </select>
+                <form class="navbar-search">
+                    <div class="input-append">
+                        <input type="text" size="30" id="search_keywords" name="search_keywords">
+                        <button type="submit" class="btn btn-inverse"
+                        onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
+                            <i class="icon-search icon-white"></i> Search
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+            
+            <div class="owner_div offset6"></div>
+
+            <ul class="nav pull-right span3">
             <?php
             echo "<li class='pointerhand'
             onclick='Page.get_faculty_request();'><p class='navbar-text'>Home</p></li>";
@@ -293,7 +317,7 @@ style="padding: 40px">
                 onclick='Page.register();'><p class='navbar-text'>Register</p></li>";
                 echo '<li class="divider-vertical"></li>';
                 echo "<li> <form class='navbar-form' action='cas.php'><input
-                type='hidden' id='owner' name='owner' value='' /><input
+                type='hidden' id='owner' name='owner' value=''/><input
                 type='hidden' id='currentCollection' name='currentCollection'
                 value=''><button class='btn btn-inverse' type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
             }
@@ -318,30 +342,6 @@ style="padding: 40px">
             </ul>            
         </div> <!-- navbar-inner -->
     </div> <!-- navbar -->
-
-    <div class="row">
-        <form>
-            <div class="span6">
-                    <div class="input-prepend input-append">
-                    <select id="search_filter">
-                        <option value="all">All</option>
-                        <option value="author">Author</option>
-                        <option value="title">Title</option>
-                        <option value="journal">Journal</option>
-                        <option value="citation_id">Citation ID</option>
-                    </select>
-                    <input type="text" size="30" id="search_keywords" name="search_keywords">
-                    <button type="submit" class="btn"
-                    onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
-                        <i class="icon-search"></i> Search
-                    </button>
-                    </div>
-            </div>
-
-            <div class="owner_div offset6"></div>
-        </form>
-    </div> <!-- row -->
-
     </div>
     
     <div id="home">
