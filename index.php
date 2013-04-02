@@ -116,28 +116,28 @@ rel="stylesheet" media="screen" />
 /* set up Essays1743 font for header... if i can figure out how to do it... (Alex)*/
 @font-face {
     font-family: "Essays1743";
-    src: url("pubs/css/fonts/essays1743/Essays1743.sfd"),
+    src: url("pubs/css/fonts/essays1743/Essays1743.woff") format("woff"),
          url("pubs/css/fonts/essays1743/Essays1743.otf") format("opentype");
 
 }
 
 @font-face {
     font-family: "Essays1743";
-    src: url("pubs/css/fonts/essays1743/Essays1743-Bold.sfd"),
+    src: url("pubs/css/fonts/essays1743/Essays1743-Bold.woff") format("woff"),
          url("pubs/css/fonts/essays1743/Essays1743-Bold.otf") format("opentype");
          font-weight: bold;
 } 
 
 @font-face {
     font-family: "Essays1743";
-    src: url("pubs/css/fonts/essays1743/Essays1743-Italic.sfd"),
+    src: url("pubs/css/fonts/essays1743/Essays1743-Italic.woff") format("woff"),
          url("pubs/css/fonts/essays1743/Essays1743-Italic.otf") format("opentype");
          font-style: italic;
 }
 
 @font-face {
     font-family: "Essays1743";
-    src: url("pubs/css/fonts/essays1743/Essays1743-BoldItalic.sfd"),
+    src: url("pubs/css/fonts/essays1743/Essays1743-BoldItalic.woff") format("woff"),
          url("pubs/css/fonts/essays1743/Essays1743-BoldItalic.otf") format("opentype");
          font-weight: bold;
          font-style: italic;
@@ -231,9 +231,10 @@ style="padding: 50px">
 <div id="welcome"></div>
 <div id="layout">
 	<div id="top" style="display:none; text-align:left">
+    <!--
     <table style="width:100%"><tr>
     
-    <!--<td>
+    <td>
     <input type='button' id="homeButton" value='Home' onclick='Page.homePage()'/>
 	</td>-->
     
@@ -316,8 +317,8 @@ style="padding: 50px">
 
     <div class="navbar navbar-fixed-top navbar-inverse">
         <div class="navbar-inner"> <!-- max-height set to 40px in bootstrap.css:4368 -->
-            
-            <div class="span6" id="search_ui" style="padding-top:5px;">  
+            <div class="span6" id="search_ui">  
+                <form class="navbar-search">
                 <select class="pull-left" id="search_filter">
                     <option value="all">All</option>
                     <option value="author">Author</option>
@@ -325,7 +326,6 @@ style="padding: 50px">
                     <option value="journal">Journal</option>
                     <option value="citation_id">Citation ID</option>
                 </select>
-                <form class="navbar-search">
                     <div class="input-append">
                         <input type="text" size="30" id="search_keywords" name="search_keywords">
                         <button type="submit" class="btn btn-inverse"
