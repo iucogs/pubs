@@ -628,7 +628,7 @@ Page.homePage = function(faculty)
 	}
 	
 	var html = '<div class="text-center"><h1 class="essays"><font size="14">Welcome to Publications</font></h1><p class="small">sponsored by the Indiana University Cognitive Science Program.</p></div>';
-  html += '<button class="btn btn-large btn-block btn-inverse disabled essays">Get started with a search or by selecting a faculty member below!</button>';
+  html += '<button class="btn btn-large btn-block btn-gray disabled essays">Get started with a search or by selecting a faculty member below!</button>';
 
   html += '<div class="row-fluid"><ul class="inline unstyled">';
 	for (var i=0; i<faculty.length; i++)

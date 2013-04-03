@@ -315,7 +315,7 @@ style="padding: 50px">
 
     <!-- Homepage html created at UserManagement.js:624 -->
 
-    <div class="navbar navbar-fixed-top navbar-inverse">
+    <div class="navbar navbar-fixed-top navbar-gray">
         <div class="navbar-inner"> <!-- max-height set to 40px in bootstrap.css:4368 -->
             <div class="span6" id="search_ui">  
                 <form class="navbar-search">
@@ -328,9 +328,9 @@ style="padding: 50px">
                 </select>
                     <div class="input-append">
                         <input type="text" size="30" id="search_keywords" name="search_keywords">
-                        <button type="submit" class="btn btn-inverse"
+                        <button type="submit" class="btn btn-gray"
                         onclick="Page.searchCitations_request($('#search_filter').find(':selected').val()); return false;">
-                            <i class="icon-search icon-white"></i> Search
+                            <i class="icon-search"></i> Search
                         </button>
                     </div>
 
@@ -353,7 +353,7 @@ style="padding: 50px">
                 echo "<li> <form class='navbar-form' action='cas.php'><input
                 type='hidden' id='owner' name='owner' value=''/><input
                 type='hidden' id='currentCollection' name='currentCollection'
-                value=''><button class='btn btn-inverse' type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
+                value=''><button class='btn btn-gray' type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
             }
             else
             {

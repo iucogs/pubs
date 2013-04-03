@@ -3513,6 +3513,39 @@ input[type="button"].btn-block {
   background-color: #24748c \9;
 }
 
+.btn-gray {
+  color: #222222;
+  text-shadow: 0 0px 0 rgba(70, 70, 70, 0.25);
+  background-color: #7d7e80;
+  *background-color: #7d7e80;
+  background-image: -moz-linear-gradient(top, #c2c4c6, #7f8082);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#c2c4c6), to(#7f8082));
+  background-image: -webkit-linear-gradient(top, #c2c4c6, #7f8082);
+  background-image: -o-linear-gradient(top, #c2c4c6, #7f8082);
+  background-image: linear-gradient(to bottom, #c2c4c6, #7f8082);
+  background-repeat: repeat-x;
+  border-color: #7d7e80 #7d7e80 #c2c4c6;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffc2c4c6', endColorstr='#ff7f8082', GradientType=0);
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+}
+
+.btn-gray:hover,
+.btn-gray:focus,
+.btn-gray:active,
+.btn-gray.active,
+.btn-gray.disabled,
+.btn-gray[disabled] {
+  color: #000000;
+  background-color: #7f8082;
+  *background-color: #8f9092;
+}
+
+.btn-gray:active,
+.btn-gray.active {
+  background-color: #707070 \9;
+}
+
 .btn-inverse {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -4784,6 +4817,27 @@ input[type="submit"].btn.btn-mini {
   -webkit-border-radius: 6px 0 6px 6px;
      -moz-border-radius: 6px 0 6px 6px;
           border-radius: 6px 0 6px 6px;
+}
+
+.navbar-gray .navbar-inner {
+  background-color: #b0b2b4;
+  background-image: -moz-linear-gradient(top, #b0b2b4, #6d6e70);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#b0b2b4), to(#6d6e70));
+  background-image: -webkit-linear-gradient(top, #b0b2b4, #6d6e70);
+  background-image: -o-linear-gradient(top, #b0b2b4, #6d6e70);
+  background-image: linear-gradient(to bottom, #b0b2b4, #6d6e70);
+  background-repeat: repeat-x;
+  border-color: #252525;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffb0b2b4', endColorstr='#ff6d6e70', GradientType=0);
+}
+
+.navbar-gray .navbar-text {
+  color: #222222;
+}
+
+.navbar-gray .divider-vertical {
+  border-right-color: #b0b2b4;
+  border-left-color: #6d6e70;
 }
 
 .navbar-inverse .navbar-inner {
