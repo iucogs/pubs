@@ -390,7 +390,7 @@ style="padding: 50px">
     <div id="right_col"></div>   <!-- Right menu -->
 
     <div id="citations"></div> <!-- Citations listing --> 
-    <div id="secondary"></div> <!-- Upload Citations, Paste Citations, Export Citations & Manage Collections listing -->
+    <div id="secondary" style="margin:0px auto;"></div> <!-- Upload Citations, Paste Citations, Export Citations & Manage Collections listing -->
     
     <div id="panel1"></div> <!-- Panel for error messages -->
     <div id="panel2"></div> <!-- Panel for saving citation -->
