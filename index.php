@@ -337,9 +337,9 @@ style="padding: 50px">
                 </form>
             </div>
             
-            <div id="owner_div" class="span3 navbar-text" style="padding-top:5px;"></div>
+            <div id="owner_div" class="navbar-text span6" style="padding-top:5px;"></div>
 
-            <ul class="nav pull-right span3">
+            <ul class="nav pull-right">
             <?php
             echo "<li class='pointerhand'
             onclick='Page.get_faculty_request();'><p class='navbar-text'>Home</p></li>";
@@ -370,7 +370,8 @@ style="padding: 50px">
                 }
                 echo "<li class='pointerhand navbar-text' onclick='Page.myAccount();'>My Account</li>";
                 echo '<li class="divider-vertical"></li>';
-                echo '<li><a href="'.$document_root.'logout.php" >Logout</a></li>';
+                echo '<li><a href="'.$document_root.'logout.php"
+                style="padding-left:0px;padding-right:20px;">Logout</a></li>';
             }
             ?>
             </ul>            

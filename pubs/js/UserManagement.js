@@ -541,7 +541,7 @@ Page.viewOwners_response = function()
 Page.rewriteSelectMenu = function()
 {
 	var html = '';
-	html += 'Show collections belonging to: <select id="setOwner" onclick="Page.changeSetOwnerSelectMenu(this) ;">';
+	html += '<ul class="nav"><li style="padding:5px;">Show collections belonging to: </li><li><select id="setOwner" onclick="Page.changeSetOwnerSelectMenu(this) ;">';
 		
 	//Commented by Abhinav		
 	/*if(!Page.hasProxy) {
@@ -564,7 +564,7 @@ Page.rewriteSelectMenu = function()
 			html += '>' + Page.proxies[i].lastname + ', ' + Page.proxies[i].firstname + '</option>';
 		}
 	}
-	html += '</select>';
+	html += '</select></li></ul>';
 	document.getElementById('owner_div').innerHTML = html;				//set	
 	Page.cache_all_request('proxies');
 
