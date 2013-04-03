@@ -350,10 +350,11 @@ style="padding: 50px">
                 echo "<li class='pointerhand'
                 onclick='Page.register();'><p class='navbar-text'>Register</p></li>";
                 echo '<li class="divider-vertical"></li>';
-                echo "<li> <form class='navbar-form' action='cas.php'><input
+                echo "<li style='padding-right:10px;'> <form class='navbar-form' action='cas.php'><input
                 type='hidden' id='owner' name='owner' value=''/><input
                 type='hidden' id='currentCollection' name='currentCollection'
-                value=''><button class='btn btn-gray' type='submit' value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
+                value=''><button class='btn btn-gray' type='submit'
+                value='Login' onclick='document.getElementById(\"owner\").value=Page.owner;document.getElementById(\"currentCollection\").value=Page.currentCollection;'>Login</button></form></li>";
             }
             else
             {
