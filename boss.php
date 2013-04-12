@@ -43,7 +43,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     if (strpos($cmd, 'citation'))    
       if(strpos($_SERVER['REQUEST_URI'], 'match'))
         $cmd .= 'match_POST';
-      elseif(strpos($SERVER['REQUEST_URI'], 'parse'))
+      elseif(strpos($_SERVER['REQUEST_URI'], 'parse'))
         $cmd .= 'parse_POST';
       else
         $cmd .= 'citation_POST ';
