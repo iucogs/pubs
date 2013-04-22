@@ -1,5 +1,6 @@
 var cogsvalue;
 
+// Creates the back button in the page.
 Page.print_user_back_button = function()
 {
 	var admin_back_html = '<input type="button" value="Back to admin" onclick="Page.adminPage(0,\''+ cogsvalue +'\');" /><br><br>';
@@ -308,6 +309,8 @@ Page.viewproxy_request = function(submitter)
 
 //Abhinav
 
+// Sends an Ajax request to view the sorted list of all proxies for current
+// user.
 Page.viewsortproxy_request = function(submitter)
 {
 	var jsonStr = '{"request": {"type": "sortview", "submitter": "' + submitter + '"}}';
@@ -502,6 +505,9 @@ Page.viewOwners_request = function()
 	Ajax.SendJSON('services/proxy.php', Page.viewOwners_response, jsonStr);
 }
 
+// Upon receiving an Ajax response object, this will compile the Page's lists of
+// proxies and owners create the select menu to choose from owners by cally
+// Page.rewriteSelectMenu().
 Page.viewOwners_response = function()
 {
 	var html = '';
@@ -538,6 +544,8 @@ Page.viewOwners_response = function()
 	return '';
 }
 
+// Creates the dropdown select for the different owners of citations in the
+// proxies list
 Page.rewriteSelectMenu = function()
 {
 	var html = '';
@@ -570,6 +578,7 @@ Page.rewriteSelectMenu = function()
 
 }
 
+// Shows only citations from the selected owner
 Page.changeSetOwnerSelectMenu = function(myselect)
 {
 	// Cancel onchange event
@@ -585,12 +594,15 @@ Page.changeSetOwnerSelectMenu = function(myselect)
 	Page.getCitationsGivenCollectionID();
 }
 
+// Sends an Ajax request to get the list of faculty
 Page.get_faculty_request = function()
 {
 	var jsonStr = '{"request": {"type": "get_faculty"}}';
 	Ajax.SendJSON('services/user.php', Page.get_faculty_response, jsonStr);
 }
 
+// Fills index.php with the home page by calling homePage() on the list of
+// faculty.
 Page.get_faculty_response = function()
 {
 	var html = '';
@@ -602,6 +614,7 @@ Page.get_faculty_response = function()
 	}
 }
 
+// Checks if the Page's proxy list contains a proxy belonging to the user
 Page.setHasProxy = function()
 {
 	var found = false;
@@ -612,12 +625,12 @@ Page.setHasProxy = function()
 	Page.hasProxy = found;
 }
 
+// Fills the owner_div on index.php by calling Page.viewOwners_request()
 Page.setOwnerDiv = function()
 {
 	Page.viewOwners_request();
 }
 
-// COMMENTFLAG //
 // Displays the homepage. Called when page first loads and by onClick event of "home" button.  
 Page.homePage = function(faculty)
 {	
