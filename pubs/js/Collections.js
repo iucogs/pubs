@@ -35,6 +35,7 @@ Page.mergeSelectedCollections = function()
 	Page.panel1.show();
 }
 
+// Sets the collections to merge to null.
 Page.clearSelectOptions = function()
 {
 	if (trim(document.getElementById('mergeCollectionsTextbox').value) != "")
@@ -48,6 +49,7 @@ Page.clearNewNameTextbox = function()
 	document.getElementById('mergeCollectionsTextbox').value = "";
 }
 
+// sets the name of a newly merged collection
 Page.mergeCollectionsGetName = function()
 {
 	var obj = document.getElementById('mergeCollectionsSelect'); 	
@@ -72,6 +74,8 @@ Page.mergeCollectionsGetName = function()
 	}
 }
 
+// Finds the collection with the given collection_id and name and sets it as the
+// current one to view
 Page.goToNewCollection = function(collection_id, newCollectionName) // Used for going to existing collection as well.
 {
 	Page.currentCollection = collection_id; 						// Can be "all", "unverified", "search"
@@ -85,6 +89,7 @@ Page.goToNewCollection = function(collection_id, newCollectionName) // Used for 
 	Page.panel1.hide();
 }
 
+// view all citations sorted by timestamp
 Page.pageThroughCitations_request = function()
 {
 //	Page.current_page = 1;
@@ -137,6 +142,7 @@ Page.printCollectionNamesMenuForViewing = function()
 }
 
 // Used by Page.updateCollectionFromList() and Page.printCollectionNamesMenuForViewing(). Page.updateCollectionFromList() is called from Page.listCollections everytime.
+// Creates a dropdown menu of all collection names.
 Page.printCollectionNamesMenuForViewing_helper = function()  
 {
 	var html = '<select style="width:92%" name="collectionNamesMenuForViewing" id="collectionNamesMenuForViewing" onchange="Page.selectCollection(this);">';
@@ -192,6 +198,7 @@ Page.printCollectionNamesMenuForViewing_helper = function()
 	return html;
 }
 
+// Shows the collection selected in the dropdown menu
 Page.selectCollection = function(theMenu)
 {
 	var selection = theMenu.options[theMenu.selectedIndex].value; 
@@ -206,6 +213,7 @@ Page.selectCollection = function(theMenu)
 	}
 }
 
+// Creates a dropdown menu to select the citation format and input type
 Page.printInputOptionsMenu = function() 
 {
 	var html = '';
@@ -240,6 +248,7 @@ Page.printInputOptionsMenu = function()
 	return html;
 }
 
+// creates entry form for a citation
 Page.showEnterCitations = function()
 {
 	var html = '<p>' + Page.printBackToCitationsButton() + '</p>';
@@ -350,7 +359,7 @@ Page.showEnterCitations = function()
 }
 
 //abhinav
-
+// Parse text into data for a newly entered citation
 Page.parsetext = function(txt) 
 {
 	var stringArray = new Array()
@@ -454,7 +463,7 @@ document.getElementById("citationInput").value=txt;
 }
 
 
-
+// sets the get type according to the given type. Defaults to getCollection
 Page.set_current_get_type = function(type)
 {
 	if (type == 'all')
@@ -483,6 +492,7 @@ Page.printCollectionNamesMenuForManagingCitations = function()
 	return html;
 }
 
+// Creates a dropdown menu of all the Collections
 // Used by Page.updateCollectionFromList() and Page.printCollectionNamesMenuForManagingCitations(). Page.updateCollectionFromList() is called from Page.listCollections everytime.
 Page.printCollectionNamesMenuForManagingCitations_helper = function()
 {
@@ -514,6 +524,7 @@ Page.printCollectionNamesMenuForManagingCitations_helper = function()
 	return html;
 }
 
+// Sends an Ajax request to get Collection information and list citations
 Page.getCollectionInfoAndListCitations = function()
 {
 	//get collection info
@@ -521,6 +532,7 @@ Page.getCollectionInfoAndListCitations = function()
 	Ajax.SendJSON('services/collections.php', Page.onResponseCollections, jsonStr);
 }
 
+// Sends an Ajax request to get the names and IDs of all the Collections
 Page.getCollectionNamesAndIds = function()
 {
 	//get collection info
@@ -528,6 +540,8 @@ Page.getCollectionNamesAndIds = function()
 	Ajax.SendJSON('services/collections.php', Page.onResponseCollections, jsonStr);
 }
 
+// Upon receiving an Ajax response, sets the Page's collections to the contents
+// of the response and creates a list of citations from the collections
 Page.onResponseCollections = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -540,7 +554,8 @@ Page.onResponseCollections = function()
 	}
 }
 
-Page.getSelectedCheckBoxesCitationIds = function()  // Get selected/checked checkboxes on citations listing.
+// Get selected/checked checkboxes on citations listing
+Page.getSelectedCheckBoxesCitationIds = function() 
 {
 	Page.temp_citation_ids = new Array();
 	var temp_citation_id;
@@ -554,7 +569,8 @@ Page.getSelectedCheckBoxesCitationIds = function()  // Get selected/checked chec
 	return Page.temp_citation_ids;
 }
 
-Page.getSelectedCheckBoxesCollectionIds = function()  // Get selected/checked checkboxes on collections listing.
+// Get selected/checked checkboxes on collections listing
+Page.getSelectedCheckBoxesCollectionIds = function() 
 {
 	var temp_collection_keys = new Array(); 
 	var temp_collection_ids = new Array();
@@ -571,12 +587,16 @@ Page.getSelectedCheckBoxesCollectionIds = function()  // Get selected/checked ch
 	return Array(temp_collection_ids, temp_collection_keys);
 }
 
+// Sends an Ajax request to merge the selected collection
+// (selected_collection_id) with the collections in the given
+// collection_ids_array... (I think)
 Page.mergeCollections_request = function(selected_collection_id, collection_ids_arr)
 {
 	var jsonStr = '{"request": {"type": "merge", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "collection_id": ' + YAHOO.lang.JSON.stringify(selected_collection_id) + ', "collection_ids": '+ YAHOO.lang.JSON.stringify(collection_ids_arr) + '}}';
 	Ajax.SendJSON('services/collections.php', Page.mergeCollections_response, jsonStr);	
 }
 
+// returns the name of the collection with the given collection_id
 Page.getCollectionNameFromPage = function(collection_id)
 {
 	for(var i in Page.collections)
@@ -590,6 +610,9 @@ Page.getCollectionNameFromPage = function(collection_id)
 	return false;
 }
 
+// Upon receiving an Ajax response, update the list of collections and set the
+// collection name of the newly merged collection. Then it creates a button to
+// go to the new collection.
 Page.mergeCollections_response = function() 
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -616,6 +639,7 @@ Page.mergeCollections_response = function()
 	}
 }
 
+// Searches for collection with the given citation_id
 Page.getCollectionsGivenCitationID_request = function(citation_id)
 {
 	var jsonStr = '{"request": {"type": "getCollectionsGivenCitationID", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '", "citation_id": ' + YAHOO.lang.JSON.stringify(citation_id) + '}}';
@@ -647,6 +671,7 @@ Page.getCollectionsGivenCitationID_response = function()
 	}
 }
 
+// Searches for citatioons with the given collection_id
 Page.getCitationsGivenCollectionID = function(citation_id)
 {
 	// Default value
@@ -688,6 +713,7 @@ Page.onResponseGetCitationsGivenCollectionID = function()
 	}
 }
 
+// Creates a textbox to enter a new name for a collection
 Page.renameCollection_request = function(i)
 {
 	Page.collection_to_be_renamed = Page.collections[i];
@@ -743,6 +769,7 @@ Page.renameCollection_response = function()
 	}
 }
 
+// Deletes collections that are selected
 Page.deleteSelectedCollections = function()
 {
 	var result_arr = Page.getSelectedCheckBoxesCollectionIds();
@@ -759,6 +786,7 @@ Page.deleteSelectedCollections = function()
 	Page.panel1.show();
 }
 
+// Generate a button to delete a collection
 Page.deleteCollection_request = function(i)
 {
 	Page.temp_collection_ids = Array(Page.collections[i].collection_id); 
@@ -780,6 +808,7 @@ Page.deleteCollectionHelper_request = function(collection_ids_arr)
 	Ajax.SendJSON('services/collections.php', Page.deleteCollection_response, jsonStr);		 
 }
 
+// Confirms deletion or says there was an error.
 Page.deleteCollection_response = function()
 {
 	if (Ajax.CheckReadyState(Ajax.request)) 
@@ -798,6 +827,7 @@ Page.deleteCollection_response = function()
 	}
 }
 
+// Updates the Page's list of collections
 Page.updateListCollection_request = function()
 {
 	var jsonStr = '{"request": {"type": "getCollectionNamesAndIds", "submitter": "' + Page.submitter + '", "owner": "' + Page.owner + '"}}';
