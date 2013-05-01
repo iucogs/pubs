@@ -1,3 +1,4 @@
+// creates a table row containing author name of the given _citation
 Page.printAuthorRowText = function(_citation)
 {
 	var html = "";
@@ -29,11 +30,14 @@ Page.printAuthorRowText = function(_citation)
 	return html;
 }
 
+// creates a table row containing the given label and _field
 Page.printTableRowText = function(label, _field)
 {
 	return '<tr height="26px" align="left" style="vertical-align:middle"><td><b>'+label+': </b></td><td style="width:100%">' + _field + '</td></tr>';
 }
 
+// create a table row with a label and a scrollable input field of the given
+// height.
 Page.printTableRowScrollableDiv = function(label, _field, height)
 {
 	var html = '';  //id="'+name+'"
@@ -45,11 +49,14 @@ Page.printTableRowScrollableDiv = function(label, _field, height)
 	return html;
 }
 
+// creates a table row with the given label, _field, and a disabled textarea
+// with the given rows and cols
 Page.printTableRowDisabledTextarea = function(label, _field, rows, cols)
 {
 	return '<tr align="left" valign="top"><td><b>'+label+': </b></td><td style="width:100%"><textarea rows="'+rows+'" cols="'+cols+'" disabled="disabled">' + _field + '</textarea></td></tr>';
 }
 
+// Create a table for author information to be entered
 Page.enterAuthorInfo = function(_citation, fieldFlag, citation_suffix) 
 {
 	var html = '';
@@ -78,7 +85,7 @@ Page.enterAuthorInfo = function(_citation, fieldFlag, citation_suffix)
 	return html; 
 }
 
-
+// creates a table for the user to enter title and year information
 Page.enterConstantByPubtypeInfo = function(_citation, fieldFlag, citation_suffix)
 {
 	var html = '';
@@ -98,6 +105,7 @@ Page.enterConstantByPubtypeInfo = function(_citation, fieldFlag, citation_suffix
 	return html;
 }
 
+// creates a table for the user to enter data into fields that aren't constant
 Page.enterChangingByPubtypeInfo = function(_citation, pubtype, flagField, citation_suffix)
 {
 	var html = '';
@@ -164,6 +172,8 @@ Page.enterChangingByPubtypeInfo = function(_citation, pubtype, flagField, citati
 	return html;
 }
 
+// creates a table to enter new information on the current working citation of
+// the given pubtype and with the given citation_suffix
 Page.changePubtypeInfoInTab = function(pubtype, citation_suffix)
 {
 	var citation_suffix = Page.get_citation_suffix_of_active_tab(tabView_b);
@@ -183,7 +193,7 @@ Page.refreshRaw = function() // needed for context menu to function in safari
 {
 }
 
-
+//
 Page.enterRawInfo = function(_citation, fieldFlag, citation_suffix) 
 {
 	var html = '';
