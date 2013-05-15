@@ -1822,7 +1822,7 @@ Page.listCitations = function()
 	var pointer_style = 'class="pointerhand"';
 	var td_highlight = '';
 
-	html += '<table style="background-color:#FFF; border:0px;border-collapse: collapse;">';
+	html += '<table style="background-color:#FFF; border:1px;border-collapse: collapse;">';
 	
 	// Make a copy of citations
 	var cit_copy = Page.copyCitationsForFormat(Page._citations);
@@ -1882,7 +1882,7 @@ Page.listCitations = function()
 							
 		if(cit_copy[i].filename == undefined || cit_copy[i].filename == "" || cit_copy[i].filename == null)
 		{
-			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/blank_icon.gif"></td>'; 
+			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/blank_icon.gif" width=20px height=20px></td>'; 
 		}
 		else
 		{
@@ -1890,7 +1890,19 @@ Page.listCitations = function()
 			var cur_folder = cit_copy[i].citation_id;
 			var cur_filename = cit_copy[i].filename;
 			
-			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/pdficon_small.gif" onclick="window.open(\''+base_url+cur_folder+'/'+escape(cur_filename)+'\');" ' + pointer_style + '></td>';	
+			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/pdficon_small.gif"  width=20px height=20px onclick="window.open(\''+base_url+cur_folder+'/'+escape(cur_filename)+'\');" ' + pointer_style + '></td>';	
+			//' + cit_copy[i].citation_id + '
+		}
+		
+		if(cit_copy[i].doi == undefined || cit_copy[i].doi == "" || cit_copy[i].doi == null)
+		{
+			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/blank_icon.gif"  width=20px height=20px></td>'; 
+		}
+		else 
+		{
+			var cur_doi = cit_copy[i].doi;			
+			
+			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/doi-icon-30x30.png"  width=20px height=20px onclick="window.open(\''+escape("http://dx.doi.org/" + cur_doi)+'\');" ' + pointer_style + '></td>';	
 			//' + cit_copy[i].citation_id + '
 		}
 		
