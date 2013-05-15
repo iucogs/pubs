@@ -1901,8 +1901,7 @@ Page.listCitations = function()
 		else 
 		{
 			var cur_doi = cit_copy[i].doi;			
-			
-			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/doi-icon-30x30.png"  width=20px height=20px onclick="window.open(\''+escape("http://dx.doi.org/" + cur_doi)+'\');" ' + pointer_style + '></td>';	
+			html += '<td style="vertical-align:top"><img src="' + Page.document_root + 'images/doi-icon-30x30.png"  width=20px height=20px onclick="window.open(\''+"http://dx.doi.org/" + escape(cur_doi)+'\');" ' + pointer_style + '></td>';	
 			//' + cit_copy[i].citation_id + '
 		}
 		
