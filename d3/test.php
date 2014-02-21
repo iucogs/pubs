@@ -1,0 +1,5 @@
+<?php
+
+echo '{"nodes": [{"name":"Allen","group":1},{"name":"Busey","group":1},{"name":"Goldstone","group":1},{"name":"Nosofsky","group":1},{"name":"Pisoni","group":1},{"name":"Shiffrin","group":1},{"name":"Thibos","group":1},{"name":"Townsend","group":1}],"links": [{"source":"Allen","target":"Goldstone","value":1},{"source":"Busey","target":"Townsend","value":1},{"source":"Goldstone","target":"Shiffrin","value":1},{"source":"Goldstone","target":"Smith","value":1},{"source":"Nosofsky","target":"Busey","value":1},{"source":"Nosofsky","target":"Townsend","value":1},{"source":"Pisoni","target":"Bent","value":1},{"source":"Shiffrin","target":"Nosofsky","value":1},{"source":"Shiffrin","target":"Rydell","value":1},{"source":"Thibos","target":"Bradley","value":1},{"source":"Townsend","target":"Busemeyer","value":1}]}';
+
+?>

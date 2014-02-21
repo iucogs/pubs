@@ -325,7 +325,7 @@ Page.printAPAStyleAuthors = function(_citation) {
 	
 	if ((_citation.author0ln != "") && (_citation.author0ln != "undefined")){
 		if((_citation.author0fn != "") && (_citation.author0fn != "undefined")){
-			html += _citation.author0ln + ", " + Page.getInitials("" + _citation.author0fn);
+			html += _citation.author0ln + ", " + rtrim(Page.getInitials("" + _citation.author0fn));
 		}
 		else
 		{
@@ -341,33 +341,42 @@ Page.printAPAStyleAuthors = function(_citation) {
 		var ln = "author" + j + "ln"; // tempVar
 		var fn = "author" + j + "fn";
 
+
 		if ((_citation[ln] != "") && (_citation[ln] != "undefined"))
 		{
 			auth_count++;
 			var next_ln = "author" + (j+1) + "ln"; // tempVar
 			var next_fn = "author" + (j+1) + "fn";
-			
-			if((_citation[next_ln] != "") && (_citation[next_ln] != "undefined"))
+      
+      if (auth_count > 3) {
+        html = _citation.author0ln + ", " + rtrim(Page.getInitials("" + _citation.author0fn)) + ", et al. ";
+        return html;
+      }
+
+
+			if((_citation[next_ln] == "") && (_citation[next_ln] == "undefined"))
 			{
 				html = rtrim(html);
-				html += ", "+ _citation[ln] + ", " +  Page.getInitials(_citation[fn]) + "";
+				html += ", "+ _citation[ln] + ", " +  rtrim(Page.getInitials(_citation[fn])) + "";
 			}
-			else
+			if (auth_count == 3) 
 			{
-				html += " &amp; "+_citation[ln] + ", " +  Page.getInitials(_citation[fn]) + "";	
-			}
+       // alert( _citation.author0ln + ", " + rtrim(Page.getInitials("" + _citation.author0fn)) + _citation.author1ln + ", " + rtrim(Page.getInitials("" + _citation.author1fn)) + " & " _citation.author2ln + ", " + rtrim(Page.getInitials("" + _citation.author2fn))); 
+			 // return html;
+      }
 		}
 	}
+
 	
 	if(_citation.pubtype == "edited_book")
 	{
 		if(auth_count > 1)
 		{
-			return html + " (Eds.) ";
+			return html + " (Eds.). ";
 		}
 		else
 		{
-			return html + " (Ed.) ";	
+			return html + " (Ed.). ";	
 		}
 	}
 	else
@@ -506,7 +515,12 @@ Page.printEditors_APA = function(_citation)
 
 		arr.push(one_editor[1] + ' ' + one_editor[0]);
 	}
-	
+
+  if (arr.length > 3) {
+    html += arr[0] + ", et al.";
+    return html;
+  }
+
 	if (arr.length > 1)
 	{
 		for (var e = 0; e < arr.length - 1; e++)
@@ -576,6 +590,48 @@ Page.printEditors_MLA = function(_citation)
 	return html;	
 }
 
+Page.printVolume = function(_citation) {
+  var html = "";
+  if (_citation.volume != "") {
+    html += "Vol. " + _citation.volume;
+  }
+  return html;
+}
+
+Page.printVolumeAPA = function(_citation) {
+  var html = "";
+  if (_citation.volume != "") {
+    html += "(Vol. " + _citation.volume + ") ";
+  }
+  return html;
+}
+
+Page.printEdition = function(_citation){
+
+  var html = "";
+ // English is a stupid language so now we need this thing.
+  if (_citation.edition != "") {
+   // Last number of the edition determines the ordinal.
+   last_digit = _citation.edition.substring(_citation.edition.length-1, _citation.edition.length);
+   switch (last_digit) {
+     case '1':
+      ordinal = "st";
+      break;
+     case '2': 
+       ordinal = "nd";
+       break;
+     case '3':
+       ordinal = "rd";
+       break;
+     default:
+       ordinal = "th";
+    }
+     html+= " (" + _citation.edition + ordinal + " ed.).";
+    }
+  
+  return html;
+}
+
 Page.printAPAStyleCitation = function(_citation)
 {
 	var html = '';
@@ -624,10 +680,10 @@ Page.printAPAStyleCitation = function(_citation)
 		{
 			html += ", ";
 			if((citation_req.number == "") || (citation_req.number == undefined)) {
-				html +=  citation_req.volume + ", ";	
+				html +=  "<em>" + citation_req.volume + "</em>, ";	
 			}
 			else { 
-				html +=  citation_req.volume + "";
+				html += "<em>" + citation_req.volume + "</em>";
 				html +=  "(" + citation_req.number + "), "; 
 			}
 			html +=  citation_req.pages + ".";
@@ -637,6 +693,8 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printVolume(_citation);
+    html += Page.printEdition(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
@@ -644,10 +702,14 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html += title;
-		html += Page.printEditorsAPAOrMLA(citation_req, 'apa');
-		//html +=  "In " + citation_req.editor + "(Eds.), "
-		html +=  "<em>" +  citation_req.booktitle + "</em>. ";
-		html +=  citation_req.pages + ". ";
+    html += Page.printEdition(_citation);
+		
+		html += rtrim(Page.printEditorsAPAOrMLA(citation_req, 'apa')) + ", ";
+    		//html +=  "In " + citation_req.editor + "(Eds.), "
+		html +=  "<em>" +  citation_req.booktitle + "</em> ";
+    html += Page.printVolumeAPA(_citation);
+		html +=  "(pp. " + citation_req.pages + "). ";
+	//	html +=  citation_req.pages + ". ";
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";	
 	}
@@ -694,6 +756,7 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printEdition(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
@@ -701,7 +764,9 @@ Page.printAPAStyleCitation = function(_citation)
 		html += Page.printAPAStyleAuthors(_citation);
 		html += "(" + citation_req.year + "). ";
 		html +=  "<em>" + title + "</em>";
+    html += Page.printEdition(_citation);
 		html +=  " (" +citation_req.translator + " Trans.) ";
+    html += Page.printVolume(_citation);
 		html +=  citation_req.location + ": ";
 		html +=  citation_req.publisher + ".";		
 	}
@@ -1054,14 +1119,19 @@ Page.printHTMLListStyleCitation = function(_citation)
 	else {
 		title = _citation.title + ". ";
 	}
+	// Check for ? or ! in title.
+	
 	
 	if (pubtype == "article") {
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + _citation.year + "). ";
 		html +=  title;
-		html += "&lt;em&gt;" + _citation.journal + "&lt;/em&gt; ";
-		html +=  _citation.volume + " ";
-		html +=  "(" + _citation.number + "), ";
+		html += "&lt;em&gt;" + _citation.journal + "&lt;/em&gt;, ";
+		html +=  "&lt;em&gt;" +_citation.volume + "&lt;/em&gt;";
+		if (_citation.number != "")
+			html += "(" + _citation.number + "), ";
+		else 
+			html += ", ";
 		html +=  _citation.pages + "."
 	}
 	else if (pubtype == "book") {
@@ -1074,12 +1144,23 @@ Page.printHTMLListStyleCitation = function(_citation)
 	else if (pubtype == "inbook") {
 		html += Page.printAPAStyleAuthors(_citation);
 		html += " (" + _citation.year + "). ";
+		html += title;
+    html += rtrim(Page.printEditorsAPAOrMLA(_citation, 'apa')) + ", ";
+    		//html +=  "In " + citation_req.editor + "(Eds.), "
+		html +=  "&lt;em&gt;" +  _citation.booktitle + "&lt;/em&gt; "
+    html += Page.printEdition(_citation);
+    html += Page.printVolumeAPA(_citation);
+		html +=  "(pp. " + _citation.pages + "). ";
+		html +=  _citation.location + ": ";
+		html +=  _citation.publisher + ".";	
+	/*	html += Page.printAPAStyleAuthors(_citation);
+		html += " (" + _citation.year + "). ";
 		html +=  title;
 		html +=  "In " + _citation.editor + "(Eds.), "
-		html +=  "&lt;em&gt;" +  _citation.booktitle + "&lt;/em&gt; "
+		html +=  "&lt;em&gt;" +  _citation.booktitle + "&lt;/em&gt;. "
 		html +=  _citation.pages + ". "
 		html +=  _citation.location + ": ";
-		html +=  _citation.publisher + "."				
+		html +=  _citation.publisher + "."	*/			
 	}
 	else if (pubtype == "manual") {
 		html += Page.printAPAStyleAuthors(_citation);
@@ -1120,7 +1201,7 @@ Page.printHTMLListStyleCitation = function(_citation)
 	}
 	else if (pubtype == "edited_book") {
 		html += Page.printAPAStyleAuthors(_citation);
-		html += " (Eds.) (" + _citation.year + "). ";
+		html += " (" + _citation.year + "). ";
 		html +=  "&lt;em&gt;" + title + "&lt;/em&gt;";
 		if(_citation.location != "")  html +=  _citation.location + ": ";
 		if(_citation.publisher != "") html +=  _citation.publisher + ".";		
@@ -1148,3 +1229,5 @@ Page.printHTMLListStyleCitation = function(_citation)
 	html += "&lt;/li&gt;";
 	return html;
 }
+
+

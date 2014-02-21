@@ -96,13 +96,13 @@ if (isset($GLOBALS['HTTP_RAW_POST_DATA']))
 	{
 		if($collection->deleteCollections($collection_ids))
 		{	
-			// Delete all collections_table that doesn't exist in collections
-			$citation->deleteAllCollectionsTableNotExistInCollections();
-			//$citation->deletedCollectionFromCollectionsTable($coll_id, $submitter, $owner); // Can be used to delete only one collection from collections_table
-			
 			$responseObj = array("error" => $collection->error, "collections_deleted" => 1);
 			sendResponse($responseObj);
-		}
+		} else {
+            // failure for some reason
+          $responseObj = array("error" => $collection->error, "collections_deleted" => 0);
+          sendResponse($responseObj);
+        }
 	}
 	else if($type == "merge")
 	{

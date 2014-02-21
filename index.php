@@ -10,7 +10,7 @@ require_once($document_root.'lib/adLDAP.php');
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
-<title>Publications Type<?php if(DB_NAME != "pubs") echo " [".DB_NAME."]";?></title>
+<title>Publications currently <?php if(DB_NAME != "pubs") echo " [".DB_NAME."]";?></title>
 
 <?php
 // Variable declarations
@@ -112,7 +112,7 @@ function LoggedIn($user_info, $document_root)
 }
 </style>
 
-
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/validate.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/Ajax.js"></script>
 <script type="text/javascript" src="<?php echo $document_root;?>js/Page.js"></script>
@@ -202,17 +202,17 @@ else
     <td>Search:&nbsp;</td>
     <td>
 	<input text="text" size="30" id="search_keywords" name="search_keywords">
-	<input type="submit" value="All" onclick="Page.searchCitations_request('all');return false;">
-	</td>
+<!--	<input type="submit" value="All" onclick="Page.searchCitations_request('all');return false;">
+	</td> -->
     <td>
 	<input type="submit" value="Author" onclick="Page.searchCitations_request('author');return false;"> 
 	</td>
     <td>
-	<input type="submit" value="Title" onclick="Page.searchCitations_request('title'); return false;">
+<!--	<input type="submit" value="Title" onclick="Page.searchCitations_request('title'); return false;">
 	</td>
     <td>
 	<input type="submit" value="Journal" onclick="Page.searchCitations_request('journal'); return false;">
-	</td>
+	</td> -->
     <td>
 	<input type="submit" value="Citation Id" onclick="Page.searchCitations_request('citation_id'); return false;">
 	</td></tr>

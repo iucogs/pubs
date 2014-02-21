@@ -19,17 +19,20 @@ if(isset($_POST['citations']) && !empty($_POST['citations'])){
 	printForm($data);
 	$parse->printOptions();
 	$parse->execute($filename,"","",time()); 
+	echo('1');
 }
 else if(!empty($_GET['file'])){
 	printForm();
 	$parse->printOptions();
 	$parse->execute("samples/".$_GET['file'],"","",time());  			// There's an error in test.txt (preg_match warning)
+	echo('2');
 }
 else {
 	printForm();
 	$parse->printOptions();
 	//$parse->execute("samples/default.txt","","",time());  			// There's an error in test.txt (preg_match warning)
 	$parse->execute("samples.txt","","",time());  						// There's an error in test.txt (preg_match warning)
+	echo('3');
 }
 
 function writeTempFile($data)

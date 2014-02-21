@@ -541,7 +541,7 @@ Page.viewOwners_response = function()
 Page.rewriteSelectMenu = function()
 {
 	var html = '';
-	html += 'Show collections belonging to: <select id="setOwner" onclick="Page.changeSetOwnerSelectMenu(this) ;">';
+	html += 'Show collections belonging to: <select id="setOwner" onChange="Page.changeSetOwnerSelectMenu(this) ;">';
 		
 	//Commented by Abhinav		
 	/*if(!Page.hasProxy) {
@@ -555,6 +555,13 @@ Page.rewriteSelectMenu = function()
 				html += ' selected="selected"';
 			}
 			html += '>Stanford Encyclopedia of Philosophy</option>';
+		}
+		else if (Page.proxies[i].username == 'toc') {
+			html += '<option value="' + Page.proxies[i].username + '"';
+			if (Page.owner == Page.proxies[i].username)	{
+				html += ' selected="selected"';
+			}
+			html += '>Tree of Consciousness</option>';
 		}
 		else {
 			html += '<option value="' + Page.proxies[i].username + '"';
@@ -572,17 +579,22 @@ Page.rewriteSelectMenu = function()
 
 Page.changeSetOwnerSelectMenu = function(myselect)
 {
-	// Cancel onchange event
+  // Cancel onchange event
 	if(myselect.options[myselect.selectedIndex].value == '') {
-	   return false;	
+	   alert("FAILURE");
+     return false;	
 	}
-	
 	Page.owner=myselect.options[myselect.selectedIndex].value;
-	Page.currentCollection = 'all';
-	Page.setHasProxy();
+  Page.setHasProxy();
 	Page.current_page=1;
 	Page.current_viewable_pages=new Array();
-	Page.getCitationsGivenCollectionID();
+	
+  if (Page.currentOwner == 'sep') {
+    page.currentCollection = 'SEP facts'; 
+  } else {
+    Page.currentCollection = 'all';
+  }
+  Page.getCitationsGivenCollectionID();
 }
 
 Page.get_faculty_request = function()

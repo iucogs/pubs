@@ -42,9 +42,7 @@ if($type == "cache_all")
 {	
 	foreach ($owner as $key)
 	{
-		// Ruth 4/12
-	//	$result = $citations->get_citations_JSON_collections_table($page, $submitter, $key, $citations_per_page, $sort_order, 'all');
-	//	$result = $citations->getCitations_byFac_all($submitter, $owner);
+	//	$result = $citations->getCitations_byFac_all($submitter, $owner, 'all', '', '',$sort_order, $citations_per_page,$page);
 
 	}
 }

@@ -1,0 +1,279 @@
+<html>
+<meta charset="utf-8">
+<style>
+
+
+
+.link {
+  stroke: #999;
+  stroke-opacity: .99;
+}
+
+.node text {
+  pointer-events: none;
+  font: 14px sans-serif;
+}
+
+.legend {
+  padding: 5px;
+  font: 10px sans-serif;
+  background: yellow;
+  box-shadow: 2px 2px 1px #888;
+}
+
+
+
+</style>
+<body>
+ 
+ <canvas id="myCanvas" width="300" height="350" style="border:5px solid #d3d3d3;">
+</canvas>
+
+<div id="chart">
+</div>
+
+
+
+<form>
+
+      Options:<br>
+      <input type="radio" name="reference" id="co" checked="checked">
+      <label for="co">COGS co-authors</label><br>
+      <input type="radio" name="reference" id="all" >
+      <label for="rall">All COGS faculty</label><br>
+
+    </form>
+  
+
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+
+<script>
+
+
+var junk = 3;
+var width = 960,
+    height = 800;
+
+var color = d3.scale.category20();
+
+var dataset = new Array();
+var tempColorLabels = new Array();
+
+
+var force = d3.layout.force()
+    .charge(-220)
+    .linkDistance(350)
+    .size([width, height]);
+	
+var nodes = force.nodes(),
+links = force.links();
+
+var linksStr = "";
+var junk2;
+
+//var dataset = '[{"group":"SOIC"},{"group":"EDUC"},{"group":"HPSC"},{"group":"SPHS"},{"group":"SPEA"},{"group":"SLST"},{"group":"PHYS"},{"group":"PSY"},{"group":"OPTO"},{"group":"GER"},{"group":"TEL"},{"group":"LING"},{"group":"BIO"},{"group":"MATH"},{"group":"LAW"},{"group":"FRAZ"},{"group":"ECON"},{"group":"SOC"},{"group":"KSOB"}]';
+
+//var dataset = new Array("SOIC","EDUC","PSY","MATH");
+//var dataset = [["SOIC"],["EDUC"],["PSY"],["MATH"]]; 
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+	
+function redraw2() {
+  trans=d3.event.translate;
+  scale=d3.event.scale;
+  
+  //alert('hi');
+
+  vis.attr("transform",
+      "translate(" + trans + ")"
+      + " scale(" + scale + ")");
+}
+
+var vis = d3.select("#chart")
+	.call(d3.behavior.zoom().on("zoom", redraw2));
+
+
+d3.json("co-authors.php", function(error, graph) {
+	var nodeMap = {};
+	linksStr = JSON.stringify(graph.links);
+    graph.nodes.forEach(function(x) { 
+		nodeMap[x.name] = x; 
+		if (linksStr.indexOf(x.name) >= 0)
+			nodeMap[x.name].isLinked = 1;
+		else
+			nodeMap[x.name].isLinked = 0; 
+	});
+//	junk2 = nodeMap; 
+    graph.links = graph.links.map(function(x) {
+      return {
+        source: nodeMap[x.source],
+        target: nodeMap[x.target],
+        value: x.value
+      };
+    });
+				junk = graph;
+	
+//	findUnlinkedNodes();
+	d3.selectAll("input[id=all]")
+	    .on("change", function(graph) { show(); });
+
+	
+d3.selectAll("input[id=co]")
+	    .on("change", function(graph) {  hide()});
+	/*	for (var i=0; i<nodeMap.length; i++ ){
+			 alert("nodeMap: " +nodeMap[i].group);
+		}*/
+		
+redraw(graph);
+
+
+});
+
+
+function hide()
+{
+	svg.selectAll(".node").filter(function(d) { return d.isLinked == "0"; }).style("display", "none");	
+}
+
+function show()
+{
+	
+	svg.selectAll(".node").style("display", "");
+	
+}
+
+function redraw(graph)
+{	
+	force
+      .nodes(graph.nodes)
+      .links(graph.links)
+      .start();
+
+var link = svg.selectAll(".link")
+      .data(graph.links)
+    .enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); })
+	  .on("click", function (d, i) { alert("Citation info"); });
+
+  var node = svg.selectAll(".node")
+      .data(graph.nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+
+node.append("circle")
+      .attr("r", 7)
+   	.style("fill", function(d) {if(dataset.indexOf(d.group) == -1) dataset.push(d.group); tempColorLabels.push([d.group, color(d.group)]); return color(d.group); })
+	  .attr("x", -8)
+      .attr("y", -8)
+	  .on("click", function(d,i) { alert("Author info"); })
+	  
+node.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.name });
+	  
+  node.append("title")
+      .text(function(d) { return d.name });
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+        node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+  
+  svg.selectAll(".node").filter(function(d) { return d.isLinked == "0"; }).style("display", "none");	
+
+	//drawLegend(dataset);
+	var c=document.getElementById("myCanvas");
+	var ctx=c.getContext("2d");
+	var tempColorLabels1 = unique(tempColorLabels);
+
+	dataset.sort();
+for (var i=0; i<dataset.length; i++)
+{
+	ctx.fillStyle=color(dataset[i]);
+	ctx.fillRect(20,(i*15)+5,10,10);
+	ctx.fillStyle="black";
+	ctx.fillText(dataset[i],40, (i*15)+15);
+}
+	ctx.stroke();
+	
+	
+/*	var legend = svg.append("g")
+	  .attr("class", "legend")
+	  .attr("height", 100)
+	  .attr("width", 100)
+    .attr('transform', 'translate(-20,50)')    
+      
+    
+    legend.selectAll('rect')
+      .data(dataset)
+      .enter()
+      .append("rect")
+	  .attr("x", width - 65)
+      .attr("y", function(d, i){ return i *  20;})
+	  .attr("width", 10)
+	  .attr("height", 10)
+	  .style("fill", function(d) { 			 
+        var colorRect = tempColorLabels[dataset.indexOf(d)][1];
+        return colorRect;
+      })
+
+      
+    legend.selectAll('text')
+      .data(dataset)
+      .enter()
+      .append("text")
+	  .attr("x", width - 52)
+      .attr("y", function(d, i){ return i *  20 + 9;})
+	  .text(function(d) {				 
+       	var text = tempColorLabels[dataset.indexOf(d)][0];	
+        return text;
+      });*/
+}
+
+function unique(a){
+        a.sort();
+		a2 = new Array();
+		a2.push(a[0]);
+        for(var i = 1; i < a.length; i++ ){
+
+            if(a[i-1] == a[i]){
+                a.splice(i, 1);
+            } else {
+				a2.push(a[i]);
+				//alert('continue' + a[i-1] + ' ' + a[i]);
+                i++;
+            }
+        }
+	//	alert(a2.length);
+        return a2;
+    } 
+	
+	
+
+
+// add legend   
+
+//document.getElementById("displayOptions").addEventListener ("change", update, false);
+
+function drawLegend(dataset) {
+	
+}
+
+</script>
+
+                      
+</body>
+</html>
+
+

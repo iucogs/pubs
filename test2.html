@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title property="dc:title">Online Tree of Consciousness Project</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="robots" content="noindex, nofollow">
+<link id="default_view" href="edit" />
+<link id="parent" href="http://scalar.usc.edu/works/online-tree-of-consciousness-project/" />
+<link id="approot" href="http://scalar.usc.edu/works/system/application/" />
+<link id="logged_in" href="http://scalar.usc.edu/works/system/users/1910" />
+<link id="user_level" href="scalar:Author" />
+<link id="flowplayer_key" href="#$095b1678109acb79c61" />
+<link id="soundcloud_id" href="55070ba50cb72b8e26f220916c4d54a3" />
+<link type="text/css" rel="stylesheet" href="http://scalar.usc.edu/works/system/application/views/melons/honeydew/../../modules/cover/login.css" />
+<link type="text/css" rel="stylesheet" href="http://scalar.usc.edu/works/system/application/views/melons/honeydew/../../modules/cover/title.css" />
+<link type="text/css" rel="stylesheet" href="http://scalar.usc.edu/works/system/application/views/melons/honeydew/content.css" />
+<link type="text/css" rel="stylesheet" href="http://scalar.usc.edu/works/system/application/views/melons/honeydew/themes/minimal.css" />
+<link  href="http://scalar.usc.edu/works/system/application/views/arbors/html/jquery-ui-1.8.12.custom.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/jquery-ui-1.8.12.custom.min.js"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/widgets/api/scalarapi.js"></script>
+
+<script type="text/javascript">
+/**
+ * Scalar    
+ * Copyright 2013 The Alliance for Networking Visual Culture.
+ * http://scalar.usc.edu/scalar
+ * Alliance4NVC@gmail.com
+ *
+ * Licensed under the Educational Community License, Version 2.0 
+ * (the "License"); you may not use this file except in compliance 
+ * with the License. You may obtain a copy of the License at
+ * 
+ * http://www.osedu.org/licenses /ECL-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS"
+ * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.       
+ */  
+
+function validate_upload_form_file($form) {
+
+	// Make sure title is present
+	var title = $form.find('input[name="dcterms:title"]').val();
+	if (title.length==0) {
+		alert('Title is a required field.  Please enter a title at the top of the form.');
+		return false;
+	}
+	
+	// Make sure file is present
+	var slug = $form.find('input[name="source_file"]').val();
+	if (slug.length==0) {
+		alert('Please choose a file to upload.');
+		return false;
+	}		
+	
+	send_form_show_loading();
+	
+	// Save using standard POST to the system, then route to the save API for creating the page
+	$form.find('#hidden_upload').load(function() {
+		validate_upload_form_file_return($form);
+	});
+	
+	return true;
+	
+}
+
+function validate_upload_form_file_return($form) {
+
+	var iframe = $form.find('iframe:first')[0];
+	var content = iframe.contentWindow.document.getElementsByTagName("body")[0].innerHTML;
+	var obj = jQuery.parseJSON(content);
+	if (obj.error.length) {
+		$(iframe).unbind();
+		$(iframe).attr('src', '');
+		alert('There was an error saving the file: '+obj.error);
+		return;
+	}
+	
+	validate_upload_form($form, obj.url);
+
+}
+
+function validate_upload_form($form, url) {
+
+	// Make sure title is present
+	var title = $form.find('input[name="dcterms:title"]').val();
+	if (title.length==0) {
+		alert('Title is a required field.  Please enter a title at the top of the form.');
+		return false;
+	}
+	
+	// Make sure URL is present
+	if ('undefined'==typeof(url) || url.length==0) {
+		alert('Could not resolve the file URL for creating the new page.');
+		return false;
+	}	
+	
+	var values = {};
+	values['scalar:metadata:url'] = url;  
+	
+	// Construct slug (if applicable)
+	var name_policy = $form.find('input[name="name_policy"]:checked').val();
+	if ('filename' == name_policy) {
+		var slug = url;
+		if (slug.indexOf('.')!=-1) slug = slug.substr(0, slug.lastIndexOf('.'));
+		values['scalar:metadata:slug'] = slug;
+	} else if ('title' == name_policy) {
+		var slug_prepend = $form.find('input[name="slug_prepend"]:checked').val();
+		var slug = (slug_prepend.length) ? slug_prepend+'/' : '';
+		slug += title;
+		values['scalar:metadata:slug'] = slug;		
+	}
+
+	return send_form($form, values);
+
+}
+
+/**
+ * Functions to send form information through Scalar's save API
+ */
+
+function send_form($form, additional_values, redirect_url) {
+
+	send_form_show_loading();
+
+	var values = {};
+	$.each($form.serializeArray(), function(i, field) {
+		if ('undefined'!=typeof(values[field.name])) {
+			if (!is_array(values[field.name])) {
+				values[field.name] = [values[field.name]];
+			}
+			values[field.name].push(field.value);
+		} else {
+			values[field.name] = field.value;
+		}
+	});	
+
+	
+	if ('undefined'!=typeof(additional_values)) {
+		for (var field in additional_values) {
+			if ('undefined'!=typeof(values[field.name])) {
+				if (!is_array(values[field.name])) {
+					values[field.name] = [values[field.name]];
+				}
+				values[field].push(additional_values[field]);
+			} else {
+				values[field] = additional_values[field];
+			}	
+		}
+	}
+
+	var success = function(version) {
+	    for (var version_uri in version) break;
+	    if ('undefined'==typeof(redirect_url)) redirect_url = version_uri.substr(0, version_uri.lastIndexOf('.'));
+	    var version_urn = version[version_uri]['http://scalar.usc.edu/2012/01/scalar-ns#urn'][0].value;
+		send_form_relationships($form, version_urn, redirect_url);     
+	}
+	alert('here4');
+
+	var error = function(obj) {
+		alert('Something went wrong while attempting to save: '+obj.statusText);
+		send_form_hide_loading();
+	}
+	junk = values;
+alert(values);
+	scalarapi.savePage(values, success, error);
+	alert('here6');
+	return false;
+
+}
+
+function send_form_relationships($form, version_urn, redirect_url) {		
+	
+	var values = {};
+	// The version just saved
+	values['scalar:urn'] = version_urn;
+	// Validation params
+	values['action'] = 'relate';
+	values['native'] = $('input[name="native"]').val();
+	values['id'] = $('input[name="id"]').val();
+	values['api_key'] = '';
+	
+	// Container of 
+	values['container_of'] = $('input[name="container_of"]');
+	// Reply of
+	values['reply_of'] = $('input[name="reply_of"]');
+	values['reply_of_paragraph_num'] = $('input[name="reply_of_paragraph_num"]');
+	// Annotation of
+	values['annotation_of'] = $('input[name="annotation_of"]');
+	values['annotation_of_start_seconds'] = $('input[name="annotation_of_start_seconds"]');
+	values['annotation_of_end_seconds'] = $('input[name="annotation_of_end_seconds"]');
+	values['annotation_of_start_line_num'] = $('input[name="annotation_of_start_line_num"]');
+	values['annotation_of_end_line_num'] = $('input[name="annotation_of_end_line_num"]');
+	values['annotation_of_points'] = $('input[name="annotation_of_points"]');
+	// Tag of
+	values['tag_of'] = $('input[name="tag_of"]');
+	// Reference of
+	values['references'] = [];
+	var textarea = $('textarea[name="sioc:content"]').val();
+	var $temp = $('<div>'+textarea+'</div>');
+	$temp.find('a').each(function() {
+		var rel = $(this).attr('rel');
+		if ('undefined'==typeof(rel)) return;
+		values['references'].push($('<input value="'+rel+'" />'));
+	});
+	
+	// Has container
+	values['has_container'] = $('input[name="has_container"]');
+	values['has_container_sort_number'] = $('input[name="has_container_sort_number"]');
+	// Has reply
+	values['has_reply'] = $('input[name="has_reply"]');
+	values['has_reply_paragraph_num'] = $('input[name="has_reply_paragraph_num"]');	
+	values['has_reply_datetime'] = $('input[name="has_reply_datetime"]');	
+	// Has Annotation
+	values['has_annotation'] = $('input[name="has_annotation"]');
+	values['has_annotation_start_seconds'] = $('input[name="has_annotation_start_seconds"]');
+	values['has_annotation_end_seconds'] = $('input[name="has_annotation_end_seconds"]');
+	values['has_annotation_start_line_num'] = $('input[name="has_annotation_start_line_num"]');
+	values['has_annotation_end_line_num'] = $('input[name="has_annotation_end_line_num"]');
+	values['has_annotation_points'] = $('input[name="has_annotation_points"]');	
+	// Has Tag
+	values['has_tag'] = $('input[name="has_tag"]');	
+	// Has reference
+	values['has_reference'] = $('input[name="has_reference"]');	
+	values['has_reference_reference_text'] = $('input[name="has_reference_reference_text"]');		
+	
+	// Save relationships
+	var success = function() {
+		document.location.href=redirect_url;
+	} 
+	scalarapi.saveManyRelations(values, success);   	
+
+}
+
+function send_form_show_loading() {
+
+    $('input[type="submit"]').attr("disabled", "disabled");
+
+	if (window['Spinner']) {
+		var opts = {
+		  lines: 13, // The number of lines to draw
+		  length: 5, // The length of each line
+		  width: 2, // The line thickness
+		  radius: 6, // The radius of the inner circle
+		  rotate: 0, // The rotation offset
+		  color: '#000', // #rgb or #rrggbb
+		  speed: 1, // Rounds per second
+		  trail: 60, // Afterglow percentage
+		  shadow: false, // Whether to render a shadow
+		  hwaccel: false, // Whether to use hardware acceleration
+		  className: 'spinner', // The CSS class to assign to the spinner
+		  zIndex: 2e9, // The z-index (defaults to 2000000000)
+		  top: 'auto', // Top position relative to parent in px
+		  right: 'auto' // Left position relative to parent in px
+		};
+		var target = document.getElementById('spinner_wrapper');
+		var spinner = new Spinner(opts).spin(target);
+	}
+
+}
+
+function send_form_hide_loading() {
+
+	$('input[type="submit"]').removeAttr("disabled");
+	
+	if (window['Spinner']) {
+		$('.spinner').remove();
+	}
+
+}
+
+function strip_tags (input, allowed) {
+	allowed = (((allowed || "") + "")
+			.toLowerCase()
+			.match(/<[a-z][a-z0-9]*>/g) || [])
+			.join(''); // making sure the allowed arg is a string containing only tags in lowercase (<a><b><c>)
+	var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi,
+		commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+ 	return input.replace(commentsAndPhpTags, '').replace(tags, function($0, $1){
+ 		return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+	});
+}
+
+// http://stackoverflow.com/questions/2883697/in-javascript-how-to-find-element-is-array
+function is_array(input){
+  return typeof(input)=='object'&&(input instanceof Array);
+}
+
+function isIOS() {
+	var deviceAgent = navigator.userAgent.toLowerCase();
+	var agentID = deviceAgent.match(/(iphone|ipod|ipad)/);
+	if (agentID) return true;
+	return false;
+}
+
+function isIPhone(){
+	var deviceAgent = navigator.userAgent.toLowerCase();
+	var agentID = deviceAgent.match(/(iphone|ipod)/);
+	if (agentID) return true;
+	return false;
+}
+
+function basename(path) {
+	if ('undefined'==typeof(path) || !path.length) return '';
+    return path.replace(/\\/g,'/').replace( /.*\//, '' );
+}
+ 
+function dirname(path) {
+	if ('undefined'==typeof(path) || !path.length) return '';
+    return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
+}
+
+// http://phpjs.org/functions/wordwrap
+function wordwrap (str, int_width, str_break, cut) {
+    var m = ((arguments.length >= 2) ? arguments[1] : 75   );
+    var b = ((arguments.length >= 3) ? arguments[2] : "\n" );
+    var c = ((arguments.length >= 4) ? arguments[3] : false);
+    var i, j, l, s, r;
+    str += '';
+    if (m < 1) {
+        return str;
+    }
+    for (i = -1, l = (r = str.split(/\r\n|\n|\r/)).length; ++i < l; r[i] += s) {
+        for (s = r[i], r[i] = ""; s.length > m; r[i] += s.slice(0, j) + ((s = s.slice(j)).length ? b : "")){
+            j = c == 2 || (j = s.slice(0, m + 1).match(/\S*(\s)?$/))[1] ? m : j.input.length - j[0].length || c == 1 && m || j.input.length + (j = s.slice(m).match(/^\S*/)).input.length;
+        }
+    }
+    return r.join("\n");
+}
+
+function getUrlVars() {
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+    for(var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+
+    return vars;
+}
+
+// http://phpjs.org/functions/in_array
+function in_array (needle, haystack, argStrict) {
+    var key = '', strict = !!argStrict;
+ 
+    if (strict) {
+        for (key in haystack) {
+            if (haystack[key] === needle) {
+                return true;
+            }
+        }
+    } else {
+        for (key in haystack) {
+            if (haystack[key] == needle) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function get_url_extension() {
+	if (-1==document.location.href.indexOf('.')) return '';
+	if (-1==document.location.href.indexOf('/')) return '';
+	var ending_segment = document.location.href.substr(document.location.href.lastIndexOf('/')+1);
+	if (-1==ending_segment.indexOf('.')) return '';
+	var segment = ending_segment.substr(ending_segment.lastIndexOf('.')+1);
+	if (-1!=segment.indexOf('?')) segment = segment.substr(0, segment.indexOf('?'));
+	if (-1!=segment.indexOf('#')) segment = segment.substr(0, segment.indexOf('#'));
+	return (is_numeric(segment)) ? '' : segment;
+}
+
+function get_str(remove_arr) {
+
+	if (document.location.href.indexOf('?')==-1) return '';
+	if ('undefined'==typeof(remove_arr)) remove_arr = new Array;
+	var varstr = '';
+	var getvars = getUrlVars();
+	var count = 1;
+	for (var field in getvars) {
+		if (is_numeric(field)) continue;
+		var value = getvars[field];
+		if (in_array(field, remove_arr)) continue;
+		varstr += field+'='+encodeURIComponent(value);
+
+		varstr += '&';
+	}
+	if ('&'==varstr.substr(varstr.length-1)) varstr = varstr.substr(0, varstr.length-1);
+	return varstr;
+
+}
+
+// http://phpjs.org/functions/htmlspecialchars
+function htmlspecialchars (string, quote_style, charset, double_encode) {
+	if (!string || string.length===0) return string;
+    var optTemp = 0, i = 0, noquotes= false;
+    if (typeof quote_style === 'undefined' || quote_style === null) {
+        quote_style = 2;
+    }
+    string = string.toString();
+    if (double_encode !== false) { // Put this first to avoid double-encoding
+        string = string.replace(/&/g, '&amp;');
+    }
+    string = string.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+ 
+    var OPTS = {
+        'ENT_NOQUOTES': 0,
+        'ENT_HTML_QUOTE_SINGLE' : 1,
+        'ENT_HTML_QUOTE_DOUBLE' : 2,
+        'ENT_COMPAT': 2,
+        'ENT_QUOTES': 3,
+        'ENT_IGNORE' : 4
+    };
+    if (quote_style === 0) {
+        noquotes = true;
+    }
+    if (typeof quote_style !== 'number') { // Allow for a single string or an array of string flags
+        quote_style = [].concat(quote_style);
+        for (i=0; i < quote_style.length; i++) {
+            // Resolve string input to bitwise e.g. 'PATHINFO_EXTENSION' becomes 4
+            if (OPTS[quote_style[i]] === 0) {
+                noquotes = true;
+            }
+            else if (OPTS[quote_style[i]]) {
+                optTemp = optTemp | OPTS[quote_style[i]];
+            }
+        }
+        quote_style = optTemp;
+    }
+    if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
+        string = string.replace(/'/g, '&#039;');
+    }
+    if (!noquotes) {
+        string = string.replace(/"/g, '&quot;');
+    }
+ 
+    return string;
+}
+
+function create_excerpt(str, num_words) {
+
+	var str = strip_tags(str);
+	var arr = str.split(' ');
+	if (arr.length <= num_words) return str;
+	str = arr.slice(0,num_words).join(' ')+' ...';
+	return str;
+
+}
+
+function strip_tags (input, allowed) {
+	allowed = (((allowed || "") + "")
+			.toLowerCase()
+			.match(/<[a-z][a-z0-9]*>/g) || [])
+			.join(''); // making sure the allowed arg is a string containing only tags in lowercase (<a><b><c>)
+	var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi,
+		commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+ 	return input.replace(commentsAndPhpTags, '').replace(tags, function($0, $1){
+ 		return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+	});
+}
+
+function ucwords(str) {
+    return (str + '').replace(/^([a-z])|\s+([a-z])/g, function ($1) {
+        return $1.toUpperCase();
+    });
+}
+
+// Convert numbers to words
+// copyright 25th July 2006, by Stephen Chapman http://javascript.about.com
+// permission to use this Javascript on your web page is granted
+// provided that all of the code (including this copyright notice) is
+// used exactly as shown (you can change the numbering system if you wish)
+// http://javascript.about.com/library/bltoword.htm
+// American Numbering System
+var th = ['','thousand','million', 'billion','trillion'];
+// uncomment this line for English Number System
+// var th = ['','thousand','million', 'milliard','billion'];
+var dg = ['zero','one','two','three','four', 'five','six','seven','eight','nine']; var tn = ['ten','eleven','twelve','thirteen', 'fourteen','fifteen','sixteen', 'seventeen','eighteen','nineteen']; var tw = ['twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety']; 
+function toWords(s){s = s.toString(); s = s.replace(/[\, ]/g,''); if (s != parseFloat(s)) return 'not a number'; var x = s.indexOf('.'); if (x == -1) x = s.length; if (x > 15) return 'too big'; var n = s.split(''); var str = ''; var sk = 0; for (var i=0; i < x; i++) {if ((x-i)%3==2) {if (n[i] == '1') {str += tn[Number(n[i+1])] + ' '; i++; sk=1;} else if (n[i]!=0) {str += tw[n[i]-2] + ' ';sk=1;}} else if (n[i]!=0) {str += dg[n[i]] +' '; if ((x-i)%3==0) str += 'hundred ';sk=1;} if ((x-i)%3==1) {if (sk) str += th[(x-i-1)/3] + ' ';sk=0;}} if (x != s.length) {var y = s.length; str += 'point '; for (var i=x+1; i<y; i++) str += dg[n[i]] +' ';} return str.replace(/\s+/g,' ');}
+
+// http://phpjs.org/functions/is_numeric:449
+function is_numeric (mixed_var) {
+    return (typeof(mixed_var) === 'number' || typeof(mixed_var) === 'string') && mixed_var !== '' && !isNaN(mixed_var);
+}
+	</script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/soundcloudsdk.js"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/soundcloudapi.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOttvbPzBW47HCrZ24RZHaftXtHVwuvFU&sensor=false"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/yepnope.1.5.3-min.js"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/arbors/html/yepnope.css.js"></script>
+<script type="text/javascript" src="http://scalar.usc.edu/works/system/application/views/melons/honeydew/main.js"></script>
+<script type="text/javascript">
+var junk = "";
+</script>
+</head>
+<body>
+
+<div class="left">
+<div id="scalarnav"></div>
+</div>
+
+<div class="middle cover">
+<div class="login">Ruth Eberle&nbsp; <a href="http://scalar.usc.edu/works/system/logout?action=do_logout&redirect_url=%2Fworks%2Fonline-tree-of-consciousness-project%2Fnew.edit" onclick="return confirm('Are you sure you wish to sign out?')">Sign out</a><br />
+You have
+Author privileges<br />
+<a href="http://scalar.usc.edu/works/system/dashboard?book_id=954&zone=style#tabs-style">Dashboard</a> | <a href="http://scalar.usc.edu/works/">Index</a> | <a href="http://scalar.usc.edu/works/guide">Guide</a></div>
+<h2 class="cover_title">Online Tree of Consciousness Project</h2>
+<div class="cover_authors"><a href="http://scalar.usc.edu/works/online-tree-of-consciousness-project/users/1378">Michael Trestman</a>, Author</div>
+</div>
+
+<div class="middle" id="middle_column">
+<div class="content" id="content_wrapper">
+
+<div class="error" id="ie_warning" style="display:none;"><p>You appear to be using Internet Explorer, which has known compatibility problems with some parts of the edit page including the WYSIWYG content editor. For the best experience please switch to Firefox or Safari.</p></div>
+
+<h4 class="content_title">Add content</h4>
+
+<form id="edit_form" method="post" enctype="multipart/form-data" onsubmit="console.log($(this)); javascript:alert($(this)[0]); javascript:alert(JSON.stringify($(this).serializeArray()));";><input type="hidden" name="action" value="add" />
+<input type="hidden" name="native" value="1" />
+<input type="hidden" name="scalar:urn" value="" />
+<input type="hidden" name="id" value="reberle@indiana.edu" />
+<input type="hidden" name="api_key" value="" />
+<input type="hidden" name="scalar:child_urn" value="urn:scalar:book:954" />
+<input type="hidden" name="scalar:child_type" value="http://scalar.usc.edu/2012/01/scalar-ns#Book" />
+<input type="hidden" name="scalar:child_rel" value="page" />
+<input type="hidden" name="urn:scalar:book" value="urn:scalar:book:954" />
+
+<table id="page_fields" class="form_fields">
+
+	<tr>
+	  <td class="field">Title</td><td class="value"><input type="text" id="title" class="input_text" name="dcterms:title" value="" /></td>
+	<tr>
+	  <td class="field">Description</td><td class="value"><input type="text" class="input_text" name="dcterms:description" value="" /></td>
+	</tr>	
+
+	<!--  Media file URL -->
+	<tr class="type_media">
+		<td class="field">Media File URL</td><td><input name="scalar:url" value="http://" style="width:100%;" onfocus="if (this.value=='http://') this.value='';" /></td>
+	</tr>
+
+	<!-- Edit content -->
+	<tr id="edit_content" class="type_composite">
+		<td colspan="2">
+						<br />
+			<div class="wysiwyg_options"><span><a href="javascript:;" class="textarea_tab wysiwyg_handle_selected to_wysiwyg_handle" title="In the editor, view a visual representation of the HTML">Visual</a>&nbsp;<a href="javascript:;" class="textarea_tab to_html_handle" title="In the editor, view the source HTML">HTML</a></span><br clear="both"></div>
+			<textarea class="wysiwyg input_textarea input_gap textarea_content" wrap="soft" name="sioc:content"></textarea>
+			<br />
+					</td>
+	</tr>
+
+	<!--  default view -->
+	<tr id="default_view" class="type_composite">
+	  <td class="field field_middle spacer">Default view</td>
+	  <td class="spacer" valign="middle"><select name="scalar:default_view" class="generic_button large" id="default_view_select"><option value="plain" >Single column</option>
+<option value="text" >Text emphasis</option>
+<option value="media" >Media emphasis</option>
+<option value="split" >Split emphasis</option>
+<option value="par" >Media per paragraph (above)</option>
+<option value="revpar" >Media per paragraph (below)</option>
+<option value="vis" >Visualization: Radial</option>
+<option value="visindex" >Visualization: Index</option>
+<option value="vispath" >Visualization: Paths</option>
+<option value="vismedia" >Visualization: Media</option>
+<option value="vistag" >Visualization: Tags</option>
+<option value="history" >History browser</option>
+</select>
+		</td>
+	</tr>
+
+	<!-- relationships -->
+	<tr id="relationships">
+		<td class="field" valign="top"><div class="field_bump_down">Relationships</div></td>
+		<td valign="top">
+		
+			<table class="form_fields">
+			
+			  <!-- paths -->
+			  <tr id="tr_container_of">
+			    <td valign="top"><span class="inline_icon_link path"></span></td>
+			    <td valign="top"><span id="path_msg"><b>To make this <span class="content_type">page</span> a path</b>, <a href="javascript:void(null);" onclick="listeditor_add($(this).parent().parent().find('#container_of_editor'), 'add_path_item')">specify the items that it contains</a></span><br />
+      <ol id="container_of_editor" class="edit_relationship_list sortable">
+      </ol>
+			      <div class="form_fields_sub_element" id="container_of_add_content" style="display:none;"><a class="generic_button border_radius" onclick="listeditor_add($(this).parent().parent().find('#container_of_editor'), 'add_path_item')">Add more content</a> or drag items to reorder</div>
+			     
+			      <div class="form_fields_sub_element form_fields_sub_element_border_top form_fields_sub_element_border_bottom" id="path_continue_to" style="display:none;margin-top:12px;">After path is completed, continue to <input type="hidden" name="scalar:continue_to_content_id" value="" /><span style="font-weight:bold">none</span>&nbsp; <a href="javascript:;" onclick="listeditor_add(null,'add_continue_to', null, false, true)">add</a> | <a href="javascript:" onclick="clear_continue_to();">clear</a></div>
+			
+			   
+			    </td>
+			  </tr>
+			
+			  <!-- replies -->
+			  <tr id="tr_reply_of">
+			    <td valign="top"><span class="inline_icon_link reply"></span></td>
+			    <td valign="top"><span id="reply_msg"><b>To make this <span class="content_type">page</span> a comment</b>, <a href="javascript:void(null);" onclick="listeditor_add($(this).parent().parent().find('#reply_of_editor'), 'add_reply_of_item')">specify the items that it comments on</a></span><br />
+      <ul id="reply_of_editor" class="edit_relationship_list">
+      </ul>
+			      <div class="form_fields_sub_element" id="reply_of_add_content" style="display:none;"><a class="generic_button border_radius" onclick="listeditor_add($(this).parent().parent().find('#reply_of_editor'), 'add_reply_of_item')">Add more content</a></div>
+			   
+			    </td>
+			  </tr>    
+			
+			  <!-- annotations -->
+			  <tr id="tr_annotation_of">
+			    <td valign="top"><span class="inline_icon_link annotation"></span></td>
+			    <td valign="top">
+			    <div id="annotation_of">
+			    <span id="annotation_msg"><b>To make this <span class="content_type">page</span> an annotation</b>, <a href="javascript:void(null);" onclick="listeditor_add($(this).parent().parent().find('#annotation_of_editor'), 'add_annotation_of_item', 'media', true)">specify media that it annotates</a></span>
+      <ul id="annotation_of_editor" class="edit_relationship_list">
+      </ul>
+				<div class="form_fields_sub_element" id="annotation_of_add_content" style="display:none;"><a class="generic_button border_radius" onclick="listeditor_add($(this).parent().parent().find('#annotation_of_editor'), 'add_annotation_of_item', 'media')">Annotate additional media</a></div>
+				</div>
+			   
+			    </td>
+			  </tr>  
+			
+			  <!-- tags -->
+			  <tr id="tr_tag_of">
+			    <td valign="top"><span class="inline_icon_link tag"></span></td>
+			    <td valign="top">
+			    	<div class="tag_of">
+			    <span id="tag_msg"><b>To make this <span class="content_type">page</span> a tag</b>, <a href="javascript:void(null);" onclick="listeditor_add($(this).parent().parent().find('#tag_of_editor'), 'add_tag_of_item')">specify the items that it tags</a></span><br />
+      <ul id="tag_of_editor" class="edit_relationship_list">
+      </ul>
+				<div class="form_fields_sub_element" id="tag_of_add_content" style="display:none;"><a class="generic_button border_radius" onclick="listeditor_add($(this).parent().parent().find('#tag_of_editor'), 'add_tag_of_item')">Tag additional content</a></div>
+				</div>
+				<div id="has_tag">
+			<span id="has_tag_msg"><b>To tag this <span class="content_type">page</span>,</b> <a href="javascript:void(null);" onclick="listeditor_add($(this).parent().parent().find('#has_tag_editor'), 'add_has_tag_item', 'tag')">specify items that tag it</a></span><br />
+				<ul id="has_tag_editor" class="edit_relationship_list">
+				  
+				</ul>
+				
+				<div class="form_fields_sub_element" id="has_tag_add_content" style="display:none;"><a class="generic_button border_radius" onclick="listeditor_add($(this).parent().parent().find('#has_tag_editor'), 'add_has_tag_item')">Add additional tags</a></div>
+				</div>
+			    </td>
+			  </tr>
+			</table>
+		</td>
+	</tr>	
+
+  <!-- styling -->
+  <tr id="styling">
+  	<td class="field" valign="top"><a class="edit_page_arrow edit_page_arrow_down">Style</a></td>
+  	<td valign="top">
+  		<table cellspacing="0" cellpadding="0" class="styling_table">
+  		<tr><!-- thumbnail -->
+  			<td>Thumbnail</td>
+  			<td>No thumbnail image has been set</td>
+  			<td class="styling_last"><select name="scalar:thumbnail"><option value="">Choose an uploaded image</option><option value="" selected></option></select></td>
+  		</tr>
+  		<tr class="styling_sub"><!-- color -->
+  			<td>Color<br /><small>e.g., for path nav bar</small></td>
+  			<td><input style="width:100%;" type="text" id="color_select" name="scalar:color" value="#ffffff" /></td>
+  			<td class="styling_last">
+  				 <a href="javascript:;" class="generic_button" onclick="$(this).next().toggle();">Choose</a>
+  				<div style="display:none;margin-top:6px;"><div id="colorpicker"></div></div>
+  			</td>
+  		</tr>  	
+  		<tr class="styling_sub"><!-- background image -->
+  			<td>Background image</td>
+  			<td>No background image has been set</td>
+  			<td class="styling_last"><select name="scalar:background"><option value="">Choose an uploaded image</option><option value="" selected></option></td>
+  		</tr>	
+  		<tr class="styling_sub"><!-- custom style -->
+   			<td style="position:relative;">
+   				Custom CSS style<br />
+   				<small>e.g., .cover_title {color:red;}</small><div style="height:6px;overflow:hidden;"></div>
+   			</td>
+  			<td colspan="2"><textarea name="scalar:custom_style" style="width:100%;height:50px;"></textarea></td>
+  		</tr>  	
+  		<tr class="styling_sub">
+   			<td style="position:relative;">
+   				Custom Javascript
+   				<div style="width:150px;white-space:normal;"><small>Javascript or jQuery source</div>
+   			</td>
+  			<td colspan="2"><textarea name="scalar:custom_scripts" style="width:100%;height:50px;"></textarea></td>
+  		</tr>  		
+  		<tr class="styling_sub"><!-- background audio -->
+  			<td>Background audio</td>
+  			<td>No background audio has been set</td>
+  			<td class="styling_last"><select name="scalar:audio"><option value="">Choose an uploaded audio</option><option value="" selected></option></td>
+  		</tr>   	
+  		</table>  			
+  	</td>
+  </tr>
+
+	<!--  meta -->
+	<tr id="add_meta">
+	  <td class="field" valign="top"><a class="edit_page_arrow edit_page_arrow_down">Metadata</a></td>
+	  <td valign="top">
+	  
+		<table id="page_meta">
+			<tr>
+			  <td class="field">Scalar URL</td>
+			  <td>http://scalar.usc.edu/works/online-tree-of-consciousness-project/<input name="scalar:slug" value="" style="width:210px;" id="slug" /><span style="white-space:nowrap;">&nbsp; (will auto-generate)</span></td>
+			</tr>
+						
+			<tr>
+				<td>Page visibility?</td>
+			    <td><select name="scalar:is_live"><option value="0" selected>Hidden</option><option value="1" selected>Visible</option></select></td>
+			</tr>			
+			
+			  <tr>
+			  <td class="field">Content type</td>
+			  <td>
+			    <span style="display:none;"><!-- jQuery uses these fields to show/hide form fields related to page or media -->
+			   	 	<input type="radio" name="rdf:type" id="type_text" onchange="checkTypeSelect()" value="http://scalar.usc.edu/2012/01/scalar-ns#Composite" CHECKED><label for="type_text">Page</label>
+			    	<input type="radio" name="rdf:type" id="type_media" onchange="checkTypeSelect()" value="http://scalar.usc.edu/2012/01/scalar-ns#Media"><label for="type_media">Media File</label>
+			    	&nbsp; &nbsp; 
+			    </span>
+			    <select name="scalar:category">
+			<option value="" selected>Book content</option><option value="commentary" >Commentary</option><option value="review" >Review</option>			    </select>
+			    <!--
+			    <span style="padding-left:40px;">Page creator</span>
+			    <span style="padding-left:16px;"><select name="page_creator"><option value="0" selected>Anonymous</option>
+			<option value="1378" >Michael Trestman</option><option value="1375" >Colin Allen</option><option value="1910" >Ruth Eberle</option><option value="2006" >Patrick Craig</option>			    </select></span>
+			    -->
+			  </td>
+		   </tr>  			
+		</table>	  
+	  
+	  	<table id="metadata_rows">
+			  
+		</table>
+	  
+		<div class="pulldown pulldown_click" style="width:190px;">
+			  <a href="javascript:;" class="generic_button border_radius">Add additional metadata</a>
+			  <ul class="pulldown-content nodots" style="width:600px;white-space:normal;line-height:150%;">	
+				<li style="color:black;">DCTERMS</li>
+				<li>
+<a href="javascript:;" onclick="add_meta_row('dcterms:abstract')" title="dcterms:abstract">abstract</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:accessRights')" title="dcterms:accessRights">accessRights</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:accrualMethod')" title="dcterms:accrualMethod">accrualMethod</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:accrualPeriodicity')" title="dcterms:accrualPeriodicity">accrualPeriodicity</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:accrualPolicy')" title="dcterms:accrualPolicy">accrualPolicy</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:alternative')" title="dcterms:alternative">alternative</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:audience')" title="dcterms:audience">audience</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:available')" title="dcterms:available">available</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:bibliographicCitation')" title="dcterms:bibliographicCitation">bibliographicCitation</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:conformsTo')" title="dcterms:conformsTo">conformsTo</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:contributor')" title="dcterms:contributor">contributor</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:coverage')" title="dcterms:coverage">coverage</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:created')" title="dcterms:created">created</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:creator')" title="dcterms:creator">creator</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:date')" title="dcterms:date">date</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:dateAccepted')" title="dcterms:dateAccepted">dateAccepted</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:dateCopyrighted')" title="dcterms:dateCopyrighted">dateCopyrighted</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:dateSubmitted')" title="dcterms:dateSubmitted">dateSubmitted</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:description')" title="dcterms:description">description</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:educationLevel')" title="dcterms:educationLevel">educationLevel</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:extent')" title="dcterms:extent">extent</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:format')" title="dcterms:format">format</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:hasFormat')" title="dcterms:hasFormat">hasFormat</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:hasPart')" title="dcterms:hasPart">hasPart</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:hasVersion')" title="dcterms:hasVersion">hasVersion</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:identifier')" title="dcterms:identifier">identifier</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:instructionalMethod')" title="dcterms:instructionalMethod">instructionalMethod</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isFormatOf')" title="dcterms:isFormatOf">isFormatOf</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isPartOf')" title="dcterms:isPartOf">isPartOf</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isReferencedBy')" title="dcterms:isReferencedBy">isReferencedBy</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isReplacedBy')" title="dcterms:isReplacedBy">isReplacedBy</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isRequiredBy')" title="dcterms:isRequiredBy">isRequiredBy</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:issued')" title="dcterms:issued">issued</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:isVersionOf')" title="dcterms:isVersionOf">isVersionOf</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:language')" title="dcterms:language">language</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:license')" title="dcterms:license">license</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:mediator')" title="dcterms:mediator">mediator</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:medium')" title="dcterms:medium">medium</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:modified')" title="dcterms:modified">modified</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:provenance')" title="dcterms:provenance">provenance</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:publisher')" title="dcterms:publisher">publisher</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:references')" title="dcterms:references">references</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:relation')" title="dcterms:relation">relation</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:replaces')" title="dcterms:replaces">replaces</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:requires')" title="dcterms:requires">requires</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:rights')" title="dcterms:rights">rights</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:rightsHolder')" title="dcterms:rightsHolder">rightsHolder</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:source')" title="dcterms:source">source</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:spatial')" title="dcterms:spatial">spatial</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:subject')" title="dcterms:subject">subject</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:tableOfContents')" title="dcterms:tableOfContents">tableOfContents</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:temporal')" title="dcterms:temporal">temporal</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:title')" title="dcterms:title">title</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:type')" title="dcterms:type">type</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('dcterms:valid')" title="dcterms:valid">valid</a>				</li>	
+				<li style="color:black;">ART</li>
+				<li>
+<a href="javascript:;" onclick="add_meta_row('art:authority')" title="art:authority">authority</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:geographic')" title="art:geographic">geographic</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:hasMediaFile')" title="art:hasMediaFile">hasMediaFile</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:height')" title="art:height">height</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:imageId')" title="art:imageId">imageId</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:imageSource')" title="art:imageSource">imageSource</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:inCollection')" title="art:inCollection">inCollection</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:lps')" title="art:lps">lps</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:lpsid')" title="art:lpsid">lpsid</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:mediafileFormat')" title="art:mediafileFormat">mediafileFormat</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:metadataCreationDate')" title="art:metadataCreationDate">metadataCreationDate</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:metadataUpdateDate')" title="art:metadataUpdateDate">metadataUpdateDate</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:nationality')" title="art:nationality">nationality</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:objectId')" title="art:objectId">objectId</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:thumbnail')" title="art:thumbnail">thumbnail</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:topic')" title="art:topic">topic</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:resolution')" title="art:resolution">resolution</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:serverurl')" title="art:serverurl">serverurl</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:sourceLocation')" title="art:sourceLocation">sourceLocation</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:vitalDates')" title="art:vitalDates">vitalDates</a>, &nbsp; <a href="javascript:;" onclick="add_meta_row('art:width')" title="art:width">width</a>				</li>	
+						
+			  </ul>
+		</div>
+		
+	  </td>
+	</tr>
+
+</table>
+
+<div style="text-align:right;margin-top:10px;">
+	<div id="spinner_wrapper" style="width:30px;display:inline-block;">&nbsp;</div>
+	<a href="javascript:;" class="generic_button large" onclick="if (confirm('Are you sure you wish to cancel edits?  Any unsaved data will be lost.')) {document.location.href='http://scalar.usc.edu/works/online-tree-of-consciousness-project/'} else {return false;}">Cancel</a> 
+	<input type="submit" class="generic_button large default" value="Save" />
+ </div>
+<br />
+
+ 
+
+</form>
+
+
+
+
+</div>
+</div>
+
+<div class="middle footer">
+<div id="footer">
+<!-- AddThis Button BEGIN -->
+<div class="addthis_toolbox addthis_default_style" style="float:right;">
+<a class="addthis_button_facebook"></a>
+<a class="addthis_button_google"></a>
+<a class="addthis_button_twitter"></a>
+<span class="addthis_separator">&bull;</span>
+<a href="http://www.addthis.com/bookmark.php?v=250&amp;username=xa-4c40b32a7baba973" class="addthis_button_compact">More</a>
+</div>
+<script type="text/javascript" src="//s7.addthis.com/js/250/addthis_widget.js#username=xa-4c40b32a7baba973"></script>
+<!-- AddThis Button END -->
+<div class="scalar_logo_wrapper">
+<span class="title-authors"><a href="http://scalar.usc.edu/works/online-tree-of-consciousness-project">Online Tree of Consciousness Project</a> by Michael Trestman.  <a href="http://scalar.usc.edu/works/online-tree-of-consciousness-project/help">Help reading this book</a>.</span><br />
+<span class="poweredby">
+Powered by <a href="http://scalar.usc.edu">Scalar</a>.<br /><a href="http://scalar.usc.edu/terms-of-service/">Terms of Service</a> | <a href="http://scalar.usc.edu/privacy-policy/">Privacy Policy</a> | <a href="http://scalar.usc.edu/contact/">Scalar Feedback</a></span>
+</div>
+</div>
+</div>
+
+<div class="middle editbar">
+</div>
+
+</body>
+</html>

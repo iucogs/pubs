@@ -1,0 +1,82 @@
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Co-author Network</title>
+
+ 
+	
+
+ 
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://linkedjazz.org/network/js/jquery.rdfquery.core.min-1.0.js"></script>
+<script src="http://linkedjazz.org/network/js/dragdealer.js"></script>
+<script src="http://linkedjazz.org/network/js/d3.v2.min.js"></script> 
+<script src="http://linkedjazz.org/network/js/network.js"></script> 
+
+<script type="text/javascript">var fileNames = ['Jackie_McLean.png','Coleman_Hawkins.png','Barney_Bigard.png','Woody_Herman.png','Ray_Drummond.png','Sy_Oliver.png','Billy_Taylor_(jazz_bassist).png','Stan_Kenton.png','Buddy_Rich.png','Lee_Young.png','Frank_Wess.png','Miles_Davis.png','Jimmie_Lunceford.png','Stevie_Wonder.png','Oscar_Peterson.png','Etta_Jones.png','Earl_Hines.png','Herbie_Hancock.png','Julius_Watkins.png','Jerome_Richardson.png','Art_Blakey.png','Buster_Williams.png','Wynton_Marsalis.png','Charlie_Johnson_(bandleader).png','Lucky_Millinder.png','John_Levy_(musician).png','Cab_Calloway.png','Chu_Berry.png','Freddie_Green.png','Artie_Shaw.png','Jimmy_Dorsey.png','Sammy_Davis,_Jr..png','Joe_King_Oliver.png','Philly_Joe_Jones.png','Slide_Hampton.png','Jo_Jones.png','Fats_Navarro.png','Tony_Williams.png','Danny_Barker.png','Bill_Johnson_(reed_player).png','Tadd_Dameron.png','Charlie_Parker.png','Thelonious_Monk.png','Marian_McPartland.png','Mel_Lewis.png','Sweets_Edison.png','Eric_Dolphy.png','Kid_Ory.png','John_Lewis_(pianist).png','Jimmy_Jones_(pianist).png','Helen_Humes.png','Ron_Carter.png','Erroll_Garner.png','James_Moody_(saxophonist).png','Teddy_Wilson.png','Sam_Rivers.png','Sarah_Vaughan.png','Red_Rodney.png','Tommy_Dorsey.png','Gigi_Gryce.png','Tony_Bennett.png','Billie_Holiday.png','Harold_Ousley.png','Gerald_Wiggins.png','Billy_Strayhorn.png','Tiny_Bradshaw.png','Jimmy_Scott.png','Max_Roach.png','Wayne_Shorter.png','Yusef_Lateef.png','Paul_Gonsalves.png','Harry_James.png','Shadow_Wilson.png','Tommy_Potter.png','Bill_Evans.png','Fats_Domino.png','George_Wein.png','Clark_Terry.png','Lionel_Hampton.png','Benny_Waters.png','Hank_Jones.png','Buddy_Tate_(musician).png','Illinois_Jacquet.png','Carmen_McRae.png','Eddie_Marshall.png','Lucky_Thompson.png','Phil_Woods.png','Phil_Wilson_(trombonist).png','Joe_Williams_(jazz_singer).png','Lena_Horne.png','Louie_Bellson.png','Lawrence_Brown_(musician).png','Billy_Higgins.png','Bob_Haggart.png','Jack_Teagarden.png','Gene_Krupa.png','Ornette_Coleman.png','Oscar_Pettiford.png','Count_Basie.png','Charlie_Shavers.png','John_Coltrane.png','Thad_Jones.png','Art_Farmer.png','Benny_Golson.png','Fletcher_Henderson.png','Erskine_Hawkins.png','Buddy_DeFranco.png','Roy_Eldridge.png','Milt_Hinton.png','Ray_Nance.png','Elvin_Jones.png','Budd_Johnson.png','Ben_Webster.png','Al_McKibbon.png','Frank_Foster_(musician).png','Ella_Fitzgerald.png','Gil_Evans.png','Andy_Kirk.png','Joe_Newman_(trumpeter).png','Fats_Waller.png','Milt_Jackson.png','Roy_Haynes.png','Sonny_Stitt.png','Bud_Powell.png','Benny_Powell.png','Oliver_Nelson.png','Mary_Lou_Williams.png','Quincy_Jones.png','Billy_Eckstine.png','Delfeayo_Marsalis.png','Don_Redman.png','Benny_Carter.png','Chet_Baker.png','Dave_Brubeck.png','Johnny_Griffin.png','Nat_Pierce.png','Dizzy_Gillespie.png','Dinah_Washington.png','Betty_Carter.png','Stan_Getz.png','J._J._Johnson.png','Gunther_Schuller.png','Percy_Heath.png','Tricky_Sam_Nanton.png','Cozy_Cole.png','Kenny_Clarke.png','Johnny_Hodges.png','Ed_Shaughnessy.png','Sid_Catlett.png','Jane_Jarvis.png','Neal_Hefti.png','Randy_Weston.png','Frank_Sinatra.png','Herb_Jeffries.png','McCoy_Tyner.png','Sidney_Bechet.png','Willie_The_Lion_Smith.png','Art_Tatum.png','Don_Byas.png','Joe_Morello.png','Sonny_Greer.png','Benny_Goodman.png','Charles_Mingus.png','Chico_Hamilton.png','Ray_Brown,_Jr..png','Norman_Granz.png','Babs_Gonzales.png','Doc_Cheatham.png','Kaiser_Marshall.png','Nat_King_Cole.png','Buck_Clayton.png','Jay_McShann.png','Bennie_Moten.png','Chick_Webb.png','Louis_Jordan.png','Nancy_Wilson_(jazz_singer).png','Duke_Ellington.png','Jelly_Roll_Morton.png','Charlie_Barnet.png','Lester_Young.png','David_Baker_(composer).png','Slam_Stewart.png','Kenny_Dorham.png','Gerald_Wilson.png','Dexter_Gordon.png','Snooky_Young.png','Charlie_Christian.png','Alan_Dawson.png','Kenny_Burrell.png','Abbey_Lincoln.png','Horace_Silver.png','Louis_Armstrong.png','Melba_Liston.png','Jimmy_Cleveland.png','Glenn_Miller.png','Bing_Crosby.png','Wynton_Kelly.png','Wardell_Gray.png','George_Shearing.png','Clifford_Brown.png','Ray_Brown_(musician).png','Hot_Lips_Page.png','Zutty_Singleton.png','James_P._Johnson.png','Claude_Thornhill.png'];var metaNames = ['Milt_Hinton.meta','Frank_Foster_(musician).meta','Buddy_Tate_(musician).meta','Mary_Lou_Williams.meta','Gunther_Schuller.meta','Billy_Taylor_(jazz_bassist).meta','Gerald_Wiggins.meta','Eddie_Marshall.meta','Dave_Brubeck.meta','J._J._Johnson.meta','Yusef_Lateef.meta','Melba_Liston.meta','Joe_Williams_(jazz_singer).meta','Cozy_Cole.meta','Charles_Mingus.meta','Louie_Bellson.meta','Lionel_Hampton.meta','Chico_Hamilton.meta','Abbey_Lincoln.meta','Clark_Terry.meta','Roy_Haynes.meta','Oscar_Peterson.meta','Ray_Drummond.meta','Benny_Golson.meta','Artie_Shaw.meta','Jimmy_Scott.meta','Danny_Barker.meta','Johnny_Griffin.meta','Buster_Williams.meta','Etta_Jones.meta','Slide_Hampton.meta','Roy_Eldridge.meta','Buddy_DeFranco.meta'];</script>
+
+<link rel="stylesheet" href="http://linkedjazz.org/network/css/network.css">
+
+<script type="text/javascript">
+
+ /* var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-34282776-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();*/
+
+</script>
+</head>
+
+<body>
+
+<!--<img src="http://linkedjazz.org/network/menu/logo.png"   id="logo">
+-->
+<div id="network" style="background-color:#fff">
+    <div id="popUp">
+    </div>
+	
+    <div style="cursor: pointer; position:absolute; right:5px; height:65px; width:65px; top:0px; opacity:0.15" id="menu_dynamic"><img alt="Dynamic mode allows you to add individuals and view their shared connections." title="Dynamic mode allows you to add individuals and view their shared connections." src="menu/menu_dynamic.png"/></div> 
+    <div style="cursor: pointer; position:absolute; right:80px; height:65px; width:65px; top:0px; opacity:0.15" id="menu_similar"><img alt="Similar mode groups individuals together by their number of shared connections." title="Similar mode groups individuals together by their number of shared connections." src="menu/menu_similar.png"/></div> 
+    <div style="cursor: pointer; position:absolute; right:150px; height:65px; width:65px; top:0px; opacity:0.15" id="menu_free"><img alt="Free mode groups individuals together based on their number of connections." title="Free mode groups individuals together based on their number of connections." src="menu/menu_free.png"/></div> 
+	<div style="cursor: pointer; position:absolute; right:225px; height:65px; width:65px; top:0px; opacity:0.15" id="menu_fixed"><img alt="Fixed mode pins the individuals with the most connections to the outside allowing clearer presentation."  title="Fixed mode pins the individuals with the most connections to the outside allowing clearer presentation." src="menu/menu_fixed.png"/></div>     
+
+
+	<div id="dynamicSearchHolder">
+    	<input type="text" id="dynamicSearchInput" placeholder="Name Filter"/>
+        <div id="dynamicSearchClear" title="Clear name filter text">&times;</div>
+    </div>
+	<div id="dynamicListHolder"></div>
+    <div id="dynamicHelp">&laquo; Click names from list to add to network</div>
+    <div id="dynamicClear"><img alt="Remove the nodes currently on the network"  title="Remove the nodes currently on the network." src="menu/menu_clear.png"/></div>
+
+</div>
+
+
+<div id="spinner">
+	<img src="menu/ljspinner.gif">
+    <span>LOADING</span>
+</div>
+<div id="video"></div>
+
+
+
+
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+<http://dbpedia.org/resource/Colin_Allen> <http://www.w3.org/2000/01/rdf-schema#comment> "Director, Cognitive Science\nProvost Professor, Department of History and Philosophy of Science<br>- Philosophy of biology, psychology, and cognitive science, especially animal cognition and evolution (cognitive ethology), and artificial moral agents" .
+<http://dbpedia.org/resource/Peter_Todd> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Robert_Nosofsky> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Amy_Cook> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Steven_Franks> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Douglas_Hofstadter> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Karin_James> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Michael_Jones> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Linda_Smith> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Richard_Shiffrin> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Gary_Kidd> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/John_Kruschke> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Annie_Lang> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/Randall_Beer> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+<http://dbpedia.org/resource/David_Leake> <http://www.w3.org/2000/01/rdf-schema#comment> "" .
+

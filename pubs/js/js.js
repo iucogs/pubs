@@ -112,7 +112,6 @@ function stopUpload2(success, filename, elements)
 {
 	var responseObj = eval("(" + elements + ")");
 	var result = '';
-	
 	if (success == 1){
 		//var currentDirectory = unescape(document.URL.substring(0,(document.URL.lastIndexOf("/")) + 1));
 		//html += '<b>Attached file:</b> <a href="' + currentDirectory + 'pdfs/temp/' + attached_filename_obj.value + '" target="_blank">' + attached_filename_obj.value + '</a>' + clear_attached_file_html + '<br>';

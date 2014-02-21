@@ -1,7 +1,6 @@
 <?php
 
 require_once('../lib/constants.php');	// Definition for PDF_DIRECTORY
-
 // Edit upload location here
 $destination_path = PDF_DIRECTORY."/".PUBS_VERSION."/temp/"; 
 //$filename = tempnam(sys_get_temp_dir(),''); // Create unique temp file in OS temp folder.
@@ -34,7 +33,7 @@ if (($_FILES[$myfile]["type"] == "application/pdf") && ($_FILES[$myfile]["size"]
 	$filename = $citation_id."_".$uploaded_filename.".pdf";	// Reinsert file extension.
 	
 	$target_path = $destination_path . $filename;
-	
+	echo $target_path;
 	if(@move_uploaded_file($_FILES[$myfile]['tmp_name'], $target_path)) {
 		$result = 1;
 	}

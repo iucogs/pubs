@@ -511,6 +511,15 @@ Page.viewOwners_response = function()
 					}
 					html += '>Stanford Encyclopedia of Philosophy</option>';
 				}
+				else if (owners[i].username == 'toc')
+				{
+					html += '<option value="' + owners[i].username + '"';
+					if (Page.owner == owners[i].username)
+					{
+						html += ' selected="selected"';
+					}
+					html += '>Tree of Consciousness</option>';
+				}
 				else
 				{
 					html += '<option value="' + owners[i].username + '"';

@@ -148,13 +148,15 @@ Page.printCollectionNamesMenuForViewing_helper = function()
 	
 	html += '></option>';
 	
-	html += '<option value="all" id="all"';
-	if (Page.currentCollection == 'all')
+	if (Page.owner != 'sep')
 	{
-		html += ' selected';	
+		html += '<option value="all" id="all"';
+		if (Page.currentCollection == 'all')
+		{
+			html += ' selected';	
+		}
+		html += '>All My Citations ' + ' &nbsp;(' + Page.default_collections[0].count + ')' + '</option>';
 	}
-	html += '>All My Citations ' + ' &nbsp;(' + Page.default_collections[0].count + ')' + '</option>';
-	
 	html += '<option value="unverified" id="unverified"';
 	if (Page.currentCollection == 'unverified')
 	{
@@ -196,7 +198,7 @@ Page.selectCollection = function(theMenu)
 {
 	var selection = theMenu.options[theMenu.selectedIndex].value; 
 	if(selection != "none") {
-		Page.current_page=1;
+    Page.current_page=1;
 		Page.current_citation_num = 0;
 		Page.current_viewable_pages=new Array(); 
 		Page.set_current_get_type(selection); 
@@ -353,8 +355,11 @@ Page.showEnterCitations = function()
 
 Page.parsetext = function(txt) 
 {
-	var stringArray = new Array();
+	var stringArray = new Array()
+		//txt = txt.replace(/;/g, ",");
+		//alert('11111111'+txt);
     	stringArray=txt.split("\n");
+		//alert('2222222'+stringArray);
 	
 	//alert(stringArray[0]);
 	//alert(stringArray[1]);
@@ -388,6 +393,65 @@ Page.parsetext = function(txt)
 	if(flag2==1)
 	document.getElementById("citationInput").value = tempArray.join("\n");
 
+var tempArray1=new Array();
+tempArray1=document.getElementById("citationInput").value.split("\n"); 
+//alert('rrrrr0000000'+tempArray1[0]+'8888888'+tempArray1.length);
+var q=0;
+var start=0;
+var end;
+var startFlag =0;
+var count = 0;
+var finalArray=new Array();
+var flag =0;
+
+for(var j=0;j < tempArray1.length ; j++)
+{
+	var arr1= new Array();
+	
+	arr1=tempArray1[j].split("");
+	
+	for(i=0;i< arr1.length;i++)
+	{
+		if(arr1[i] == ';')
+			arr1[i]=',';
+		
+	}
+	//alert('arr1====='+arr1);
+	
+	if(arr1[arr1.length-1] =='.')
+	{
+	
+		
+		if(startFlag==0)
+	      start=0;
+		  
+	      end=j;
+	
+		for(z=start;z<=end;z++)
+		{
+			//alert('start'+start);
+			//alert('end'+end);
+			if (flag==0)
+			finalArray[count]="";
+			
+			finalArray[count]=finalArray[count].concat(tempArray1[z]);
+			finalArray[count+1]= "\n";
+			finalArray[count+2]=" ";
+			flag=1;
+			//alert('999999'+ finalArray);
+		}
+		flag=0;
+		start=end+1;
+		count=count+3;
+	
+	}
+	startFlag++;
+}
+txt=finalArray.join("");
+txt = txt.replace(/;/g, ",");
+document.getElementById("citationInput").value=txt;
+//alert(finalArray);
+//alert(document.getElementById("citationInput").value);
 //document.getElementById("citationInput").value=txt.replace(/(\r\n|\n|\r)/gm," ");
 }
 
@@ -587,6 +651,12 @@ Page.getCollectionsGivenCitationID_response = function()
 
 Page.getCitationsGivenCollectionID = function(citation_id)
 {
+	if ((Page.owner == 'sep') && (Page.currentCollection == "all"))
+	{
+		Page.current_get_type = 'getCollection';
+		Page.currentCollection = 27;
+		Page.currentCollection_name = 'SEP consciousness-animal';
+	}
 	// Default value
 	if(citation_id == undefined) { citation_id = 0; }
 	
@@ -596,7 +666,8 @@ Page.getCitationsGivenCollectionID = function(citation_id)
 		//Page.current_page = 1; //Commented so that page will stay at current page when panel closed
 		Page.input_method = 9;
 		//setTimeout("Page.getCitations(Page.current_page, 'getCitations_byFac_all', ' + citation_id +')", 1000);	
-		Page.getCitations(Page.current_page, Page.current_get_type, citation_id);	
+		Page.getCitations(Page.current_page, 'getCitations_byFac_all', ' + citation_id +');
+    //Page.getCitations(Page.current_page, Page.current_get_type, citation_id);	
 	}
 	else if (Page.currentCollection == "unverified")
 	{
