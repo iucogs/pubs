@@ -345,6 +345,8 @@ Page.printAPAStyleAuthors = function(_citation) {
 		if ((_citation[ln] != "") && (_citation[ln] != "undefined"))
 		{
 			auth_count++;
+      
+    
 			var next_ln = "author" + (j+1) + "ln"; // tempVar
 			var next_fn = "author" + (j+1) + "fn";
       
@@ -354,21 +356,20 @@ Page.printAPAStyleAuthors = function(_citation) {
       }
 
 
-			if((_citation[next_ln] == "") && (_citation[next_ln] == "undefined"))
+			if((_citation[next_ln] == "") || (_citation[next_ln] == "undefined"))
 			{
 				html = rtrim(html);
 				html += ", "+ _citation[ln] + ", " +  rtrim(Page.getInitials(_citation[fn])) + "";
 			}
-			if (auth_count == 3) 
-			{
-       // alert( _citation.author0ln + ", " + rtrim(Page.getInitials("" + _citation.author0fn)) + _citation.author1ln + ", " + rtrim(Page.getInitials("" + _citation.author1fn)) + " & " _citation.author2ln + ", " + rtrim(Page.getInitials("" + _citation.author2fn))); 
-			 // return html;
-      }
+			
 		}
 	}
-
+  if (auth_count == 3) {      
+    html = _citation.author0ln + ", " + rtrim(Page.getInitials("" + _citation.author0fn)) + ", " + _citation.author1ln + ", " + rtrim(Page.getInitials("" + _citation.author1fn)) + " &  " + _citation.author2ln + ", " + rtrim(Page.getInitials("" + _citation.author2fn)); 
+    return html;
+  } 
 	
-	if(_citation.pubtype == "edited_book")
+  if(_citation.pubtype == "edited_book")
 	{
 		if(auth_count > 1)
 		{
@@ -383,6 +384,7 @@ Page.printAPAStyleAuthors = function(_citation) {
 	{
 		return html;	
 	}
+  return html;
 }
 
 Page.getInitials = function(str) {
