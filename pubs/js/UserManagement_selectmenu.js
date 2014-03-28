@@ -571,6 +571,8 @@ Page.changeSetOwnerSelectMenu = function(myselect)
 
 Page.get_faculty_request = function()
 {
+  console.log("get_faculty_request: ");
+  console.log(Page.owner);
 	var jsonStr = '{"request": {"type": "get_faculty"}}';
 	Ajax.SendJSON('services/user.php', Page.get_faculty_response, jsonStr);
 }
@@ -578,13 +580,15 @@ Page.get_faculty_request = function()
 Page.get_faculty_response = function()
 {
 	var html = '';
+  console.log("get_faculty_response");
+  console.log(Page.owner);
 	if (Ajax.CheckReadyState(Ajax.request)) 
 	{	 
 	//alert(Ajax.request.responseText);
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.homePage(responseObj.get_faculty);
 	}
-}
+  }
 
 Page.setHasProxy = function()
 {
@@ -602,9 +606,11 @@ Page.setOwnerDiv = function()
 //				- Called by onClick event of "Home" button
 Page.homePage = function(faculty)
 {
+  console.log("Homepage!");	
+  console.log(Page.owner);
 	var html = 'Welcome to Publications, sponsored by the Indiana University Cognitive Science Program.<br><br>';
-	
-	html += '<table>';
+ 
+  html += '<table>';
 	for (var i=0; i<faculty.length; i++)
 	{
 		html += '<tr><td class="pointerhand" onclick="Page.owner=\'' + faculty[i].username + '\';Page.setHasProxy();Page.currentCollection=\'' + faculty[i].collection_id + '\'; Page.getFacultyRepresentativePublications(\'' + faculty[i].username + '\');">' + faculty[i].lastname + ', ' + faculty[i].firstname + '</td></tr>';

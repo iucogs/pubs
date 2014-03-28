@@ -612,6 +612,7 @@ Page.get_faculty_response = function()
 		var responseObj = eval("(" + Ajax.request.responseText + ")");
 		Page.homePage(responseObj.get_faculty);
 	}
+
 }
 
 Page.setHasProxy = function()
@@ -633,12 +634,15 @@ Page.setOwnerDiv = function()
 //				- Called by onClick event of "Home" button
 Page.homePage = function(faculty)
 {	
-	// Reset owner then rewrite proxy select menu
-	Page.owner = '';
+	// Reset owner then rewrite proxy select menu and save it to restore
+  // collections.
+	var temp = Page.owner;
+  Page.owner = '';
 	if (Page.loggedIn) { 
 		Page.rewriteSelectMenu();
 	}
-	
+  Page.owner = temp;
+
 	var html = 'Welcome to Publications, sponsored by the Indiana University Cognitive Science Program.<br><br>';
 	
 	html += '<table align="center" style="height:100%;width:100%;text-align:left">';

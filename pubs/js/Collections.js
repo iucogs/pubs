@@ -271,7 +271,8 @@ Page.showEnterCitations = function()
 		html += '<textarea name="citationInput" id="citationInput" style="width:99%;height:300px;" onFocus="disableSubmit=true;" onBlur="disableSubmit=false;"></textarea>';
 
 		html += '<p><input type="button" onclick="Page.parsetext(textareaform.citationInput.value);Page.parseTextIntoCollection_request(Page.parseTextIntoCollection_response, textareaform.citationInput.value, \'new\', textareaform.entryName.value);" value="Insert citation(s)"></p>';
-		html += '</form>';
+
+    html += '</form>';
 		
 		document.getElementById('secondary').innerHTML = html;			// Set
 		document.getElementById('citations').style.display = 'none';	// Hide
@@ -355,7 +356,8 @@ Page.showEnterCitations = function()
 
 Page.parsetext = function(txt) 
 {
-	var stringArray = new Array()
+	console.log(txt);
+  var stringArray = new Array()
 		//txt = txt.replace(/;/g, ",");
 		//alert('11111111'+txt);
     	stringArray=txt.split("\n");
@@ -447,8 +449,11 @@ for(var j=0;j < tempArray1.length ; j++)
 	}
 	startFlag++;
 }
-txt=finalArray.join("");
-txt = txt.replace(/;/g, ",");
+console.log("Before finalArray join: " + txt);
+console.log("finalArray: " + finalArray);
+//txt = finalArray.join("");
+//txt = txt.replace(/;/g, ",");
+console.log("Final :" + txt);
 document.getElementById("citationInput").value=txt;
 //alert(finalArray);
 //alert(document.getElementById("citationInput").value);
@@ -488,18 +493,21 @@ Page.printCollectionNamesMenuForManagingCitations = function()
 // Used by Page.updateCollectionFromList() and Page.printCollectionNamesMenuForManagingCitations(). Page.updateCollectionFromList() is called from Page.listCollections everytime.
 Page.printCollectionNamesMenuForManagingCitations_helper = function()
 {
-	var html = '<select name="collectionNamesMenuForManagingCitations" id="collectionNamesMenuForManagingCitations">'; 
-	//onchange="Page.currentCollectionForManagingCitations=this.options[this.selectedIndex].value;">';
-	html += '<option value="new" id="new" >New Collection</option>';
-	
-	for (var i=0; i < Page.collections.length; i++) {
-	  html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
-	  html += 'value="' + Page.collections[i].collection_id + '" id="' + Page.collections[i].collection_id + '"';
-	  if (Page.currentCollectionForAddingCitations == Page.collections[i].collection_id)
-	  {
-		  html += ' selected';	
-	  }
+//	var html = '<select name="collectionNamesMenuForManagingCitations" id="collectionNamesMenuForManagingCitations" onchange="Page.currentCollectionForManagingCitations=this.options[this.selectedIndex].value;Page.ownerCurrentCollectionForManagingCitations[Page.owner]=this.options[this.selectedIndex];">'; 
+  var html = '<select name="collectionNamesMenuForManagingCitations" id="collectionNamesMenuForManagingCitations" onchange="Page.ownerCurrentCollectionForManagingCitations[Page.owner]=this.options[this.selectedIndex];">'; 
+
+  //onchange="Page.currentCollectionForManagingCitations=this.options[this.selectedIndex].value;">';
+  html += '<option value="new" id="new" >New Collection</option>';
   
+  for (var i=0; i < Page.collections.length; i++) {
+    html += '<option onmouseover="this.parentNode.title=\''+Page.collections[i].collection_name+'\'" ';
+	  html += 'value="' + Page.collections[i].collection_id + '" id="' + Page.collections[i].collection_id + '"';
+	  if (Page.ownerCurrentCollectionForManagingCitations[Page.owner] !== undefined) {
+      if (Page.ownerCurrentCollectionForManagingCitations[Page.owner].id == Page.collections[i].collection_id)
+	    {
+		    html += ' selected';	
+	    }
+    }
 	  html += '>';
 	  
 	  // Check collection's name length
@@ -947,7 +955,7 @@ Page.parseTextIntoCollection_request = function(callbackmethod, str, action, col
 {
 	// Save info before checking collection_name exist.
 	Page.newEntries = str;
-	
+  console.log(str);	
 	if(collection_name == "") 
 		Page.panel1_alert_message('Please enter a collection name.', '');
 	else if(str == "")

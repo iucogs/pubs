@@ -252,8 +252,8 @@ else
 			echo "<td class='pointerhand' onclick='Page.adminPage(0,1);'>Admin</td>"; //Abhinav 
 			echo '<td>::</td>';
 		}
-		echo "<td class='pointerhand' onclick='Page.myAccount();'>My Account</td>";
-		echo '<td>::</td>';
+		//echo "<td class='pointerhand' onclick='Page.myAccount();'>My Account</td>";
+		//echo '<td>::</td>';
 		echo '<td><a href="'.$document_root.'logout.php" >Logout</a></td>';
 	}
 	echo "</tr></table>";

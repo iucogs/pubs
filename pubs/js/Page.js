@@ -27,7 +27,8 @@ Page.currentExportFormat = '';
 Page.currentTimestamp = "all";
 Page.currentCollection = "all"; 
 Page.currentCollection_name = "";
-//Page.currentCollectionForManagingCitations = "new";
+Page.currentCollectionForManagingCitations;
+Page.ownerCurrentCollectionForManagingCitations = {};
 Page.current_get_type = 'getCitations_byFac_all';
 Page.currentNewAuthorNum = -1;
 Page.collectionNames;
@@ -411,7 +412,7 @@ Page.rewritePage = function(responseObj, scrollFlag)
 		Page.fullcollection_citations_array = responseObj.fullcollection_citations_array;
 		Page.sections_array = responseObj.sections_array;
 		Page.getCollectionNamesAndIds();
-		if (scrollFlag == 1) { scroll(0,0); alert("scrollin!"); }
+		if (scrollFlag == 1) { scroll(0,0); }
     //	alert('here2');
 	}
 }
@@ -2556,9 +2557,9 @@ Page.exportCitations = function()
   list += '<html><meta charset="UTF-8">';
 
 
-	if (Page.currentExportFormat == 'htmllistprint')
-		citationsToExport = Page.fullcollection_citations_array;
-	else
+//	if (Page.currentExportFormat == 'htmllistprint')
+//		citationsToExport = Page.fullcollection_citations_array;
+//	else
 		citationsToExport = Page._citations;
 	
   if (Page.currentExportFormat == 'htmllistprint') {
